@@ -1,4 +1,4 @@
-s## Vector Objects on Map
+## Vector Objects on Map
 
 In following examples, **Vector Elements**  - Markers, Points, Lines, Polygons, Texts, BalloonPopups and a 3D model  - are added by the application.
 For each object, the styling is defined and objects are created based on given coordinates.

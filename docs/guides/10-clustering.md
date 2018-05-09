@@ -65,8 +65,8 @@ Clusters are generated dynamically, based on `VectorDataSource` data that loads 
     {% endhighlight %}
   </div>
 
-  <div id="">
-    {% highlight c## %}
+  <div id="tab-csharp">
+    {% highlight csharp %}
 
     // 1. Create overlay layer for markers
     var dataSource = new LocalVectorDataSource(MapView.Options.BaseProjection);
@@ -221,8 +221,8 @@ The Cluster Element Builder takes set of original markers (map objects) as input
     {% endhighlight %}
   </div>
 
-  <div id="">
-    {% highlight c## %}
+  <div id="tab-csharp">
+    {% highlight csharp %}
     public class MyClusterElementBuilder : ClusterElementBuilder
     {
         BalloonPopupStyleBuilder balloonPopupStyleBuilder;
