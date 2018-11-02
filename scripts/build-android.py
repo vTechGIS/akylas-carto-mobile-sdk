@@ -5,13 +5,13 @@ import argparse
 from build.sdk_build_utils import *
 
 ANDROID_TOOLCHAINS = {
-  'armeabi':     'arm-linux-androideabi',
+  # 'armeabi':     'arm-linux-androideabi',
   'armeabi-v7a': 'arm-linux-androideabi',
   'x86':         'x86',
-  'mips':        'mipsel-linux-android',
-  'arm64-v8a':   'aarch64-linux-android',
-  'x86_64':      'x86_64',
-  'mips64':      'mips64el-linux-android'
+  # 'mips':        'mipsel-linux-android',
+  # 'arm64-v8a':   'aarch64-linux-android',
+  # 'x86_64':      'x86_64',
+  # 'mips64':      'mips64el-linux-android'
 }
 
 ANDROID_ABIS = list(ANDROID_TOOLCHAINS.keys())
