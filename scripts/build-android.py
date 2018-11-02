@@ -44,7 +44,7 @@ def buildAndroidSO(args, abi):
     "-DANDROID_TOOLCHAIN_NAME='%s-%s'" % (ANDROID_TOOLCHAINS[abi], args.compiler if not args.compiler.startswith('gcc-') else args.compiler[4:]),
     "-DANDROID_ABI='%s'" % abi,
     "-DANDROID_STL='%s'" % ('c++_static' if args.compiler.startswith('clang') else 'gnustl_static'),
-    "-DANDROID_NATIVE_API_LEVEL='%s'" % ('android-21' if '64' in abi else 'android-10'),
+    "-DANDROID_NATIVE_API_LEVEL='%s'" % ('android-21' if '64' in abi else 'android-21'),
     '-DSDK_CPP_DEFINES=%s' % " ".join(defines),
     "-DSDK_VERSION='%s'" % version,
     "-DSDK_PLATFORM='Android'",
@@ -77,7 +77,7 @@ def buildAndroidJAR(args):
     '-source', '1.6',
     '-target', '1.6',
     '-bootclasspath', '%s/scripts/android/rt.jar' % baseDir,
-    '-classpath', '%s/platforms/android-10/android.jar' % args.androidsdkpath,
+    '-classpath', '%s/platforms/android-28/android.jar' % args.androidsdkpath,
     '-d', buildDir,
     *javaFiles
   ):

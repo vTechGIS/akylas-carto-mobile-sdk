@@ -7,9 +7,9 @@ project(carto_mobile_sdk_java)
 
 set(ANDROID_SDK_DIR "/Applications/android-sdk-macosx")
 set(ANDROID_NDK "/Applications/android-ndk-r11c")
-set(ANDROID_NATIVE_API_LEVEL "android-9")
+set(ANDROID_NATIVE_API_LEVEL "android-16")
 
-set(ANDROID_API_VER 8)
+set(ANDROID_API_VER 28)
 set(DIST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../dist/android")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../../all/native" carto_mobile_sdk)
