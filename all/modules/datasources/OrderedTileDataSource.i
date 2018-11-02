@@ -1,5 +1,5 @@
-#ifndef _ORDEREDTILEDATASOURCE_I
-#define _ORDEREDTILEDATASOURCE_I
+#ifndef _OrderedTileDataSource_I
+#define _OrderedTileDataSource_I
 
 %module(directors="1") OrderedTileDataSource
 
