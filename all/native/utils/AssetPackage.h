@@ -20,6 +20,7 @@ namespace carto {
      */
     class AssetPackage {
     public:
+        AssetPackage() { }
         virtual ~AssetPackage() { }
     
         /**
@@ -36,8 +37,6 @@ namespace carto {
          */
         virtual std::shared_ptr<BinaryData> loadAsset(const std::string& name) const = 0;
 
-    protected:
-        AssetPackage() { }
     };
     
 }
