@@ -1,9 +1,19 @@
+
+allprojects {
+    repositories {
+        // The order in which you list these repositories matter.
+        google()
+        jcenter()
+    }
+}
 buildscript {
     repositories {
+        // The order in which you list these repositories matter.
+        google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.android.tools.build:gradle:3.1.0'
     }
     System.properties['com.android.build.gradle.overrideVersionCheck'] = 'true'
 }
@@ -12,7 +22,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion "28.0.0"
+    buildToolsVersion "28.0.3"
 
     defaultConfig {
         minSdkVersion 10
@@ -33,10 +43,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+       disable 'MissingTranslation'
+    }
 }
 
 dependencies {
-    compile fileTree(dir: '../../dist/android/', include: ['*.jar'])
+    implementation fileTree(dir: '../../dist/android/', include: ['*.jar'])
 }
 
 project.buildDir = '../../build/android-aar'
