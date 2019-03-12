@@ -27,6 +27,7 @@
 #import "NTAssetTileDataSource.h"
 #import "NTCombinedTileDataSource.h"
 #import "NTOrderedTileDataSource.h"
+#import "NTMergedMBVTTileDataSource.h"
 #import "NTBitmapOverlayRasterTileDataSource.h"
 #import "NTHTTPTileDataSource.h"
 #import "NTMemoryCacheTileDataSource.h"
