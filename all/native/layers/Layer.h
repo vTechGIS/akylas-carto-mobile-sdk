@@ -156,7 +156,12 @@ namespace carto {
          * @param viewState The view state to use.
          */
         virtual void simulateClick(ClickType::ClickType clickType, const ScreenPos& screenPos, const ViewState& viewState);
-    
+
+        /**
+         * Returns true if the layer requires offscreen drawing pass.
+         * @return True if the layer  requires offscreen drawing pass.
+         */
+        bool needsOffscreenPass() const;
     protected:
         friend class Layers;
         friend class MapRenderer;
@@ -183,6 +188,7 @@ namespace carto {
         virtual void offsetLayerHorizontally(double offset) = 0;
 
         virtual bool onDrawFrame(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState) = 0;
+        virtual bool onDrawOffscreenFrame(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState);
         virtual bool onDrawFrame3D(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState);
         
         virtual std::shared_ptr<Bitmap> getBackgroundBitmap() const;
@@ -206,7 +212,9 @@ namespace carto {
         std::atomic<float> _opacity;
         
         std::atomic<bool> _visible;
-        
+
+        std::atomic<bool> _needsOffscreenPass;
+
         MapRange _visibleZoomRange;
 
         mutable std::recursive_mutex _mutex;

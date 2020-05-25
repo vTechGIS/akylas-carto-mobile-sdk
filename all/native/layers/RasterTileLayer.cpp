@@ -71,9 +71,11 @@ namespace {
 }
 
 namespace carto {
+    RasterTileLayer::RasterTileLayer(const std::shared_ptr<TileDataSource>& dataSource) : RasterTileLayer(dataSource,std::make_shared<TileRenderer>() ) {
+    }
 
-    RasterTileLayer::RasterTileLayer(const std::shared_ptr<TileDataSource>& dataSource) :
-        TileLayer(dataSource),
+    RasterTileLayer::RasterTileLayer(const std::shared_ptr<TileDataSource>& dataSource, const std::shared_ptr<TileRenderer>& tileRenderer) :
+        TileLayer(dataSource, tileRenderer),
         _rasterTileEventListener(),
         _visibleTileIds(),
         _tempDrawDatas(),

@@ -17,9 +17,8 @@ namespace carto {
                 resource->destroy();
             }
             _deleteQueue.clear();
-        }
-        if (!_deleteQueue.empty()) {
-            Log::Debugf("GLResourceManager::~GLResourceManager: Delete queue size: %d", static_cast<int>(_deleteQueue.size()));
+        } else {
+            Log::Warn("GLResourceManager::~GLResourceManager: Method called from wrong thread!");
         }
     }
 

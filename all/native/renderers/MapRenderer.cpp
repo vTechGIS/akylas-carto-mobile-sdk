@@ -822,6 +822,17 @@ namespace carto {
         }
         BillboardSorter billboardSorter(billboardDrawDatas);
 
+
+        // Do Offscreen pass for layers which need it.
+        for (const std::shared_ptr<Layer>& layer : layers) {
+            if (layer->needsOffscreenPass()) {
+                if (viewState.getHorizontalLayerOffsetDir() != 0) {
+                    layer->offsetLayerHorizontally(viewState.getHorizontalLayerOffsetDir() * Const::WORLD_SIZE);
+                }
+                layer->onDrawFrame(deltaSeconds, billboardSorter, viewState);
+            }
+        }
+
         // Do base drawing pass
         bool needRedraw = false;
         for (const std::shared_ptr<Layer>& layer : layers) {

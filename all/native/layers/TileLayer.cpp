@@ -176,8 +176,10 @@ namespace carto {
             Log::Error("TileLayer::DataSourceListener: Lost connection to layer");
         }
     }
-        
-    TileLayer::TileLayer(const std::shared_ptr<TileDataSource>& dataSource) :
+    TileLayer::TileLayer(const std::shared_ptr<TileDataSource>& dataSource) : TileLayer(dataSource, std::make_shared<TileRenderer>()) {
+    }
+
+    TileLayer::TileLayer(const std::shared_ptr<TileDataSource>& dataSource, const std::shared_ptr<TileRenderer>& tileRenderer) :
         Layer(),
         _synchronizedRefresh(false),
         _calculatingTiles(false),
@@ -195,7 +197,7 @@ namespace carto {
         _zoomLevelBias(0.0f),
         _maxOverzoomLevel(MAX_PARENT_SEARCH_DEPTH),
         _maxUnderzoomLevel(MAX_CHILD_SEARCH_DEPTH),
-        _tileRenderer(std::make_shared<TileRenderer>()),
+        _tileRenderer(tileRenderer),
         _visibleTiles(),
         _preloadingTiles(),
         _utfGridTiles(),

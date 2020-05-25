@@ -257,7 +257,8 @@ namespace carto {
         };
         
         explicit TileLayer(const std::shared_ptr<TileDataSource>& dataSource);
-
+        explicit TileLayer(const std::shared_ptr<TileDataSource>& dataSource, const std::shared_ptr<TileRenderer>& tileRenderer);
+        
         virtual void setComponents(const std::shared_ptr<CancelableThreadPool>& envelopeThreadPool,
                                    const std::shared_ptr<CancelableThreadPool>& tileThreadPool,
                                    const std::weak_ptr<Options>& options,
@@ -319,6 +320,8 @@ namespace carto {
         int _maxUnderzoomLevel;
 
         std::shared_ptr<TileRenderer> _tileRenderer;
+        std::weak_ptr<ProjectionSurface> _projectionSurface;
+        std::weak_ptr<GLResourceManager> _glResourceManager;
     
     private:
         void calculateVisibleTiles(const std::shared_ptr<CullState>& cullState);
@@ -339,8 +342,6 @@ namespace carto {
         std::vector<MapTile> _preloadingTiles;
         std::unordered_map<MapTile, std::shared_ptr<UTFGridTile> > _utfGridTiles;
 
-        std::weak_ptr<GLResourceManager> _glResourceManager;
-        std::weak_ptr<ProjectionSurface> _projectionSurface;
     };
     
 }

@@ -36,6 +36,14 @@ namespace carto {
          * @param dataSource The data source from which this layer loads data.
          */
         explicit RasterTileLayer(const std::shared_ptr<TileDataSource>& dataSource);
+
+        /**
+         * Constructs a RasterTileLayer object from a data source.
+         * @param dataSource The data source from which this layer loads data.
+         * @param tileRenderer Used internally for custom Tile renderer
+         */
+        explicit RasterTileLayer(const std::shared_ptr<TileDataSource>& dataSource, const std::shared_ptr<TileRenderer> & tileRenderer);
+        
         virtual ~RasterTileLayer();
         
         /**

@@ -142,6 +142,11 @@ namespace carto {
             }
         }
     }
+
+
+    bool Layer::needsOffscreenPass() const {
+        return _needsOffscreenPass;
+    }
     
     Layer::Layer() :
         _envelopeThreadPool(),
@@ -156,7 +161,8 @@ namespace carto {
         _metaData(),
         _options(),
         _mapRenderer(),
-        _touchHandler()
+        _touchHandler(),
+        _needsOffscreenPass(false)
     {
     }
     
@@ -215,7 +221,10 @@ namespace carto {
             mapRenderer->requestRedraw();
         }
     }
-    
+    bool Layer::onDrawOffscreenFrame(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState) {
+        return false;
+    }
+
     bool Layer::onDrawFrame3D(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState) {
         return false;
     }

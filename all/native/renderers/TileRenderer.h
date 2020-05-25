@@ -63,27 +63,33 @@ namespace carto {
         void calculateRayIntersectedElements3D(const cglib::ray3<double>& ray, const ViewState& viewState, float radius, std::vector<std::tuple<vt::TileId, double, long long> >& results) const;
         void calculateRayIntersectedBitmaps(const cglib::ray3<double>& ray, const ViewState& viewState, std::vector<std::tuple<vt::TileId, double, vt::TileBitmap, cglib::vec2<float> > >& results) const;
     
+    protected:
+        virtual bool initializeRenderer();
+
+        cglib::vec3<float> _mainLightDir;
+        cglib::vec3<float> _viewDir;
+
+        std::weak_ptr<Options> _options;
+        std::shared_ptr<VTRenderer> _vtRenderer;
+        std::weak_ptr<MapRenderer> _mapRenderer;
+        std::shared_ptr<vt::TileTransformer> _tileTransformer;
+        std::map<vt::TileId, std::shared_ptr<const vt::Tile> > _tiles;
+        
+        double _horizontalLayerOffset;
+
+        mutable std::mutex _mutex;
+
     private:
-        bool initializeRenderer();
 
         static const std::string LIGHTING_SHADER_2D;
         static const std::string LIGHTING_SHADER_3D;
 
-        std::weak_ptr<MapRenderer> _mapRenderer;
-        std::weak_ptr<Options> _options;
-        std::shared_ptr<vt::TileTransformer> _tileTransformer;
 
-        std::shared_ptr<VTRenderer> _vtRenderer;
         bool _interactionMode;
         bool _subTileBlending;
         int _labelOrder;
         int _buildingOrder;
-        double _horizontalLayerOffset;
-        cglib::vec3<float> _viewDir;
-        cglib::vec3<float> _mainLightDir;
-        std::map<vt::TileId, std::shared_ptr<const vt::Tile> > _tiles;
         
-        mutable std::mutex _mutex;
     };
     
 }
