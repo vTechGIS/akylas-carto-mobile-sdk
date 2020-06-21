@@ -69,6 +69,26 @@ namespace carto {
          * @param color The new highlight color of the layer.
          */
         void setHighlightColor(const Color& color);
+        /**
+         * Returns the illumination direction of the layer.
+         * @return direction in degrees.
+         */
+        float getIlluminationDirection() const;
+        /**
+         * Sets the illumination direction.
+         * @param direction in degrees.
+         */
+        void setIlluminationDirection(float direction);
+        /**
+         * Returns wheter the illumination direction should change with the map rotation.
+         * @return enabled
+         */
+        bool getIlluminationMapRotationEnabled() const;
+        /**
+         * Sets wheter the illumination direction should change with the map rotation.
+         * @param enabled whether to enable or not.
+         */
+        void setIlluminationMapRotationEnabled(bool enabled);
 
     protected:
         virtual bool onDrawFrame(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState);
@@ -79,6 +99,8 @@ namespace carto {
         float _heightScale;
         Color _shadowColor;
         Color _highlightColor;
+        float _illuminationDirection;
+        bool _illuminationMapRotationEnabled;
     };
     
 }

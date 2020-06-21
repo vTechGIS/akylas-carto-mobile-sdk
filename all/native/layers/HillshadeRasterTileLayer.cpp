@@ -22,7 +22,9 @@ namespace carto {
         _contrast(0.5f),
         _heightScale(1.0f),
         _shadowColor(0, 0, 0, 255),
-        _highlightColor(255, 255, 255, 255)
+        _highlightColor(255, 255, 255, 255),
+        _illuminationDirection(67),
+        _illuminationMapRotationEnabled(true)
     {
     }
     
@@ -81,6 +83,30 @@ namespace carto {
         redraw();
     }
 
+
+    float HillshadeRasterTileLayer::getIlluminationDirection() const {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _illuminationDirection;
+    }
+    void HillshadeRasterTileLayer::setIlluminationDirection(float direction) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+            _illuminationDirection = direction;
+        }
+        redraw();
+    }
+    bool HillshadeRasterTileLayer::getIlluminationMapRotationEnabled() const {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _illuminationMapRotationEnabled;
+    }
+    void HillshadeRasterTileLayer::setIlluminationMapRotationEnabled(bool enabled) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+            _illuminationMapRotationEnabled = enabled;
+        }
+        redraw();
+    }
+
     bool HillshadeRasterTileLayer::onDrawFrame(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState) {
         updateTileLoadListener();
 
@@ -94,6 +120,8 @@ namespace carto {
             _tileRenderer->setRasterFilterMode(getRasterFilterMode());
             _tileRenderer->setNormalMapShadowColor(getShadowColor());
             _tileRenderer->setNormalMapHighlightColor(getHighlightColor());
+            _tileRenderer->setNormalIlluminationDirection(getIlluminationDirection());
+            _tileRenderer->setNormalIlluminationMapRotationEnabled(getIlluminationMapRotationEnabled());
             bool refresh = _tileRenderer->onDrawFrame(deltaSeconds, viewState);
 
             if (opacity < 1.0f) {
