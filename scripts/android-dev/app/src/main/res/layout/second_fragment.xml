@@ -35,12 +35,31 @@
 
 
             <TextView
-                android:id="@+id/textExaggeration"
+                android:id="@+id/textContrast"
                 android:layout_width="40dp"
                 android:layout_height="match_parent"></TextView>
 
             <androidx.appcompat.widget.AppCompatSeekBar
-                android:id="@+id/exagerationSeekBar"
+                android:id="@+id/contrastSeekBar"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="100" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="30dp"
+            android:orientation="horizontal">
+
+
+            <TextView
+                android:id="@+id/textHeightScale"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"></TextView>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/heightScaleSeekBar"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -60,12 +79,29 @@
 
             <androidx.appcompat.widget.AppCompatSeekBar
                 android:id="@+id/illuminationDirectionSeekBar"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:max="360" />
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="30dp"
+            android:orientation="horizontal">
 
+
+            <TextView
+                android:id="@+id/testHighlightOpacity"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"></TextView>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/highlightOpacitySeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="255" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="30dp"

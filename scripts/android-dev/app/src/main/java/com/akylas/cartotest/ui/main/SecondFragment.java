@@ -75,17 +75,16 @@ public class SecondFragment extends Fragment {
 //        subdomains.add("c");
 //        source.setSubdomains(subdomains);
 //        final RasterTileLayer rasterlayer = new RasterTileLayer(source);
-        final CartoOnlineVectorTileLayer rasterlayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_VOYAGER);
-
+        final CartoOnlineVectorTileLayer backlayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_POSITRON);
         final AppCompatSeekBar opacitySeekBar = (AppCompatSeekBar) view.findViewById(R.id.opacitySeekBar); // initiate the Seek bar
         final TextView textOpacity = (TextView) view.findViewById(R.id.textOpacity); // initiate the Seek bar
         opacitySeekBar.setProgress(100);
-        textOpacity.setText(rasterlayer.getOpacity() + "");
+        textOpacity.setText(backlayer.getOpacity() + "");
         opacitySeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                rasterlayer.setOpacity(i / 100.0f);
-                textOpacity.setText(rasterlayer.getOpacity() + "");
+                backlayer.setOpacity(i / 100.0f);
+                textOpacity.setText(backlayer.getOpacity() + "");
                 mapView.requestRender();
             }
 
@@ -100,10 +99,11 @@ public class SecondFragment extends Fragment {
         });
 
 
-        HTTPTileDataSource source2 =  new HTTPTileDataSource(6, 12, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.webp");
+//        HTTPTileDataSource source2 =  new HTTPTileDataSource(5, 14  , "http://192.168.1.45:8080/data/test_ign/{z}/{x}/{y}.png");
+        HTTPTileDataSource source2 =  new HTTPTileDataSource(5, 11  , "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.webp");
 //        HTTPTileDataSource source2 = new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
         final HillshadeRasterTileLayer layer = new HillshadeRasterTileLayer(source2);
-//        layer.setHighlightColor(new Color((short)0, (short)137,(short)36, (short)255));
+//        layer.setHighlightColor(new Color((short)255, (short)255,(short)255, (short)255));
 
 //        final CheckBox inspectCheckBox = (CheckBox) view.findViewById(R.id.inspectCheckBox); // initiate the Seek bar
 //        inspectCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -113,17 +113,16 @@ public class SecondFragment extends Fragment {
 //                mapView.requestRender();
 //            }
 //        });
-        final  AppCompatSeekBar exagerationSeekBar = (AppCompatSeekBar) view.findViewById(R.id.exagerationSeekBar); // initiate the Seek bar
-        final TextView textExaggeration = (TextView) view.findViewById(R.id.textExaggeration); // initiate the Seek bar
-        layer.setContrast(0.75f);
-        exagerationSeekBar.setProgress(75);
-        textExaggeration.setText(layer.getContrast() + "");
-        exagerationSeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
+        final  AppCompatSeekBar contrastSeekBar = (AppCompatSeekBar) view.findViewById(R.id.contrastSeekBar); // initiate the Seek bar
+        final TextView textContrast = (TextView) view.findViewById(R.id.textContrast); // initiate the Seek bar
+        contrastSeekBar.setProgress((int)(layer.getContrast()*100.0f));
+        textContrast.setText(layer.getContrast() + "");
+        contrastSeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
                 layer.setContrast(i / 100.0f);
-                textExaggeration.setText(layer.getContrast() + "");
+                textContrast.setText(layer.getContrast() + "");
                 mapView.requestRender();
             }
 
@@ -136,19 +135,16 @@ public class SecondFragment extends Fragment {
             }
 
         });
-
-
         final  AppCompatSeekBar illuminationDirectionSeekBar = (AppCompatSeekBar) view.findViewById(R.id.illuminationDirectionSeekBar); // initiate the Seek bar
         final TextView textIlluminationDirection = (TextView) view.findViewById(R.id.textIlluminationDirection); // initiate the Seek bar
-        layer.setHeightScale(0.28f);
-        illuminationDirectionSeekBar.setProgress(28);
-        textIlluminationDirection.setText(layer.getHeightScale() + "");
+        illuminationDirectionSeekBar.setProgress((int)layer.getIlluminationDirection());
+        textIlluminationDirection.setText(layer.getIlluminationDirection() + "");
         illuminationDirectionSeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
-                layer.setHeightScale(i / 100.0f);
-                textIlluminationDirection.setText(layer.getHeightScale() + "");
+                layer.setIlluminationDirection(i);
+                textIlluminationDirection.setText(layer.getIlluminationDirection() + "");
                 mapView.requestRender();
             }
 
@@ -161,7 +157,56 @@ public class SecondFragment extends Fragment {
             }
 
         });
-        layer.setZoomLevelBias(1);
+
+
+        final  AppCompatSeekBar heightScaleSeekBar = (AppCompatSeekBar) view.findViewById(R.id.heightScaleSeekBar); // initiate the Seek bar
+        final TextView textHeightScale = (TextView) view.findViewById(R.id.textHeightScale); // initiate the Seek bar
+        heightScaleSeekBar.setProgress((int)(layer.getHeightScale()*100.0f));
+        textHeightScale.setText(layer.getHeightScale() + "");
+        heightScaleSeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+
+                layer.setHeightScale(i / 100.0f);
+                textHeightScale.setText(layer.getHeightScale() + "");
+                mapView.requestRender();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+
+        });
+
+
+//        Color highlightColor = new Color((short)255, (short)255,(short)255, (short)255);
+        final  AppCompatSeekBar highlightOpacitySeekBar = (AppCompatSeekBar) view.findViewById(R.id.highlightOpacitySeekBar); // initiate the Seek bar
+        final TextView textHighlightOpacity = (TextView) view.findViewById(R.id.testHighlightOpacity); // initiate the Seek bar
+        highlightOpacitySeekBar.setProgress(255);
+        textHighlightOpacity.setText("255");
+        highlightOpacitySeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                Color highlightColor = new Color((short)i, (short)i,(short)i, (short)255);
+                layer.setHighlightColor(highlightColor);
+                textHighlightOpacity.setText(i + "");
+                mapView.requestRender();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+
+        });
+//        layer.setZoomLevelBias(1);
 //        layer.setOpacity(0.5f);
 
         Options options = mapView.getOptions();
@@ -174,10 +219,10 @@ public class SecondFragment extends Fragment {
         options.setRotatable(true);
         options.setPanningMode(PanningMode.PANNING_MODE_STICKY);
         options.setBaseProjection(new EPSG4326());
-        mapView.getLayers().add(rasterlayer);
+        mapView.getLayers().add(backlayer);
         mapView.getLayers().add(layer);
-        mapView.setFocusPos(new MapPos(6.151881, 45.142932), 0);
-        mapView.setZoom(11, 0);
+        mapView.setFocusPos(new MapPos(5.7562, 45.175), 0);
+        mapView.setZoom(12, 0);
         com.carto.utils.Log.setShowInfo(true);
         com.carto.utils.Log.setShowDebug(true);
         com.carto.utils.Log.setShowWarn(true);
