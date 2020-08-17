@@ -51,6 +51,7 @@ namespace carto {
         // If either was not found, do table scan
         if (!foundMinZoom || !foundMaxZoom) {
             try {
+                Log::Warnf("MBTilesTileDataSource: minzoom and maxzoom not found int metadata, we need to compute it and it might be long");
                 sqlite3pp::query query(*_db, "SELECT MIN(zoom_level), MAX(zoom_level) FROM tiles");
                 for (auto it = query.begin(); it != query.end(); it++) {
                     if (!foundMinZoom) {
