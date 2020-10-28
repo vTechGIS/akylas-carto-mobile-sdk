@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
@@ -20,7 +21,9 @@ import android.widget.Toast;
 import com.akylas.cartotest.R;
 import com.carto.components.Options;
 import com.carto.components.PanningMode;
+import com.carto.components.RenderProjectionMode;
 import com.carto.core.IntVector;
+import com.carto.core.DoubleVector;
 import com.carto.core.MapPos;
 import com.carto.core.MapPosVector;
 import com.carto.core.MapRange;
@@ -251,7 +254,21 @@ public class SecondFragment extends Fragment {
 //            poses.add(new MapPos(points[i+1], points[i]));
 //        }
 
-        Projection projection = mapView.getOptions().getBaseProjection();
+        final Options options = mapView.getOptions();
+
+        final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
+        modeButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                if (options.getRenderProjectionMode() == RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL) {
+                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_PLANAR);
+                } else {
+                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL);
+                }
+            }
+        });
+
+        Projection projection = options.getBaseProjection();
         ValhallaOfflineRoutingService routingService;
         try {
             routingService = new ValhallaOfflineRoutingService("/storage/100F-3415/alpimaps_mbtiles/france.vtiles");
@@ -275,7 +292,7 @@ public class SecondFragment extends Fragment {
             if (result != null) {
                 MapPosVector points = result.getPoints();
                 Log.d(TAG, "showing route " + points.size());
-                IntVector elevations = layer.getElevations(points);
+                DoubleVector elevations = layer.getElevations(points);
                 for (int i = (int) (elevations.size() - 1); i >= 0; i--) {
                     MapPos point = points.get(i);
                     Log.d(TAG, "elevations2 " + i + "  " + point.getX() + "  " +  point.getY() + "  " +  elevations.get(i));
@@ -344,14 +361,13 @@ public class SecondFragment extends Fragment {
 
         final EPSG4326 projection = new EPSG4326();
 
-        Options options = mapView.getOptions();
+        final Options options = mapView.getOptions();
+
         options.setZoomGestures(true);
-        options.setWatermarkScale(0);
         options.setRestrictedPanning(true);
         options.setSeamlessPanning(true);
-        options.setEnvelopeThreadPoolSize(2);
-        options.setTileThreadPoolSize(2);
         options.setRotatable(true);
+        options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL);
         options.setPanningMode(PanningMode.PANNING_MODE_STICKY);
         options.setBaseProjection(projection);
         mapView.getLayers().add(backlayer);
