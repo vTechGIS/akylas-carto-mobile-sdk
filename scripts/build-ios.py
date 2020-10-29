@@ -112,14 +112,16 @@ def buildIOSFramework(args, archs):
   ):
     return False
 
+  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/Info.plist' % outputDir):
+      return False
+
   if args.sharedlib:
     if not execute('install_name_tool', outputDir,
       '-id', '@rpath/CartoMobileSDK.framework/CartoMobileSDK',
       'CartoMobileSDK'
     ):
       return False
-    if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/Info.plist' % outputDir):
-      return False
+    
 
   makedirs('%s/Headers' % outputDir)
   if not args.sharedlib:
@@ -176,7 +178,7 @@ def buildIOSCocoapod(args, buildpackage):
   iosversion = '9.0' if args.metalangle else '7.0'
   frameworks = (["IOSurface"] if args.metalangle else ["OpenGLES", "GLKit"]) + ["UIKit", "CoreGraphics", "CoreText", "CFNetwork", "Foundation", "CartoMobileSDK"]
 
-  with open('%s/scripts/ios-cocoapod/CartoMobileSDK.podspec.template' % baseDir, 'r') as f:
+  with open('%s/scripts/ios-cocoapod/Akylas-CartoMobileSDK.podspec.template' % baseDir, 'r') as f:
     cocoapodFile = string.Template(f.read()).safe_substitute({ 'baseDir': baseDir, 'distDir': distDir, 'distName': distName, 'version': version, 'iosversion': iosversion, 'frameworks': ', '.join('"%s"' % framework for framework in frameworks) })
   with open('%s/CartoMobileSDK.podspec' % distDir, 'w') as f:
     f.write(cocoapodFile)
