@@ -103,7 +103,7 @@ public class SecondFragment extends Fragment {
     void proceedWithSdCard(View view) {
         TileDataSource hillshadeSource = null;
         try {
-            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource("/storage/100F-3415/alpimaps_mbtiles/BDALTIV2_75M_rvb.etiles");
+            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/100F-3415/alpimaps_mbtiles/BDALTIV2_75M_rvb.etiles");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -273,19 +273,21 @@ public class SecondFragment extends Fragment {
         try {
             routingService = new ValhallaOfflineRoutingService("/storage/100F-3415/alpimaps_mbtiles/france.vtiles");
 //            routingService.connectElevationDataSource(hillshadeSource, elevationDecoder);
-            routingService.setProfile("bicycle");
+            routingService.setProfile("pedestrian");
 
             LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
             VectorLayer vectorLayer = new VectorLayer(localSource);
             mapView.getLayers().add(vectorLayer);
             MapPosVector vector = new MapPosVector();
-            vector.add(new MapPos(5.729, 45.192));
-            vector.add(new MapPos(6.675, 45.506));
+            vector.add(new MapPos(5.73018952319828, 45.19395768156221));
+            vector.add(new MapPos(5.725817787850285, 45.19885075467135));
             RoutingRequest request = new RoutingRequest(projection, vector);
             VariantObjectBuilder variantbuilder = new VariantObjectBuilder();
             VariantObjectBuilder variantbuilder2 = new VariantObjectBuilder();
-            variantbuilder2.setLong("use_hills", 0);
-            variantbuilder.setVariant("bicycle", variantbuilder2.buildVariant());
+            variantbuilder2.setDouble("use_hills", 0f);
+            variantbuilder2.setDouble("use_roads", 0.0f);
+            variantbuilder2.setLong("max_hiking_difficulty", 6);
+            variantbuilder.setVariant("pedestrian", variantbuilder2.buildVariant());
             request.setCustomParameter("costing_options", variantbuilder.buildVariant());
             RoutingResult result = routingService.calculateRoute(request);
             MapPosVector pointsWithAltitude = new MapPosVector();
@@ -302,7 +304,7 @@ public class SecondFragment extends Fragment {
                 LineStyleBuilder builder = new LineStyleBuilder();
                 builder.setWidth(4);
                 builder.setColor(new Color((short) 255, (short) 0, (short) 0, (short) 255));
-                Line line = new Line(pointsWithAltitude, builder.buildStyle());
+                Line line = new Line(points, builder.buildStyle());
                 localSource.add(line);
             }
 //            Log.d(TAG, "elevations " + elevations.toString());
