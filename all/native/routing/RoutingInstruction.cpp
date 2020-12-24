@@ -46,9 +46,6 @@ namespace carto {
     const std::string& RoutingInstruction::getStreetName() const {
         return _streetName;
     }
-    const std::string& RoutingInstruction::getInstruction() const {
-        return _instruction;
-    }
 
     const std::string& RoutingInstruction::getInstruction() const {
         return _instruction;

@@ -139,7 +139,6 @@ namespace carto {
          * @return The name of the street.
          */
         const std::string& getStreetName() const;
-        const std::string& getInstruction() const;
         /**
          * Returns the optional instruction description. This info is dependent on the routing engine (can be empty) and may be localized.
          * @return The optional instruction description.
