@@ -28,10 +28,12 @@ def zip(args, dir, *cmdArgs):
 
 def detectAndroidAPIs(args):
   api32, api64 = None, None
-  for name in os.listdir('%s/platforms' % args.androidndkpath):
-    if name.startswith('android-'):
-      api = int(name[8:])
-      if api >= 21:
+  with open('%s/meta/platforms.json' % args.androidndkpath, 'rb') as f: 
+    platforms = json.load(f)
+    minapi = platforms.get('min', 1)
+    maxapi = platforms.get('max', 0)
+    for api in range(minapi, maxapi + 1):
+      if api >= 9:
         api32 = min(api32 or api, api)
       if api >= 21:
         api64 = min(api64 or api, api)
