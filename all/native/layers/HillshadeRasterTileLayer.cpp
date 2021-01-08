@@ -84,6 +84,7 @@ namespace carto
         _elevationDecoder(elevationDecoder),
         _contrast(0.5f),
         _heightScale(1.0f),
+        _exagerateHeightScaleEnabled(false),
         _normalMapLightingShader(),
         _shadowColor(0, 0, 0, 255),
         _highlightColor(255, 255, 255, 255),
@@ -195,6 +196,19 @@ namespace carto
         }
         redraw();
     }
+    bool HillshadeRasterTileLayer::getExagerateHeightScaleEnabled() const
+    {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _exagerateHeightScaleEnabled;
+    }
+    void HillshadeRasterTileLayer::setExagerateHeightScaleEnabled(bool enabled)
+    {
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+            _exagerateHeightScaleEnabled = enabled;
+        }
+        redraw();
+    }
 
     bool HillshadeRasterTileLayer::onDrawFrame(float deltaSeconds, BillboardSorter &billboardSorter, const ViewState &viewState)
     {
@@ -233,10 +247,14 @@ namespace carto
         std::array<float, 4> scales;
         {
             std::lock_guard<std::recursive_mutex> lock(_mutex);
-            alpha = static_cast<std::uint8_t>(_contrast * 255.0f);
-            float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
-            float scale = 16 * _heightScale * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom() * (1 - exaggeration)) / 40075016.6855785);
             scales = _elevationDecoder->getVectorTileScales();
+            alpha = static_cast<std::uint8_t>(_contrast * 255.0f);
+            float scale = 16 * _heightScale * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom()) / 40075016.6855785);
+            if (_exagerateHeightScaleEnabled) {
+                float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
+                 scale = 16 * _heightScale * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom() * (1 - exaggeration)) / 40075016.6855785);
+
+            }
             std::transform(scales.begin(), scales.end(), scales.begin(), [&scale](float &c) { return c * scale; });
         }
 

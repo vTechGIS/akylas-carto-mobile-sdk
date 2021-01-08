@@ -99,6 +99,17 @@ namespace carto {
          * @param enabled whether to enable or not.
          */
         void setIlluminationMapRotationEnabled(bool enabled);
+        /**
+         * Returns the normal vector tile should be exagerated based on the zoom level.
+         * @return enabled
+         */
+        bool getExagerateHeightScaleEnabled() const;
+
+        /**
+         * Sets wheter the normal vector tile should be exagerated based on the zoom level.
+         * @param enabled whether to enable or not.
+         */
+        void setExagerateHeightScaleEnabled(bool enabled);
 
         double getElevation(const MapPos& pos) const;
         std::vector<double> getElevations(const std::vector<MapPos> poses) const;
@@ -113,6 +124,7 @@ namespace carto {
         const DirectorPtr<ElevationDecoder> _elevationDecoder;
    
         float _contrast;
+        bool _exagerateHeightScaleEnabled;
         float _heightScale;
         std::string _normalMapLightingShader;
         Color _shadowColor;
