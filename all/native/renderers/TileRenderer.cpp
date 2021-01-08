@@ -30,6 +30,7 @@ namespace carto {
         _labelOrder(0),
         _buildingOrder(1),
         _rasterFilterMode(vt::RasterFilterMode::BILINEAR),
+        _normalMapLightingShader(LIGHTING_SHADER_NORMALMAP),
         _normalMapShadowColor(0, 0, 0, 255),
         _normalMapHighlightColor(255, 255, 255, 255),
         _horizontalLayerOffset(0),
@@ -99,6 +100,15 @@ namespace carto {
     void TileRenderer::setNormalMapHighlightColor(const Color& color) {
         std::lock_guard<std::mutex> lock(_mutex);
         _normalMapHighlightColor = color;
+    void TileRenderer::setNormalMapLightingShader(const std::string& shader) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        if (shader.size() > 0) {
+            _normalMapLightingShader = shader;
+        } else {
+            _normalMapLightingShader = LIGHTING_SHADER_NORMALMAP;
+        }
+
+
     }
     void TileRenderer::setNormalIlluminationDirection(float direction) {
         std::lock_guard<std::mutex> lock(_mutex);
@@ -338,7 +348,7 @@ namespace carto {
             });
             tileRenderer->setLightingShader3D(lightingShader3D);
 
-            vt::GLTileRenderer::LightingShader lightingShaderNormalMap(false, LIGHTING_SHADER_NORMALMAP, [this](GLuint shaderProgram, const vt::ViewState& viewState) {
+            vt::GLTileRenderer::LightingShader lightingShaderNormalMap(false, _normalMapLightingShader, [this](GLuint shaderProgram, const vt::ViewState& viewState) {
                 float azimuthal = _normalIlluminationDirection * Const::DEG_TO_RAD;
                 if (_normalIlluminationMapRotationEnabled) {
                     azimuthal -= _mapRotation * Const::DEG_TO_RAD;

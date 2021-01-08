@@ -28,6 +28,7 @@
 %attribute(carto::HillshadeRasterTileLayer, bool, IlluminationMapRotationEnabled, getIlluminationMapRotationEnabled, setIlluminationMapRotationEnabled)
 %attributeval(carto::HillshadeRasterTileLayer, carto::Color, ShadowColor, getShadowColor, setShadowColor)
 %attributeval(carto::HillshadeRasterTileLayer, carto::Color, HighlightColor, getHighlightColor, setHighlightColor)
+%attributeval(carto::HillshadeRasterTileLayer, std::string, NormalMapLightingShader, getNormalMapLightingShader, setNormalMapLightingShader)
 %std_exceptions(carto::HillshadeRasterTileLayer::HillshadeRasterTileLayer)
 
 %include "layers/HillshadeRasterTileLayer.h"

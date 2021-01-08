@@ -71,6 +71,14 @@ namespace carto {
          * @param color The new highlight color of the layer.
          */
         void setHighlightColor(const Color& color);
+
+        std::string getNormalMapLightingShader() const;
+        /**
+         * Sets a custom normalmap lighting shader.
+         * @param shader The custom shader.
+         */
+        void setNormalMapLightingShader(const std::string& shader);
+
         /**
          * Returns the illumination direction of the layer.
          * @return direction in degrees.
@@ -106,6 +114,7 @@ namespace carto {
    
         float _contrast;
         float _heightScale;
+        std::string _normalMapLightingShader;
         Color _shadowColor;
         Color _highlightColor;
         float _illuminationDirection;

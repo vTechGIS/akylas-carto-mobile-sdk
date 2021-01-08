@@ -84,6 +84,7 @@ namespace carto
         _elevationDecoder(elevationDecoder),
         _contrast(0.5f),
         _heightScale(1.0f),
+        _normalMapLightingShader(),
         _shadowColor(0, 0, 0, 255),
         _highlightColor(255, 255, 255, 255),
         _illuminationDirection(67),
@@ -155,6 +156,19 @@ namespace carto
         redraw();
     }
 
+    std::string HillshadeRasterTileLayer::getNormalMapLightingShader() const
+    {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _normalMapLightingShader;
+    }
+    void HillshadeRasterTileLayer::setNormalMapLightingShader(const std::string &shader)
+    {
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+            _normalMapLightingShader = shader;
+        }
+        redraw();
+    }
     float HillshadeRasterTileLayer::getIlluminationDirection() const
     {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
@@ -195,6 +209,7 @@ namespace carto
                 mapRenderer->clearAndBindScreenFBO(Color(0, 0, 0, 0), false, false);
             }
 
+            _tileRenderer->setNormalMapLightingShader(getNormalMapLightingShader());
             _tileRenderer->setRasterFilterMode(getRasterFilterMode());
             _tileRenderer->setNormalMapShadowColor(getShadowColor());
             _tileRenderer->setNormalMapHighlightColor(getHighlightColor());
