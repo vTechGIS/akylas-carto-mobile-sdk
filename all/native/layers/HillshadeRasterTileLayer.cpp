@@ -86,6 +86,7 @@ namespace carto
         _heightScale(1.0f),
         _exagerateHeightScaleEnabled(false),
         _normalMapLightingShader(),
+        _accentColor(0, 0, 0, 255),
         _shadowColor(0, 0, 0, 255),
         _highlightColor(255, 255, 255, 255),
         _illuminationDirection(67),
@@ -141,6 +142,22 @@ namespace carto
         }
         redraw();
     }
+
+    Color HillshadeRasterTileLayer::getAccentColor() const
+    {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _accentColor;
+    }
+
+    void HillshadeRasterTileLayer::setAccentColor(const Color &color)
+    {
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+            _accentColor = color;
+        }
+        redraw();
+    }
+
 
     Color HillshadeRasterTileLayer::getHighlightColor() const
     {
@@ -226,6 +243,7 @@ namespace carto
             _tileRenderer->setNormalMapLightingShader(getNormalMapLightingShader());
             _tileRenderer->setRasterFilterMode(getRasterFilterMode());
             _tileRenderer->setNormalMapShadowColor(getShadowColor());
+            _tileRenderer->setNormalMapAccentColor(getAccentColor());
             _tileRenderer->setNormalMapHighlightColor(getHighlightColor());
             _tileRenderer->setNormalIlluminationDirection(getIlluminationDirection());
             _tileRenderer->setNormalIlluminationMapRotationEnabled(getIlluminationMapRotationEnabled());

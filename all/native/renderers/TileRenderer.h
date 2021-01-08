@@ -53,6 +53,7 @@ namespace carto {
         void setRasterFilterMode(vt::RasterFilterMode filterMode);
         void setNormalMapShadowColor(const Color& color);
         void setNormalMapHighlightColor(const Color& color);
+        void setNormalMapAccentColor(const Color& color);
         void setNormalMapLightingShader(const std::string& shader);
         void setNormalIlluminationMapRotationEnabled(bool enabled);
         void setNormalIlluminationDirection(float direction);
@@ -88,6 +89,7 @@ namespace carto {
         int _buildingOrder;
         vt::RasterFilterMode _rasterFilterMode;
         Color _normalMapShadowColor;
+        Color _normalMapAccentColor;
         Color _normalMapHighlightColor;
         std::string _normalMapLightingShader;
         double _horizontalLayerOffset;

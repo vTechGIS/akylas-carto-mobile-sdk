@@ -32,6 +32,7 @@ namespace carto {
         _rasterFilterMode(vt::RasterFilterMode::BILINEAR),
         _normalMapLightingShader(LIGHTING_SHADER_NORMALMAP),
         _normalMapShadowColor(0, 0, 0, 255),
+        _normalMapAccentColor(0, 0, 0, 255),
         _normalMapHighlightColor(255, 255, 255, 255),
         _horizontalLayerOffset(0),
         _viewDir(0, 0, 0),
@@ -100,6 +101,11 @@ namespace carto {
     void TileRenderer::setNormalMapHighlightColor(const Color& color) {
         std::lock_guard<std::mutex> lock(_mutex);
         _normalMapHighlightColor = color;
+    }
+    void TileRenderer::setNormalMapAccentColor(const Color& color) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _normalMapAccentColor = color;
+    }
     void TileRenderer::setNormalMapLightingShader(const std::string& shader) {
         std::lock_guard<std::mutex> lock(_mutex);
         if (shader.size() > 0) {
@@ -356,6 +362,7 @@ namespace carto {
                 MapVec viewDir = MapVec(std::cos(azimuthal), std::sin(azimuthal));
                 cglib::vec3<float> cViewDir(viewDir.getX(), viewDir.getY(), 1);
                 glUniform4f(glGetUniformLocation(shaderProgram, "u_shadowColor"), _normalMapShadowColor.getR() / 255.0f, _normalMapShadowColor.getG() / 255.0f, _normalMapShadowColor.getB() / 255.0f, _normalMapShadowColor.getA() / 255.0f);
+                glUniform4f(glGetUniformLocation(shaderProgram, "u_accentColor"), _normalMapAccentColor.getR() / 255.0f, _normalMapAccentColor.getG() / 255.0f, _normalMapAccentColor.getB() / 255.0f, _normalMapAccentColor.getA() / 255.0f);
                 glUniform4f(glGetUniformLocation(shaderProgram, "u_highlightColor"), _normalMapHighlightColor.getR() / 255.0f, _normalMapHighlightColor.getG() / 255.0f, _normalMapHighlightColor.getB() / 255.0f, _normalMapHighlightColor.getA() / 255.0f);
                 glUniform3fv(glGetUniformLocation(shaderProgram, "u_lightDir"), 1,cViewDir.data() );
             });

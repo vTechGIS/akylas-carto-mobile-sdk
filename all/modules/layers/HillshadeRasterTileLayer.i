@@ -29,6 +29,7 @@
 %attribute(carto::HillshadeRasterTileLayer, bool, ExagerateHeightScaleEnabled, getExagerateHeightScaleEnabled, setExagerateHeightScaleEnabled)
 %attributeval(carto::HillshadeRasterTileLayer, carto::Color, ShadowColor, getShadowColor, setShadowColor)
 %attributeval(carto::HillshadeRasterTileLayer, carto::Color, HighlightColor, getHighlightColor, setHighlightColor)
+%attributeval(carto::HillshadeRasterTileLayer, carto::Color, AccentColor, getAccentColor, setAccentColor)
 %attributeval(carto::HillshadeRasterTileLayer, std::string, NormalMapLightingShader, getNormalMapLightingShader, setNormalMapLightingShader)
 %std_exceptions(carto::HillshadeRasterTileLayer::HillshadeRasterTileLayer)
 

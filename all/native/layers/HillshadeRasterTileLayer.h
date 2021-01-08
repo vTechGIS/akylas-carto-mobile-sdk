@@ -51,23 +51,34 @@ namespace carto {
         void setHeightScale(float heightScale);
 
         /**
-         * Returns the shadow color of the layer.
+         * Returns the shading color of areas that face away from the light source.
          * @return The shadow color of the layer.
          */
         Color getShadowColor() const;
         /**
-         * Sets the shadow color of the layer.
+         * Sets the shading color of areas that face away from the light source.
          * @param color The new shadow color of the layer.
          */
         void setShadowColor(const Color& color);
+        /**
+         * Returns the shading color used to accentuate rugged terrain like sharp cliffs and gorges.
+         * @return The accent color of the layer.
+         */
+        Color getAccentColor() const;
+        /**
+         * Sets the shading color used to accentuate rugged terrain like sharp cliffs and gorges.
+         * @param color The new accent color of the layer.
+         */
+        void setAccentColor(const Color& color);
 
         /**
-         * Returns the highlight color of the layer.
+         * Returns the shading color of areas that faces towards the light source.
          * @return The highlight color of the layer.
          */
         Color getHighlightColor() const;
+
         /**
-         * Sets the highlight color of the layer.
+         * Sets the shading color of areas that faces towards the light source.
          * @param color The new highlight color of the layer.
          */
         void setHighlightColor(const Color& color);
@@ -128,6 +139,7 @@ namespace carto {
         float _heightScale;
         std::string _normalMapLightingShader;
         Color _shadowColor;
+        Color _accentColor;
         Color _highlightColor;
         float _illuminationDirection;
         bool _illuminationMapRotationEnabled;
