@@ -92,14 +92,15 @@ namespace carto {
 
         /**
          * Returns the illumination direction of the layer.
-         * @return direction in degrees.
+         * @return The direction vector for the hillshade illumination
          */
-        float getIlluminationDirection() const;
+        MapVec getIlluminationDirection() const;
         /**
          * Sets the illumination direction.
-         * @param direction in degrees.
+         * @param The new direction vector for the illumination light. (0,0,-1) means straight down, (-0.707,0,-0.707) means
+         *        from east with a 45 degree angle. The direction vector will be normalized.
          */
-        void setIlluminationDirection(float direction);
+        void setIlluminationDirection(MapVec direction);
         /**
          * Returns wheter the illumination direction should change with the map rotation.
          * @return enabled
@@ -141,7 +142,7 @@ namespace carto {
         Color _shadowColor;
         Color _accentColor;
         Color _highlightColor;
-        float _illuminationDirection;
+        MapVec _illuminationDirection;
         bool _illuminationMapRotationEnabled;
     };
     

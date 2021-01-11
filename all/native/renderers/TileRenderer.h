@@ -56,7 +56,7 @@ namespace carto {
         void setNormalMapAccentColor(const Color& color);
         void setNormalMapLightingShader(const std::string& shader);
         void setNormalIlluminationMapRotationEnabled(bool enabled);
-        void setNormalIlluminationDirection(float direction);
+        void setNormalIlluminationDirection(MapVec direction);
 
         void offsetLayerHorizontally(double offset);
     
@@ -95,7 +95,8 @@ namespace carto {
         double _horizontalLayerOffset;
         cglib::vec3<float> _viewDir;
         cglib::vec3<float> _mainLightDir;
-        double _normalIlluminationDirection;
+        cglib::vec3<float> _normalLightDir;
+        MapVec _normalIlluminationDirection;
         bool _normalIlluminationMapRotationEnabled;
         double _mapRotation;
 

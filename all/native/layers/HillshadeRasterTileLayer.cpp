@@ -89,7 +89,7 @@ namespace carto
         _accentColor(0, 0, 0, 255),
         _shadowColor(0, 0, 0, 255),
         _highlightColor(255, 255, 255, 255),
-        _illuminationDirection(67),
+        _illuminationDirection(0,0,0),
         _illuminationMapRotationEnabled(true)
     {
     }
@@ -187,16 +187,21 @@ namespace carto
         }
         redraw();
     }
-    float HillshadeRasterTileLayer::getIlluminationDirection() const
+    MapVec HillshadeRasterTileLayer::getIlluminationDirection() const
     {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
         return _illuminationDirection;
     }
-    void HillshadeRasterTileLayer::setIlluminationDirection(float direction)
+    void HillshadeRasterTileLayer::setIlluminationDirection(MapVec direction)
     {
         {
             std::lock_guard<std::recursive_mutex> lock(_mutex);
-            _illuminationDirection = direction;
+            MapVec directionNormalized = direction;
+            directionNormalized.normalize();
+            if (_illuminationDirection == directionNormalized) {
+                return;
+            }
+            _illuminationDirection = directionNormalized;
         }
         redraw();
     }

@@ -3,7 +3,7 @@
 
 %module HillshadeRasterTileLayer
 
-!proxy_imports(carto::HillshadeRasterTileLayer, core.MapPos, core.MapPosVector, core.DoubleVector, datasources.TileDataSource, rastertiles.ElevationDecoder, graphics.Color, layers.RasterTileLayer)
+!proxy_imports(carto::HillshadeRasterTileLayer, core.MapPos, core.MapVec, core.MapPosVector, core.DoubleVector, datasources.TileDataSource, rastertiles.ElevationDecoder, graphics.Color, layers.RasterTileLayer)
 
 %{
 #include "layers/HillshadeRasterTileLayer.h"
@@ -24,7 +24,7 @@
 
 %attribute(carto::HillshadeRasterTileLayer, float, Contrast, getContrast, setContrast)
 %attribute(carto::HillshadeRasterTileLayer, float, HeightScale, getHeightScale, setHeightScale)
-%attribute(carto::HillshadeRasterTileLayer, float, IlluminationDirection, getIlluminationDirection, setIlluminationDirection)
+%attribute(carto::HillshadeRasterTileLayer, carto::MapVec, IlluminationDirection, getIlluminationDirection, setIlluminationDirection)
 %attribute(carto::HillshadeRasterTileLayer, bool, IlluminationMapRotationEnabled, getIlluminationMapRotationEnabled, setIlluminationMapRotationEnabled)
 %attribute(carto::HillshadeRasterTileLayer, bool, ExagerateHeightScaleEnabled, getExagerateHeightScaleEnabled, setExagerateHeightScaleEnabled)
 %attributeval(carto::HillshadeRasterTileLayer, carto::Color, ShadowColor, getShadowColor, setShadowColor)
