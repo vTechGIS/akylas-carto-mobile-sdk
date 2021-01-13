@@ -272,7 +272,7 @@ namespace carto
             std::lock_guard<std::recursive_mutex> lock(_mutex);
             scales = _elevationDecoder->getVectorTileScales();
             alpha = static_cast<std::uint8_t>(_contrast * 255.0f);
-            float scale = static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom()) / 40075016.6855785);
+            float scale = 0.1f * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom()) / 40075016.6855785);
             if (_exagerateHeightScaleEnabled) {
                 float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
                  scale = 16 * _heightScale * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom() * (1 - exaggeration)) / 40075016.6855785);
