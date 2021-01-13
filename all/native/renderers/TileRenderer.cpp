@@ -411,7 +411,7 @@ namespace carto {
         uniform vec4 u_shadowColor;
         uniform vec4 u_highlightColor;
         uniform vec3 u_lightDir;
-        vec4 applyLighting(lowp vec4 color, mediump vec3 normal, mediump float intensity) {
+        vec4 applyLighting(lowp vec4 color, mediump vec3 normal, mediump vec3 surfaceNormal, mediump float intensity) {
             mediump float lighting = max(0.0, dot(normal, u_lightDir));
             lowp vec4 shadeColor = mix(u_shadowColor, u_highlightColor, lighting);
             return shadeColor * color * intensity;
