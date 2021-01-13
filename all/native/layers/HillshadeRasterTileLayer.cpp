@@ -229,7 +229,7 @@ namespace carto
             std::lock_guard<std::recursive_mutex> lock(_mutex);
             _exagerateHeightScaleEnabled = enabled;
         }
-        redraw();
+        tilesChanged(false);
     }
 
     bool HillshadeRasterTileLayer::onDrawFrame(float deltaSeconds, BillboardSorter &billboardSorter, const ViewState &viewState)

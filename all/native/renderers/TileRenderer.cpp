@@ -109,13 +109,14 @@ namespace carto {
     }
     void TileRenderer::setNormalMapLightingShader(const std::string& shader) {
         std::lock_guard<std::mutex> lock(_mutex);
-        if (shader.size() > 0) {
-            _normalMapLightingShader = shader;
-        } else {
-            _normalMapLightingShader = LIGHTING_SHADER_NORMALMAP;
+        std::string newValue = shader;
+        if (newValue.length() == 0) {
+            newValue = LIGHTING_SHADER_NORMALMAP;
         }
-
-
+        if (newValue != _normalMapLightingShader) {
+            _normalMapLightingShader = newValue;
+            _vtRenderer.reset();
+        }
     }
     void TileRenderer::setNormalIlluminationDirection(MapVec direction) {
         std::lock_guard<std::mutex> lock(_mutex);
