@@ -161,7 +161,9 @@ namespace carto {
                 normalIlluminationDir = _normalIlluminationDirection;
             }
             if (_normalIlluminationMapRotationEnabled) {
-                double azimuthal = fmod((acos(normalIlluminationDir.getY()) * Const::RAD_TO_DEG - _mapRotation),  360.0) ;
+                double y = normalIlluminationDir.getY();
+                double x = normalIlluminationDir.getX();
+                double azimuthal = ((x > 0) ? acos(y) : -acos(y)) * Const::RAD_TO_DEG - _mapRotation;
                 double sin = std::sin(azimuthal * Const::DEG_TO_RAD);
                 double cos = std::cos(azimuthal * Const::DEG_TO_RAD);
                 normalIlluminationDir = MapVec(sin, cos, normalIlluminationDir.getZ());
