@@ -36,7 +36,7 @@
 
             <TextView
                 android:text="contrast"
-                android:layout_width="40dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"></TextView>
 
             <androidx.appcompat.widget.AppCompatSeekBar
@@ -59,7 +59,7 @@
 
             <TextView
                 android:text="heightScale"
-                android:layout_width="40dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"></TextView>
 
             <androidx.appcompat.widget.AppCompatSeekBar
@@ -83,7 +83,7 @@
 
             <TextView
                 android:text="illuminationDir"
-                android:layout_width="40dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"></TextView>
 
 
@@ -107,7 +107,7 @@
 
             <TextView
                 android:text="highlightOpacity"
-                android:layout_width="40dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"></TextView>
 
             <androidx.appcompat.widget.AppCompatSeekBar
@@ -118,6 +118,29 @@
                 android:max="255" />
             <TextView
                 android:id="@+id/testHighlightOpacity"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"></TextView>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="30dp"
+            android:orientation="horizontal">
+
+
+            <TextView
+                android:text="shadowOpacity"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"></TextView>
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/shadowOpacitySeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="255" />
+            <TextView
+                android:id="@+id/testShadowOpacity"
                 android:layout_width="40dp"
                 android:layout_height="match_parent"></TextView>
 
@@ -146,11 +169,11 @@
                 android:layout_height="match_parent"></TextView>
 
         </LinearLayout>
-<!--        <CheckBox-->
-<!--            android:id="@+id/inspectCheckBox"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="inspect"></CheckBox>-->
+        <CheckBox
+            android:id="@+id/slopesCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="inspect"></CheckBox>
     </LinearLayout>
 
     <TextView
