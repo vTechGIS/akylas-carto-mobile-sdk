@@ -21,28 +21,28 @@
 namespace carto {
     
     TileRenderer::TileRenderer() :
-            _mapRenderer(),
-            _options(),
-            _tileTransformer(),
-            _vtRenderer(),
-            _interactionMode(false),
-            _subTileBlending(true),
-            _labelOrder(0),
-            _buildingOrder(1),
-            _rasterFilterMode(vt::RasterFilterMode::BILINEAR),
+        _mapRenderer(),
+        _options(),
+        _tileTransformer(),
+        _vtRenderer(),
+        _interactionMode(false),
+        _subTileBlending(true),
+        _labelOrder(0),
+        _buildingOrder(1),
+        _rasterFilterMode(vt::RasterFilterMode::BILINEAR),
             _normalMapLightingShader(LIGHTING_SHADER_NORMALMAP),
-            _normalMapShadowColor(0, 0, 0, 255),
+        _normalMapShadowColor(0, 0, 0, 255),
             _normalMapAccentColor(0, 0, 0, 255),
-            _normalMapHighlightColor(255, 255, 255, 255),
-            _horizontalLayerOffset(0),
-            _viewDir(0, 0, 0),
-            _mainLightDir(0, 0, 0),
+        _normalMapHighlightColor(255, 255, 255, 255),
+        _horizontalLayerOffset(0),
+        _viewDir(0, 0, 0),
+        _mainLightDir(0, 0, 0),
             _normalLightDir(0, 0, 0),
             _normalIlluminationMapRotationEnabled(false),
             _normalIlluminationDirection(0,0,0),
             _mapRotation(0),
-            _tiles(),
-            _mutex()
+        _tiles(),
+        _mutex()
     {
     }
     
