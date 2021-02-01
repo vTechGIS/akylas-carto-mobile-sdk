@@ -413,11 +413,15 @@ namespace carto {
     const std::string TileRenderer::LIGHTING_SHADER_NORMALMAP = R"GLSL(
         uniform vec4 u_shadowColor;
         uniform vec4 u_highlightColor;
+        uniform vec4 u_accentColor;
         uniform vec3 u_lightDir;
         vec4 applyLighting(lowp vec4 color, mediump vec3 normal, mediump vec3 surfaceNormal, mediump float intensity) {
             mediump float lighting = max(0.0, dot(normal, u_lightDir));
-            lowp vec4 shadeColor = mix(u_shadowColor, u_highlightColor, lighting);
-            return shadeColor * color * intensity;
+            mediump float accent = normal.z;
+            lowp vec4 accent_color = (1.0 - accent) * u_accentColor * intensity;
+            mediump float alpha = clamp(u_shadowColor.a*(1.0-lighting)+u_highlightColor.a*lighting, 0.0, 1.0);
+            lowp vec4 shade_color = vec4(mix(u_shadowColor.rgb, u_highlightColor.rgb, lighting), alpha);
+            return (accent_color * (1.0 - shade_color.a) + shade_color) * color * intensity;
         }
     )GLSL";
 
