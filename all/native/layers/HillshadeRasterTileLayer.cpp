@@ -263,7 +263,7 @@ namespace carto
         }
         return false;
     }
-
+    
     std::shared_ptr<vt::Tile> HillshadeRasterTileLayer::createVectorTile(const MapTile &tile, const std::shared_ptr<Bitmap> &bitmap) const
     {
         std::uint8_t alpha = 0;
@@ -274,33 +274,33 @@ namespace carto
             alpha = static_cast<std::uint8_t>(_contrast * 255.0f);
             float scale = 0.1f * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom()) / 40075016.6855785);
             if (_exagerateHeightScaleEnabled) {
-                float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
+            float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
                  scale = 16 * _heightScale * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom() * (1 - exaggeration)) / 40075016.6855785);
 
             }
             std::transform(scales.begin(), scales.end(), scales.begin(), [&scale](float &c) { return c * scale; });
         }
-
+        
         // Build normal map from height map
         vt::TileId vtTileId(tile.getZoom(), tile.getX(), tile.getY());
         std::shared_ptr<Bitmap> rgbaBitmap = bitmap->getRGBABitmap();
-        auto rgbaBitmapDataPtr = reinterpret_cast<const std::uint32_t *>(rgbaBitmap->getPixelData().data());
+        auto rgbaBitmapDataPtr = reinterpret_cast<const std::uint32_t*>(rgbaBitmap->getPixelData().data());
         std::vector<std::uint32_t> rgbaBitmapData(rgbaBitmapDataPtr, rgbaBitmapDataPtr + rgbaBitmap->getWidth() * rgbaBitmap->getHeight());
         auto vtBitmap = std::make_shared<vt::Bitmap>(rgbaBitmap->getWidth(), rgbaBitmap->getHeight(), std::move(rgbaBitmapData));
         vt::NormalMapBuilder normalMapBuilder(scales, alpha);
         std::shared_ptr<const vt::Bitmap> normalMap = normalMapBuilder.buildNormalMapFromHeightMap(vtTileId, vtBitmap);
-        auto normalMapDataPtr = reinterpret_cast<const std::uint8_t *>(normalMap->data.data());
+        auto normalMapDataPtr = reinterpret_cast<const std::uint8_t*>(normalMap->data.data());
         std::vector<std::uint8_t> normalMapData(normalMapDataPtr, normalMapDataPtr + normalMap->data.size() * sizeof(std::uint32_t));
         auto tileBitmap = std::make_shared<vt::TileBitmap>(vt::TileBitmap::Type::NORMALMAP, vt::TileBitmap::Format::RGBA, normalMap->width, normalMap->height, std::move(normalMapData));
-
+        
         // Build vector tile from created normal map
         float tileSize = 256.0f; // 'normalized' tile size in pixels. Not really important
         std::shared_ptr<vt::TileBackground> tileBackground = std::make_shared<vt::TileBackground>(vt::Color(), std::shared_ptr<vt::BitmapPattern>());
         std::shared_ptr<const vt::TileTransformer::VertexTransformer> vtTransformer = getTileTransformer()->createTileVertexTransformer(vtTileId);
         vt::TileLayerBuilder tileLayerBuilder(vtTileId, 0, vtTransformer, tileSize, 1.0f); // Note: the size/scale argument is ignored
         tileLayerBuilder.addBitmap(tileBitmap);
-        std::shared_ptr<vt::TileLayer> tileLayer = tileLayerBuilder.buildTileLayer(boost::optional<vt::CompOp>(), vt::FloatFunction(1));
-        return std::make_shared<vt::Tile>(vtTileId, tileSize, tileBackground, std::vector<std::shared_ptr<vt::TileLayer>>{tileLayer});
+        std::shared_ptr<vt::TileLayer> tileLayer = tileLayerBuilder.buildTileLayer(std::optional<vt::CompOp>(), vt::FloatFunction(1));
+        return std::make_shared<vt::Tile>(vtTileId, tileSize, tileBackground, std::vector<std::shared_ptr<vt::TileLayer> > { tileLayer });
     }
 
     std::shared_ptr<Bitmap> HillshadeRasterTileLayer::getTileDataBitmap(std::shared_ptr<TileData> tileData) const {

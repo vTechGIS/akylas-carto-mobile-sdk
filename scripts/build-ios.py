@@ -108,7 +108,7 @@ def buildIOSLib(args, arch, outputDir=None):
     '-DSHARED_LIBRARY:BOOL=%s' % ('ON' if args.sharedlib else 'OFF'),
     '-DCMAKE_OSX_ARCHITECTURES=%s' % arch,
     '-DCMAKE_OSX_SYSROOT=iphone%s' % platform.lower(),
-    '-DCMAKE_OSX_DEPLOYMENT_TARGET=%s' % ('9.0' if args.metalangle else '9.0'),
+    '-DCMAKE_OSX_DEPLOYMENT_TARGET=9.0',
     '-DCMAKE_BUILD_TYPE=%s' % args.configuration,
     "-DSDK_CPP_DEFINES=%s" % " ".join(defines),
     "-DSDK_VERSION='%s'" % version,
@@ -118,6 +118,7 @@ def buildIOSLib(args, arch, outputDir=None):
     return False
   return cmake(args, buildDir, [
     '--build', '.',
+    '--parallel', '4',
     '--config', args.configuration
   ])
 
@@ -204,7 +205,7 @@ def buildIOSXCFramework(args, archs, outputDir=None):
     return False
 
   if outputDir is None:
-    print("Output available in:\n%s" % distDir)
+  print("Output available in:\n%s" % distDir)
   return True
 
 def buildIOSCocoapod(args, buildpackage):
@@ -212,7 +213,7 @@ def buildIOSCocoapod(args, buildpackage):
   distDir = getDistDir('ios')
   version = args.buildversion
   distName = 'sdk4-ios-%s.zip' % version
-  iosversion = '9.0' if args.metalangle else '7.0'
+  iosversion = '9.0'
   frameworks = (["IOSurface"] if args.metalangle else ["OpenGLES", "GLKit"]) + ["UIKit", "CoreGraphics", "CoreText", "CFNetwork", "Foundation", "CartoMobileSDK"]
 
   with open('%s/scripts/ios-cocoapod/Akylas-CartoMobileSDK.podspec.template' % baseDir, 'r') as f:
@@ -266,8 +267,8 @@ if args.buildxcframework:
   if not buildIOSXCFramework(args, args.iosarch):
     sys.exit(-1)
 else:
-  if not buildIOSFramework(args, args.iosarch):
-    sys.exit(-1)
+if not buildIOSFramework(args, args.iosarch):
+  sys.exit(-1)
 
 if args.buildcocoapod or args.buildcocoapodpackage:
   if not buildIOSCocoapod(args, args.buildcocoapodpackage):
