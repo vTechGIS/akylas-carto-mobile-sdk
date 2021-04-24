@@ -28,12 +28,19 @@ android {
     defaultConfig {
         externalNativeBuild {
             cmake {
-                arguments "-DINCLUDE_VALHALLA:BOOL=ON -DSINGLE_LIBRARY:BOOL=ON", "-DANDROID_STL=c++_static", "-DSDK_CPP_DEFINES='-D_CARTO_SERVICES_SUPPORT -D_CARTO_SEARCH_SUPPORT -D_CARTO_GEOCODING_SUPPORT -D_CARTO_ROUTING_SUPPORT -D_CARTO_OFFLINE_SUPPORT -D_CARTO_PACKAGEMANAGER_SUPPORT -D_CARTO_LICENSEMANAGER_SUPPORT -D_CARTO_EDITABLE_SUPPORT -D_CARTO_WKBT_SUPPORT -D_CARTO_VALHALLA_ROUTING_SUPPORT'", "-DWRAPPER_DIR=${projectDir.absolutePath.replaceAll('\\\\', '/')}/../../../generated/android-java/wrappers"
+                // Sets an optional flag for the C compiler.
+                cppFlags "-D_CARTO_MOBILE_SDK_VERSION=\"\\\"0.0.0\\\"\"", "-D_CARTO_MOBILE_SDK_PLATFORM=\"\\\"Android\\\"\""
+                arguments "-DINCLUDE_VALHALLA:BOOL=ON",
+                        "-DSINGLE_LIBRARY:BOOL=ON",
+                        "-DANDROID_STL=c++_static",
+                "-DSDK_CPP_DEFINES='-DCRYPTOPP_DISABLE_SHA -DCRYPTOPP_DISABLE_ASM -D_CARTO_SERVICES_SUPPORT -D_CARTO_SEARCH_SUPPORT -D_CARTO_GEOCODING_SUPPORT -D_CARTO_ROUTING_SUPPORT -D_CARTO_OFFLINE_SUPPORT -D_CARTO_PACKAGEMANAGER_SUPPORT -D_CARTO_LICENSEMANAGER_SUPPORT -D_CARTO_EDITABLE_SUPPORT -D_CARTO_WKBT_SUPPORT -D_CARTO_VALHALLA_ROUTING_SUPPORT' ",
+                 "-DWRAPPER_DIR=${projectDir.absolutePath.replaceAll('\\\\', '/')}/../../../generated/android-java/wrappers"
             }
         }
     }
     externalNativeBuild {
         cmake {
+            version "3.18.1"
             path file("$projectDir/../../build/CMakeLists.txt")
         }
     }
