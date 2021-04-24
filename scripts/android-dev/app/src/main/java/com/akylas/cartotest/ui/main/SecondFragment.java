@@ -30,6 +30,7 @@ import com.carto.core.MapPosVector;
 import com.carto.core.MapRange;
 import com.carto.core.MapVec;
 import com.carto.core.StringVector;
+import com.carto.core.Variant;
 import com.carto.core.VariantObjectBuilder;
 import com.carto.datasources.HTTPTileDataSource;
 import com.carto.datasources.LocalVectorDataSource;
@@ -52,6 +53,7 @@ import com.carto.rastertiles.MapBoxElevationDataDecoder;
 import com.carto.routing.RoutingRequest;
 import com.carto.routing.RoutingResult;
 import com.carto.routing.ValhallaOfflineRoutingService;
+import com.carto.routing.ValhallaOnlineRoutingService;
 import com.carto.search.SearchRequest;
 import com.carto.search.VectorTileSearchService;
 import com.carto.styles.CompiledStyleSet;
@@ -136,14 +138,14 @@ public class SecondFragment extends Fragment {
     }
 
     void proceedWithSdCard(View view) {
-//        TileDataSource hillshadeSource = null;
+        TileDataSource hillshadeSource = null;
         try {
-            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/10E7-1004/alpimaps_mbtiles/hillshade.mbtiles");
-        } catch (IOException e) {
+            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/10E7-1004/alpimaps_mbtiles/BDALTIV2_75M_rvb_2.etiles");
+//            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
+            //        HTTPTileDataSource hillshadeSource =   new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
+        } catch (Exception e) {
             e.printStackTrace();
         }
-//        HTTPTileDataSource hillshadeSource = hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.158:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.webp");
-//        HTTPTileDataSource hillshadeSource =   new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
         final MapBoxElevationDataDecoder decoder = elevationDecoder = new MapBoxElevationDataDecoder();
         final HillshadeRasterTileLayer layer = hillshadeLayer = new HillshadeRasterTileLayer(hillshadeSource, decoder);
         layer.setContrast(1.0f);
@@ -311,14 +313,17 @@ public class SecondFragment extends Fragment {
         final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                testValhalla(hillshadeLayer, options);
                 // Code here executes on main thread after user presses button
-                if (options.getRenderProjectionMode() == RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL) {
-                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_PLANAR);
-                } else {
-                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL);
-                }
+//                if (options.getRenderProjectionMode() == RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL) {
+//                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_PLANAR);
+//                } else {
+//                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL);
+//                }
             }
         });
+
+//        testValhalla(hillshadeLayer, options);
 
 
     }
@@ -350,8 +355,9 @@ public class SecondFragment extends Fragment {
         Projection projection = options.getBaseProjection();
         ValhallaOfflineRoutingService routingService;
         try {
-            routingService = new ValhallaOfflineRoutingService("/storage/100F-3415/alpimaps_mbtiles/france.vtiles");
-//            routingService.connectElevationDataSource(hillshadeSource, elevationDecoder);
+            routingService = new ValhallaOfflineRoutingService("/storage/10E7-1004/alpimaps_mbtiles/france.vtiles");
+//            routingService = new ValhallaOnlineRoutingService("toto");
+//            routingService.setCustomServiceURL("http://192.168.1.45:8081/{service}");
             routingService.setProfile("pedestrian");
 
             LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
@@ -361,13 +367,7 @@ public class SecondFragment extends Fragment {
             vector.add(new MapPos(5.73018952319828, 45.19395768156221));
             vector.add(new MapPos(5.725817787850285, 45.19885075467135));
             RoutingRequest request = new RoutingRequest(projection, vector);
-            VariantObjectBuilder variantbuilder = new VariantObjectBuilder();
-            VariantObjectBuilder variantbuilder2 = new VariantObjectBuilder();
-            variantbuilder2.setDouble("use_hills", 0f);
-            variantbuilder2.setDouble("use_roads", 0.0f);
-            variantbuilder2.setLong("max_hiking_difficulty", 6);
-            variantbuilder.setVariant("pedestrian", variantbuilder2.buildVariant());
-            request.setCustomParameter("costing_options", variantbuilder.buildVariant());
+            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_hills\":0,\"use_roads\":0,\"max_hiking_difficulty\":6}}"));
             RoutingResult result = routingService.calculateRoute(request);
             MapPosVector pointsWithAltitude = new MapPosVector();
             if (result != null) {
@@ -376,14 +376,14 @@ public class SecondFragment extends Fragment {
                 DoubleVector elevations = layer.getElevations(points);
                 for (int i = (int) (elevations.size() - 1); i >= 0; i--) {
                     MapPos point = points.get(i);
-                    Log.d(TAG, "elevations2 " + i + "  " + point.getX() + "  " +  point.getY() + "  " +  elevations.get(i));
+//                    Log.d(TAG, "elevations2 " + i + "  " + point.getX() + "  " +  point.getY() + "  " +  elevations.get(i));
 //                    int computedElevation = layer.getElevation(point);
                     pointsWithAltitude.add(new MapPos(point.getX(), point.getY(), elevations.get(i)));
                 }
                 LineStyleBuilder builder = new LineStyleBuilder();
                 builder.setWidth(4);
                 builder.setColor(new Color((short) 255, (short) 0, (short) 0, (short) 255));
-                Line line = new Line(points, builder.buildStyle());
+                Line line = new Line(pointsWithAltitude, builder.buildStyle());
                 localSource.add(line);
             }
 //            Log.d(TAG, "elevations " + elevations.toString());
