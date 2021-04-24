@@ -140,8 +140,8 @@ public class SecondFragment extends Fragment {
     void proceedWithSdCard(View view) {
         TileDataSource hillshadeSource = null;
         try {
-            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/10E7-1004/alpimaps_mbtiles/BDALTIV2_75M_rvb_2.etiles");
-//            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
+//            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/10E7-1004/alpimaps_mbtiles/BDALTIV2_75M_rvb_2.etiles");
+            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
             //        HTTPTileDataSource hillshadeSource =   new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
         } catch (Exception e) {
             e.printStackTrace();
@@ -313,7 +313,11 @@ public class SecondFragment extends Fragment {
         final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                new Thread() {
+                    public void run() {
                 testValhalla(hillshadeLayer, options);
+                    }
+                }.start();
                 // Code here executes on main thread after user presses button
 //                if (options.getRenderProjectionMode() == RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL) {
 //                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_PLANAR);
