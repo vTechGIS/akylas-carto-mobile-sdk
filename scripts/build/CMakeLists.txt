@@ -39,8 +39,9 @@ if(WIN32)
 endif(WIN32)
 
 if(IOS)
+  add_definitions("-DCRYPTOPP_NO_CXX17")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fobjc-arc -fmodules -fvisibility=hidden")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc -fmodules -stdlib=libc++ -std=c++17 -ftemplate-depth=1024 -fexceptions -frtti -fvisibility=hidden -fvisibility-inlines-hidden")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc -fmodules -stdlib=libc++ -std=c++17 -ftemplate-depth=1024 -fexceptions -frtti -fvisibility=hidden -fvisibility-inlines-hidden -fno-aligned-allocation")
   set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Os")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Os")
   set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} -ObjC")
@@ -99,7 +100,7 @@ endif(WIN32)
 
 # Subprojects
 set(SDK_CARTO_SUBPROJECTS vt mapnikvt mbvtbuilder cartocss nml osrm sgre geocoding)
-set(SDK_EXTERNAL_SUBPROJECTS cryptopp pugixml sqlite sqlite3pp bidi freetype harfbuzz msdfgen brotli miniz libjpeg libpng libwebp tess2 pvrt rg_etc1)
+set(SDK_EXTERNAL_SUBPROJECTS cryptopp pugixml sqlite sqlite3pp bidi freetype harfbuzz brotli miniz libjpeg libpng libwebp tess2 pvrt rg_etc1)
 
 if(ANDROID)
   set(SDK_EXTERNAL_SUBPROJECTS "${SDK_EXTERNAL_SUBPROJECTS}" "androidcpufeatures")
@@ -143,7 +144,7 @@ file(GLOB SDK_SRC_FILES
   "${SDK_SRC_DIR}/*/*.h"
   "${SDK_SRC_DIR}/*/*/*.h"
 )
-set_source_files_properties("${SDK_SRC_DIR}/utils/PlatformUtils.cpp" PROPERTIES COMPILE_OPTIONS "-D_CARTO_MOBILE_SDK_PLATFORM=\"\\\"${SDK_PLATFORM}\\\"\";-D_CARTO_MOBILE_SDK_VERSION=\"\\\"${SDK_VERSION}\\\"\"")
+set_source_files_properties("${SDK_SRC_DIR}/utils/PlatformUtils.cpp" PROPERTIES COMPILE_OPTIONS "-D_CARTO_MOBILE_SDK_PLATFORM=\"${SDK_PLATFORM}\";-D_CARTO_MOBILE_SDK_VERSION=\"${SDK_VERSION}\"")
 
 if(WIN32 OR IOS OR ANDROID)
   list(REMOVE_ITEM SDK_SRC_FILES "${SDK_SRC_DIR}/network/HTTPClientPionImpl.cpp")
@@ -244,7 +245,7 @@ if(ANDROID)
   target_link_libraries(carto_mobile_sdk EGL GLESv2 z log android jnigraphics)
 elseif(IOS)
   if(SDK_CPP_DEFINES MATCHES ".*_CARTO_USE_METALANGLE.*")
-    target_link_libraries(carto_mobile_sdk "-framework Foundation" "-framework CoreGraphics" "-framework CoreText" "-framework IOSurface" "-framework UIKit" "-framework CFNetwork")
+    target_link_libraries(carto_mobile_sdk "-framework Foundation" "-framework CoreGraphics" "-framework CoreText" "-framework Metal" "-framework MetalKit" "-framework UIKit" "-framework CFNetwork")
   else()
     target_link_libraries(carto_mobile_sdk "-framework Foundation" "-framework CoreGraphics" "-framework CoreText" "-framework OpenGLES" "-framework GLKit" "-framework UIKit" "-framework CFNetwork")
   endif()

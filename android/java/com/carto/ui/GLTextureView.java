@@ -1,8 +1,34 @@
+<<<<<<< HEAD
+=======
+/*
+ * Copyright (C) 2018 Wasabeef
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
 package com.carto.ui;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLDebugHelper;
+<<<<<<< HEAD
+=======
+import android.opengl.GLSurfaceView.EGLConfigChooser;
+import android.opengl.GLSurfaceView.EGLContextFactory;
+import android.opengl.GLSurfaceView.EGLWindowSurfaceFactory;
+import android.opengl.GLSurfaceView.GLWrapper;
+import android.opengl.GLSurfaceView.Renderer;
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.TextureView;
@@ -22,6 +48,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
 
+<<<<<<< HEAD
 /*
  * Copyright (C) 2018 Wasabeef
  *
@@ -36,6 +63,10 @@ import javax.microedition.khronos.opengles.GL10;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+=======
+/**
+ * GLTextureView is a wrapper for TextureView class that emulates GLSurfaceView API.
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
  */
 public class GLTextureView extends TextureView
         implements TextureView.SurfaceTextureListener, View.OnLayoutChangeListener {
@@ -531,6 +562,7 @@ public class GLTextureView extends TextureView
 
     // ----------------------------------------------------------------------
 
+<<<<<<< HEAD
     /**
      * An interface used to wrap a GL interface.
      * <p>Typically
@@ -682,6 +714,8 @@ public class GLTextureView extends TextureView
         void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context);
     }
 
+=======
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
     private class DefaultContextFactory implements EGLContextFactory {
         private int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
 
@@ -705,6 +739,7 @@ public class GLTextureView extends TextureView
         }
     }
 
+<<<<<<< HEAD
     /**
      * An interface for customizing the eglCreateWindowSurface and eglDestroySurface calls.
      * <p>
@@ -721,6 +756,8 @@ public class GLTextureView extends TextureView
         void destroySurface(EGL10 egl, EGLDisplay display, EGLSurface surface);
     }
 
+=======
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
     private static class DefaultWindowSurfaceFactory implements EGLWindowSurfaceFactory {
 
         public EGLSurface createWindowSurface(EGL10 egl, EGLDisplay display, EGLConfig config,
@@ -745,6 +782,7 @@ public class GLTextureView extends TextureView
         }
     }
 
+<<<<<<< HEAD
     /**
      * An interface for choosing an EGLConfig configuration from a list of
      * potential configurations.
@@ -766,6 +804,8 @@ public class GLTextureView extends TextureView
         EGLConfig chooseConfig(EGL10 egl, EGLDisplay display);
     }
 
+=======
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
     private abstract class BaseConfigChooser implements EGLConfigChooser {
         public BaseConfigChooser(int[] configSpec) {
             mConfigSpec = filterConfigSpec(configSpec);
@@ -1635,7 +1675,11 @@ public class GLTextureView extends TextureView
         private int renderMode;
         private boolean requestRender;
         private boolean renderComplete;
+<<<<<<< HEAD
         private ArrayList<Runnable> eventQueue = new ArrayList<>();
+=======
+        private ArrayList<Runnable> eventQueue = new ArrayList<Runnable>();
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
         private boolean sizeChanged = true;
 
         // End of member variables protected by the glThreadManager monitor.
@@ -1794,7 +1838,11 @@ public class GLTextureView extends TextureView
 
     private static final GLThreadManager glThreadManager = new GLThreadManager();
 
+<<<<<<< HEAD
     private final WeakReference<GLTextureView> mThisWeakRef = new WeakReference<>(this);
+=======
+    private final WeakReference<GLTextureView> mThisWeakRef = new WeakReference<GLTextureView>(this);
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718
     private GLThread glThread;
     private Renderer renderer;
     private boolean detached;
@@ -1805,5 +1853,10 @@ public class GLTextureView extends TextureView
     private int debugFlags;
     private int eglContextClientVersion;
     private boolean preserveEGLContextOnPause;
+<<<<<<< HEAD
     private List<SurfaceTextureListener> surfaceTextureListeners = new ArrayList<>();
 }
+=======
+    private List<SurfaceTextureListener> surfaceTextureListeners = new ArrayList<SurfaceTextureListener>();
+}
+>>>>>>> e7701d3dee77e2330a5fea89727909096979f718

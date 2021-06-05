@@ -32,25 +32,28 @@ namespace carto {
     MapPackageHandler::~MapPackageHandler() {
     }
 
-    void MapPackageHandler::openDatabase() {
+    bool MapPackageHandler::openDatabase() {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
 
         if (_packageDb) {
-            return;
+            return true;
         }
 
         try {
             // Open package database
-            _packageDb.reset(new sqlite3pp::database());
+            _packageDb = std::make_unique<sqlite3pp::database>();
             if (_packageDb->connect_v2(_fileName.c_str(), SQLITE_OPEN_READONLY) != SQLITE_OK) {
                 Log::Errorf("MapPackageHandler::openDatabase: Failed to open database %s", _fileName.c_str());
-                return;
+                _packageDb.reset();
+                return false;
             }
+            _packageDb->execute("PRAGMA temp_store=MEMORY");
+            _packageDb->execute("PRAGMA cache_size=256");
 
             // Create new sqlite decryption function. First check if the database is crypted.
             std::string encKey = _serverEncKey;
             bool encrypted = CheckDbEncryption(*_packageDb, _serverEncKey + _localEncKey); // NOTE: this is a hack - though tiles are actually encrypted with server key only, with check that local key is included in the hash also
-            _decryptFunc.reset(new sqlite3pp::ext::function(*_packageDb));
+            _decryptFunc = std::make_unique<sqlite3pp::ext::function>(*_packageDb);
             _decryptFunc->create("tile_decrypt", [encrypted, encKey](sqlite3pp::ext::context& ctx) {
                 const unsigned char* encData = reinterpret_cast<const unsigned char*>(ctx.get<const void*>(0));
                 std::size_t encSize = ctx.args_bytes(0);
@@ -70,11 +73,14 @@ namespace carto {
             for (auto qit = query.begin(); qit != query.end(); qit++) {
                 const unsigned char* dataPtr = reinterpret_cast<const unsigned char*>(qit->get<const void*>(0));
                 std::size_t dataSize = qit->column_bytes(0);
-                _sharedDictionary.reset(new BinaryData(dataPtr, dataSize));
+                _sharedDictionary = std::make_unique<BinaryData>(dataPtr, dataSize);
             }
+            return true;
         }
         catch (const std::exception& ex) {
             Log::Errorf("MapPackageHandler::openDatabase: Exception %s", ex.what());
+            _packageDb.reset();
+            return false;
         }
     }
 
@@ -90,7 +96,9 @@ namespace carto {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
 
         try {
-            openDatabase();
+            if (!openDatabase()) {
+                return std::shared_ptr<BinaryData>();
+            }
 
             // Try to load the tile (this could fail, as tile masks may not be complete to the last zoom level)
             sqlite3pp::query query(*_packageDb, "SELECT tile_decrypt(tile_data, zoom_level, tile_column, tile_row) FROM tiles WHERE zoom_level=:zoom AND tile_column=:x AND tile_row=:y");

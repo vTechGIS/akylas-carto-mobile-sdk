@@ -12,6 +12,8 @@
 #include "datasources/TileDataSource.h"
 
 #include <map>
+#include <memory>
+#include <optional>
 
 namespace sqlite3pp {
     class database;
@@ -85,9 +87,11 @@ namespace carto {
         virtual std::shared_ptr<TileData> loadTile(const MapTile& mapTile);
     
     private:
+        static std::unique_ptr<sqlite3pp::database> OpenDatabase(const std::string& path);
+
         MBTilesScheme::MBTilesScheme _scheme;
-        std::unique_ptr<sqlite3pp::database> _db;
-        mutable std::unique_ptr<MapBounds> _cachedDataExtent;
+        std::unique_ptr<sqlite3pp::database> _database;
+        mutable std::optional<MapBounds> _cachedDataExtent;
         mutable std::mutex _mutex;
     };
     

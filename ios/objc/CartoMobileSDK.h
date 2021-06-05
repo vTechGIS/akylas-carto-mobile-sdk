@@ -110,6 +110,7 @@
 
 #import "ui/MapView.h"
 #import "NTMapClickInfo.h"
+#import "NTMapInteractionInfo.h"
 #import "NTMapEventListener.h"
 #import "NTBalloonPopupButtonClickInfo.h"
 #import "NTRasterTileClickInfo.h"
@@ -177,6 +178,7 @@
 #endif
 
 #ifdef _CARTO_GEOCODING_SUPPORT
+#import "NTGeocodingAddress.h"
 #import "NTGeocodingRequest.h"
 #import "NTGeocodingResult.h"
 #import "NTReverseGeocodingRequest.h"

@@ -127,7 +127,7 @@ namespace carto {
     
     void PersistentCacheTileDataSource::openDatabase(const std::string& databasePath) {
         try {
-            _database.reset(new sqlite3pp::database(databasePath.c_str()));
+            _database = std::make_unique<sqlite3pp::database>(databasePath.c_str());
         }
         catch (const std::exception& ex) {
             Log::Errorf("PersistentCacheTileDataSource::openDatabase: Failed to connect to database: %s", ex.what());
@@ -156,7 +156,13 @@ namespace carto {
                 command.finish();
             }
 
-            sqlite3pp::command command3(*_database, "CREATE TABLE IF NOT EXISTS persistent_cache(tileId INTEGER NOT NULL PRIMARY KEY, compressed BLOB, time INTEGER, expirationTime INTEGER)");
+            sqlite3pp::command command3(*_database, R"SQL(
+                    CREATE TABLE IF NOT EXISTS persistent_cache(
+                        tileId INTEGER NOT NULL PRIMARY KEY,
+                        compressed BLOB,
+                        time INTEGER,
+                        expirationTime INTEGER
+                    ))SQL");
             command3.execute();
             command3.finish();
         }

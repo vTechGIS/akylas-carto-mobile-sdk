@@ -33,7 +33,7 @@ def detectAndroidAPIs(args):
     minapi = platforms.get('min', 1)
     maxapi = platforms.get('max', 0)
     for api in range(minapi, maxapi + 1):
-      if api >= 9:
+      if api >= 11:
         api32 = min(api32 or api, api)
       if api >= 21:
         api64 = min(api64 or api, api)
@@ -44,7 +44,7 @@ def detectAndroidJavaAPI(args):
   for name in os.listdir('%s/platforms' % args.androidsdkpath):
     if name.startswith('android-'):
       api = int(name[8:])
-      if api >= 10:
+      if api >= 11:
         apiJava = min(apiJava or api, api)
   return apiJava
 
@@ -99,6 +99,9 @@ def buildAndroidJAR(args):
   for sourceDir in ["%s/generated/android-java/proxies" % baseDir, "%s/android/java" % baseDir]:
     for dirpath, dirnames, filenames in os.walk(sourceDir):
       for filename in [f for f in filenames if f.endswith(".java")]:
+        if os.name == 'nt':
+          javaFiles.append(os.path.join(dirpath, "*.java"))
+          break
         javaFiles.append(os.path.join(dirpath, filename))
 
   if not javac(args, buildDir,
@@ -117,6 +120,9 @@ def buildAndroidJAR(args):
   classFiles = []
   for dirpath, dirnames, filenames in os.walk("."):
     for filename in [f for f in filenames if f.endswith(".class")]:
+      if os.name == 'nt':
+        classFiles.append(os.path.join(dirpath[2:], "*.class"))
+        break
       classFiles.append(os.path.join(dirpath[2:], filename))
   os.chdir(currentDir)
 
@@ -142,7 +148,12 @@ def buildAndroidAAR(args):
   version = args.buildversion
 
   with open('%s/scripts/android-aar/carto-mobile-sdk.pom.template' % baseDir, 'r') as f:
-    pomFile = string.Template(f.read()).safe_substitute({ 'baseDir': baseDir, 'buildDir': buildDir, 'distDir': distDir, 'version': version })
+    pomFile = string.Template(f.read()).safe_substitute({
+      'baseDir': baseDir,
+      'buildDir': buildDir,
+      'distDir': distDir,
+      'version': version
+    })
   pomFileName = '%s/carto-mobile-sdk.pom' % buildDir
   with open(pomFileName, 'w') as f:
     f.write(pomFile)
@@ -167,15 +178,15 @@ def buildAndroidAAR(args):
     'assembleRelease'
   ):
     return False
-  aarFileName = '%s/outputs/aar/android-aar.aar' % buildDir
+  aarFileName = '%s/outputs/aar/carto-mobile-sdk-%s.aar' % (buildDir, args.configuration.lower())
   if not os.path.exists(aarFileName):
-    aarFileName = '%s/outputs/aar/android-aar-%s.aar' % (buildDir, args.configuration.lower())
+    aarFileName = '%s/outputs/aar/carto-mobile-sdk.aar' % buildDir
   if makedirs(distDir) and \
      copyfile(pomFileName, '%s/carto-mobile-sdk-%s.pom' % (distDir, version)) and \
      copyfile(aarFileName, '%s/carto-mobile-sdk-%s.aar' % (distDir, version)) and \
      copyfile(srcFileName, '%s/carto-mobile-sdk-%s-sources.jar' % (distDir, version)):
     zip(args, '%s/scripts/android-aar/src/main' % baseDir, '%s/carto-mobile-sdk-%s.aar' % (distDir, version), 'R.txt')
-    print("Output available in:\n%s\n\nTo publish, upload .pom, sources.jar and .aar to bintray.\n" % distDir)
+    print("Output available in:\n%s\n\nTo publish, use:\ngradle -p android-aar publishReleasePublicationToSonatypeRepository -Dbuild-version=%s\nThen log in to https://s01.oss.sonatype.org, 'Close' and then 'Release'.\n" % (distDir, version))
     return True
   return False
 
@@ -211,6 +222,10 @@ if args.androidndkpath == 'auto':
     args.androidndkpath = os.path.join(args.androidsdkpath, 'ndk-bundle')
 args.defines += ';' + getProfile(args.profile).get('defines', '')
 args.cmakeoptions += ';' + getProfile(args.profile).get('cmake-options', '')
+
+if not os.path.exists("%s/generated/android-java/proxies" % getBaseDir()):
+  print("Proxies/wrappers not generated yet, run swigpp script first.")
+  sys.exit(-1)
 
 if not checkExecutable(args.cmake, '--help'):
   print('Failed to find CMake executable. Use --cmake to specify its location')

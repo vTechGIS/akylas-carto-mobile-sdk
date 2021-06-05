@@ -2,7 +2,7 @@
 
 #include "PackageManagerReverseGeocodingService.h"
 #include "components/Exceptions.h"
-#include "geocoding/GeocodingProxy.h"
+#include "geocoding/utils/CartoGeocodingProxy.h"
 #include "packagemanager/PackageInfo.h"
 #include "packagemanager/handlers/GeocodingPackageHandler.h"
 
@@ -57,7 +57,9 @@ namespace carto {
             std::map<std::shared_ptr<PackageInfo>, std::shared_ptr<sqlite3pp::database> > packageDatabaseMap;
             for (auto it = packageHandlerMap.begin(); it != packageHandlerMap.end(); it++) {
                 if (auto geocodingHandler = std::dynamic_pointer_cast<GeocodingPackageHandler>(it->second)) {
-                    packageDatabaseMap[it->first] = geocodingHandler->getGeocodingDatabase();
+                    if (auto packageDatabase = geocodingHandler->getDatabase()) {
+                        packageDatabaseMap[it->first] = packageDatabase;
+                    }
                 }
             }
 
@@ -80,7 +82,7 @@ namespace carto {
                 _cachedRevGeocoder = revGeocoder;
             }
 
-            results = GeocodingProxy::CalculateAddresses(_cachedRevGeocoder, request);
+            results = CartoGeocodingProxy::CalculateAddresses(_cachedRevGeocoder, request);
         });
         return results;
     }
