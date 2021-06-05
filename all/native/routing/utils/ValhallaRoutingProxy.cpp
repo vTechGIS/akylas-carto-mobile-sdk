@@ -457,15 +457,6 @@ namespace carto {
         try {
             for (const picojson::value& legInfo : result.get("trip").get("legs").get<picojson::array>()) {
                 std::vector<valhalla::midgard::PointLL> shape = valhalla::midgard::decode<std::vector<valhalla::midgard::PointLL> >(legInfo.get("shape").get<std::string>());
-<<<<<<< HEAD:all/native/routing/ValhallaRoutingProxy.cpp
-                points.reserve(points.size() + shape.size());
-                epsg3857Points.reserve(epsg3857Points.size() + shape.size());
-                for (std::size_t i = 0; i < shape.size(); i++) {
-                    const valhalla::midgard::PointLL& point = shape.at(i);
-                    points.push_back(proj->fromLatLong(point.second, point.first));
-                }
-=======
->>>>>>> e7701d3dee77e2330a5fea89727909096979f718:all/native/routing/utils/ValhallaRoutingProxy.cpp
 
                 const picojson::array& maneuvers = legInfo.get("maneuvers").get<picojson::array>();
                 for (std::size_t i = 0; i < maneuvers.size(); i++) {
@@ -487,20 +478,6 @@ namespace carto {
                         action = RoutingAction::ROUTING_ACTION_REACH_VIA_LOCATION;
                     }
 
-<<<<<<< HEAD:all/native/routing/ValhallaRoutingProxy.cpp
-                    int pointIndexEpsg3857 = static_cast<int>(epsg3857Points.size());
-                    std::size_t shapeBeginIndex = maneuver.get("begin_shape_index").get<std::int64_t>();
-                    int pointIndex = points.size() + shapeBeginIndex;
-                    for (std::size_t j = shapeBeginIndex; j <= static_cast<std::size_t>(maneuver.get("end_shape_index").get<std::int64_t>()); j++) {
-                        const valhalla::midgard::PointLL& point = shape.at(j);
-                        epsg3857Points.push_back(epsg3857.fromLatLong(point.second, point.first));
-                    }
-
-                    float turnAngle = CalculateTurnAngle(epsg3857Points, pointIndexEpsg3857);
-                    float azimuth = CalculateAzimuth(epsg3857Points, pointIndexEpsg3857);
-
-=======
->>>>>>> e7701d3dee77e2330a5fea89727909096979f718:all/native/routing/utils/ValhallaRoutingProxy.cpp
                     std::string streetName;
                     if (maneuver.get("street_names").is<picojson::array>()) {
                         for (const picojson::value& name : maneuver.get("street_names").get<picojson::array>()) {
