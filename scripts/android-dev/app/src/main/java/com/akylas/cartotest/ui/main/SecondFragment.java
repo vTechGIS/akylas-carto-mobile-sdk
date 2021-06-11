@@ -140,8 +140,8 @@ public class SecondFragment extends Fragment {
     void proceedWithSdCard(View view) {
         TileDataSource hillshadeSource = null;
         try {
-//            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/10E7-1004/alpimaps_mbtiles/BDALTIV2_75M_rvb_2.etiles");
-            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
+            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/10E7-1004/alpimaps_mbtiles/BDALTIV2_75M_rvb_2.etiles");
+//            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
             //        HTTPTileDataSource hillshadeSource =   new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
         } catch (Exception e) {
             e.printStackTrace();
@@ -304,7 +304,7 @@ public class SecondFragment extends Fragment {
                 super.onMapClicked(mapClickInfo);
                 MapPos clickPos = mapClickInfo.getClickPos();
                 Log.d(TAG, "onMapClicked " + clickPos);
-                Log.d(TAG, "elevation " + layer.getElevation(clickPos));
+                Log.d(TAG, "elevation " + layer.getElevation(new MapPos(5.722772489758224 ,45.182362864932706)));
             }
         });
 
