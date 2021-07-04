@@ -12,6 +12,8 @@
 #include "layers/RasterTileLayer.h"
 #include "rastertiles/ElevationDecoder.h"
 
+#include <atomic>
+
 namespace carto {
     
     /**
@@ -136,15 +138,15 @@ namespace carto {
 
         const DirectorPtr<ElevationDecoder> _elevationDecoder;
    
-        float _contrast;
-        bool _exagerateHeightScaleEnabled;
-        float _heightScale;
-        std::string _normalMapLightingShader;
-        Color _shadowColor;
-        Color _accentColor;
-        Color _highlightColor;
-        MapVec _illuminationDirection;
-        bool _illuminationMapRotationEnabled;
+        std::atomic<float> _contrast;
+        std::atomic<bool> _exagerateHeightScaleEnabled;
+        std::atomic<float> _heightScale;
+        std::atomic<std:string> _normalMapLightingShader;
+        std::atomic<Color> _shadowColor;
+        std::atomic<Color> _accentColor;
+        std::atomic<Color> _highlightColor;
+        std::atomic<MapVec> _illuminationDirection;
+        std::atomic<bool> _illuminationMapRotationEnabled;
     };
     
 }

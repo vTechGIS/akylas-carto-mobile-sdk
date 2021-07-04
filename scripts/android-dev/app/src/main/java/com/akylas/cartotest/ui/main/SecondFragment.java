@@ -13,18 +13,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.akylas.cartotest.R;
 import com.carto.components.Options;
 import com.carto.components.PanningMode;
 import com.carto.components.RenderProjectionMode;
-import com.carto.core.IntVector;
-import com.carto.core.DoubleVector;
 import com.carto.core.MapPos;
 import com.carto.core.MapPosVector;
 import com.carto.core.MapRange;
@@ -39,7 +33,6 @@ import com.carto.datasources.TileDataSource;
 import com.carto.geometry.VectorTileFeatureCollection;
 import com.carto.graphics.Color;
 import com.carto.layers.CartoBaseMapStyle;
-import com.carto.layers.CartoOnlineRasterTileLayer;
 import com.carto.layers.CartoOnlineVectorTileLayer;
 import com.carto.layers.HillshadeRasterTileLayer;
 import com.carto.layers.RasterTileLayer;
@@ -78,7 +71,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
 
 public class SecondFragment extends Fragment {
     private final String TAG = "SecondFragment";
@@ -407,6 +399,12 @@ public class SecondFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.second_fragment, container, false);
 
+        MapView.registerLicense("XTUMwQ0ZRQ0RLZEM4Z1dMdkc1TDZkZy83RlN3Z0V2aTB5d0lVSlEwbGZNZjV5bDJLMnlPWXFJYWpVWmhuQWtZPQoKYXBwVG9rZW49OWYwZjBhMDgtZGQ1Mi00NjVkLTg5N2YtMTg0MDYzODQxMDBiCnBhY2thZ2VOYW1lPWNvbS5ha3lsYXMuY2FydG90ZXN0Cm9ubGluZUxpY2Vuc2U9MQpwcm9kdWN0cz1zZGstYW5kcm9pZC00LioKd2F0ZXJtYXJrPWNhcnRvZGIK", this.getContext());
+
+        com.carto.utils.Log.setShowInfo(true);
+        com.carto.utils.Log.setShowDebug(true);
+        com.carto.utils.Log.setShowWarn(true);
+        com.carto.utils.Log.setShowError(true);
 
         final MapView mapView = this.mapView = (MapView) view.findViewById(R.id.mapView);
 
@@ -464,7 +462,6 @@ public class SecondFragment extends Fragment {
         final EPSG4326 projection = new EPSG4326();
 
         final Options options = mapView.getOptions();
-
         options.setZoomGestures(true);
         options.setRestrictedPanning(true);
         options.setSeamlessPanning(true);

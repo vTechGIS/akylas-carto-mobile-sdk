@@ -138,8 +138,8 @@ def buildXamarinDLL(args, target):
   ):
     return False
   return makedirs(distDir) and \
-    copyfile('%s/bin/%s/CartoMobileSDK.%s.dll' % (buildDir, args.configuration, target), '%s/CartoMobileSDK.%s.dll' % (distDir, target)) and \
-    copyfile('%s/bin/%s/CartoMobileSDK.%s.xml' % (buildDir, args.configuration, target), '%s/CartoMobileSDK.%s.xml' % (distDir, target))
+         copyfile('%s/bin/%s/CartoMobileSDK.%s.dll' % (buildDir, args.configuration, target), '%s/CartoMobileSDK.%s.dll' % (distDir, target)) and \
+         copyfile('%s/bin/%s/CartoMobileSDK.%s.xml' % (buildDir, args.configuration, target), '%s/CartoMobileSDK.%s.xml' % (distDir, target))
 
 def buildXamarinNuget(args, target):
   baseDir = getBaseDir()
@@ -214,7 +214,7 @@ if args.metalangle and args.target == 'ios':
 args.cmakeoptions += ';' + getProfile(args.profile).get('cmake-options', '')
 args.nativeconfiguration = args.configuration
 
-if not os.path.exists("%s/generated/%s-csharp/proxies" % (args.target, getBaseDir())):
+if not os.path.exists("%s/generated/%s-csharp/proxies" % (getBaseDir(), args.target)):
   print("Proxies/wrappers not generated yet, run swigpp script first.")
   sys.exit(-1)
 
@@ -222,9 +222,14 @@ if not checkExecutable(args.cmake, '--help'):
   print('Failed to find CMake executable. Use --cmake to specify its location')
   sys.exit(-1)
 
-if args.target == 'android' and not checkExecutable(args.make, '--help'):
-  print('Failed to find make executable. Use --make to specify its location')
-  sys.exit(-1)
+if args.target == 'android':
+  if not checkExecutable(args.make, '--help'):
+    print('Failed to find make executable. Use --make to specify its location')
+    sys.exit(-1)
+  for abi in ANDROID_ABIS:
+    if not (abi in args.androidabi or os.path.exists('%s/libcarto_mobile_sdk.so' % getBuildDir('xamarin_android', abi))):
+      print('Android build requires %s in specified list' % abi)
+      sys.exit(-1)
 
 if not checkExecutable(args.msbuild, '/?'):
   print('Failed to find msbuild executable. Use --msbuild to specify its location')
