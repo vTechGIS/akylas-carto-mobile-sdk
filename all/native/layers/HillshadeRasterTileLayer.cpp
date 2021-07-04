@@ -126,13 +126,11 @@ namespace carto
         redraw();
     }
     
-    Color HillshadeRasterTileLayer::getAccentColor() const
-    {
+    Color HillshadeRasterTileLayer::getAccentColor() const {
         return _accentColor.load();
     }
     
-    void HillshadeRasterTileLayer::setAccentColor(const Color &color)
-    {
+    void HillshadeRasterTileLayer::setAccentColor(const Color &color) {
         _accentColor.store(color);
         redraw();
     }
@@ -148,59 +146,40 @@ namespace carto
 
     std::string HillshadeRasterTileLayer::getNormalMapLightingShader() const
     {
-        std::lock_guard<std::recursive_mutex> lock(_mutex);
-        return _normalMapLightingShader;
+        return _normalMapLightingShader.load();
     }
     void HillshadeRasterTileLayer::setNormalMapLightingShader(const std::string &shader)
     {
-        {
-            std::lock_guard<std::recursive_mutex> lock(_mutex);
-            _normalMapLightingShader = shader;
-        }
+        _normalMapLightingShader.store(shader);
         redraw();
     }
     MapVec HillshadeRasterTileLayer::getIlluminationDirection() const
     {
-        std::lock_guard<std::recursive_mutex> lock(_mutex);
-        return _illuminationDirection;
+        return _illuminationDirection.load();
     }
     void HillshadeRasterTileLayer::setIlluminationDirection(MapVec direction)
     {
-        {
-            std::lock_guard<std::recursive_mutex> lock(_mutex);
-            MapVec directionNormalized = direction;
-            directionNormalized.normalize();
-            if (_illuminationDirection == directionNormalized) {
-                return;
-            }
-            _illuminationDirection = directionNormalized;
-        }
+        MapVec directionNormalized = direction;
+        directionNormalized.normalize();
+        _illuminationDirection.store(directionNormalized);
         redraw();
     }
     bool HillshadeRasterTileLayer::getIlluminationMapRotationEnabled() const
     {
-        std::lock_guard<std::recursive_mutex> lock(_mutex);
-        return _illuminationMapRotationEnabled;
+        return _illuminationMapRotationEnabled.load();
     }
     void HillshadeRasterTileLayer::setIlluminationMapRotationEnabled(bool enabled)
     {
-        {
-            std::lock_guard<std::recursive_mutex> lock(_mutex);
-            _illuminationMapRotationEnabled = enabled;
-        }
+        _illuminationMapRotationEnabled.store(enabled);
         redraw();
     }
     bool HillshadeRasterTileLayer::getExagerateHeightScaleEnabled() const
     {
-        std::lock_guard<std::recursive_mutex> lock(_mutex);
-        return _exagerateHeightScaleEnabled;
+        return _exagerateHeightScaleEnabled.load();
     }
     void HillshadeRasterTileLayer::setExagerateHeightScaleEnabled(bool enabled)
     {
-        {
-            std::lock_guard<std::recursive_mutex> lock(_mutex);
-            _exagerateHeightScaleEnabled = enabled;
-        }
+        _exagerateHeightScaleEnabled.store(enabled);
         tilesChanged(false);
     }
 
