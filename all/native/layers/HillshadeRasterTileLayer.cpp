@@ -92,6 +92,7 @@ namespace carto
         _illuminationDirection(MapVec(0,0,0)),
         _illuminationMapRotationEnabled(true)
     {
+        setTileBlendingSpeed(0.0f);
     }
 
     HillshadeRasterTileLayer::~HillshadeRasterTileLayer()
@@ -200,6 +201,7 @@ namespace carto
 
             _tileRenderer->setNormalMapLightingShader(getNormalMapLightingShader());
             _tileRenderer->setRasterFilterMode(getRasterFilterMode());
+            _tileRenderer->setLayerBlendingSpeed(getTileBlendingSpeed());
             _tileRenderer->setNormalMapShadowColor(getShadowColor());
             _tileRenderer->setNormalMapAccentColor(getAccentColor());
             _tileRenderer->setNormalMapHighlightColor(getHighlightColor());
