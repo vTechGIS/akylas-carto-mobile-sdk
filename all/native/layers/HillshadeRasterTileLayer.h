@@ -141,7 +141,7 @@ namespace carto {
         std::atomic<float> _contrast;
         std::atomic<bool> _exagerateHeightScaleEnabled;
         std::atomic<float> _heightScale;
-        std::atomic<std:string> _normalMapLightingShader;
+        std::string _normalMapLightingShader;
         std::atomic<Color> _shadowColor;
         std::atomic<Color> _accentColor;
         std::atomic<Color> _highlightColor;

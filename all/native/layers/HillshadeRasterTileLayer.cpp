@@ -86,10 +86,10 @@ namespace carto
         _heightScale(1.0f),
         _exagerateHeightScaleEnabled(true),
         _normalMapLightingShader(),
-        _accentColor(0, 0, 0, 255),
-        _shadowColor(0, 0, 0, 255),
-        _highlightColor(255, 255, 255, 255),
-        _illuminationDirection(0,0,0),
+        _accentColor(Color(0, 0, 0, 255)),
+        _shadowColor(Color(0, 0, 0, 255)),
+        _highlightColor(Color(255, 255, 255, 255)),
+        _illuminationDirection(MapVec(0,0,0)),
         _illuminationMapRotationEnabled(true)
     {
     }
@@ -146,11 +146,13 @@ namespace carto
 
     std::string HillshadeRasterTileLayer::getNormalMapLightingShader() const
     {
-        return _normalMapLightingShader.load();
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _normalMapLightingShader;
     }
     void HillshadeRasterTileLayer::setNormalMapLightingShader(const std::string &shader)
     {
-        _normalMapLightingShader.store(shader);
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        _normalMapLightingShader = shader;
         redraw();
     }
     MapVec HillshadeRasterTileLayer::getIlluminationDirection() const
