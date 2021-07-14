@@ -62,10 +62,10 @@ namespace carto {
             // If either result contains 'replace with parent' then the only option is to pass this result on.
             // Otherwise we would need to do request the parent ourselves, do unpacking, scaling, clipping and packing.
             if (result1->isReplaceWithParent()) {
-                return result1;
+                return result2;
             }
             if (result2->isReplaceWithParent()) {
-                return result2;
+                return result1;
             }
             
             // We have data for both sources, we can merge them. Note that we may need to decompress the data first.
