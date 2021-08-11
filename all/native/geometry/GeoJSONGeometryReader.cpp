@@ -122,8 +122,12 @@ namespace carto {
         std::vector<std::shared_ptr<Feature> > features;
         features.reserve(featuresValue.Size());
         for (rapidjson::SizeType i = 0; i < featuresValue.Size(); i++) {
-            std::shared_ptr<Feature> feature = readFeature(featuresValue[i]);
-            features.push_back(feature);
+            try {
+                std::shared_ptr<Feature> feature = readFeature(featuresValue[i]);
+                features.push_back(feature);
+            } catch (const std::exception& ex) {
+                _logger->write(Logger::Severity::ERROR, "Failed to create feature processor: " + std::string(ex.what()));
+            }
         }
         return std::make_shared<FeatureCollection>(std::move(features));
     }
