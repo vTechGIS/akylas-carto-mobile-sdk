@@ -13,12 +13,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.akylas.cartotest.R;
 import com.carto.components.Options;
 import com.carto.components.PanningMode;
 import com.carto.components.RenderProjectionMode;
+import com.carto.core.DoubleVector;
 import com.carto.core.MapPos;
 import com.carto.core.MapPosVector;
 import com.carto.core.MapRange;
@@ -481,7 +485,7 @@ public class SecondFragment extends Fragment {
         com.carto.utils.Log.setShowDebug(true);
         com.carto.utils.Log.setShowWarn(true);
         com.carto.utils.Log.setShowError(true);
-        checkStoragePermission(view);
+//        checkStoragePermission(view);
 
         return view;
     }
