@@ -193,6 +193,9 @@ namespace carto {
         {
             std::lock_guard<std::recursive_mutex> lock(_mutex);
 
+            // Reset cullstate. This will force recalculation of visible tiles, which is important if data extent has changed.
+            _lastCullState.reset();
+
             // Invalidate current tasks
             for (const std::shared_ptr<FetchTaskBase>& task : _fetchingTileTasks.getAll()) {
                 task->invalidate();
@@ -366,7 +369,7 @@ namespace carto {
         TileLayer::calculateRayIntersectedElements(ray, viewState, results);
     }
 
-    bool RasterTileLayer::processClick(ClickType::ClickType clickType, const RayIntersectedElement& intersectedElement, const ViewState& viewState) const {
+    bool RasterTileLayer::processClick(const ClickInfo& clickInfo, const RayIntersectedElement& intersectedElement, const ViewState& viewState) const {
         std::shared_ptr<ProjectionSurface> projectionSurface = viewState.getProjectionSurface();
         if (!projectionSurface) {
             return false;
@@ -381,12 +384,12 @@ namespace carto {
                 const Color& interpolatedColor = std::get<2>(*pixelInfo);
                 MapPos hitPos = _dataSource->getProjection()->fromInternal(projectionSurface->calculateMapPos(intersectedElement.getHitPos()));
 
-                auto clickInfo = std::make_shared<RasterTileClickInfo>(clickType, hitPos, mapTile, nearestColor, interpolatedColor, intersectedElement.getLayer());
-                return eventListener->onRasterTileClicked(clickInfo);
+                auto rasterClickInfo = std::make_shared<RasterTileClickInfo>(clickInfo, hitPos, mapTile, nearestColor, interpolatedColor, intersectedElement.getLayer());
+                return eventListener->onRasterTileClicked(rasterClickInfo);
             }
         }
 
-        return TileLayer::processClick(clickType, intersectedElement, viewState);
+        return TileLayer::processClick(clickInfo, intersectedElement, viewState);
     }
 
     void RasterTileLayer::offsetLayerHorizontally(double offset) {

@@ -194,7 +194,7 @@ namespace carto {
         _polygon3DRenderer->calculateRayIntersectedElements(thisLayer, ray, viewState, results);
     }
 
-    bool VectorLayer::processClick(ClickType::ClickType clickType, const RayIntersectedElement& intersectedElement, const ViewState& viewState) const {
+    bool VectorLayer::processClick(const ClickInfo& clickInfo, const RayIntersectedElement& intersectedElement, const ViewState& viewState) const {
         std::shared_ptr<ProjectionSurface> projectionSurface = viewState.getProjectionSurface();
         if (!projectionSurface) {
             return false;
@@ -216,7 +216,7 @@ namespace carto {
                         float y = static_cast<float>(cglib::dot_product(delta, bottomLeft - topLeft) / cglib::norm(bottomLeft - topLeft) * bitmap->getHeight());
 
                         MapPos hitPos = _dataSource->getProjection()->fromInternal(projectionSurface->calculateMapPos(intersectedElement.getHitPos()));
-                        if (popup->processClick(clickType, hitPos, ScreenPos(x, y))) {
+                        if (popup->processClick(clickInfo, hitPos, ScreenPos(x, y))) {
                             return true;
                         }
                     }
@@ -228,12 +228,12 @@ namespace carto {
             if (vectorElementEventListener) {
                 MapPos hitPos = _dataSource->getProjection()->fromInternal(projectionSurface->calculateMapPos(intersectedElement.getHitPos()));
                 MapPos elementPos = _dataSource->getProjection()->fromInternal(projectionSurface->calculateMapPos(intersectedElement.getElementPos()));
-                auto vectorElementClickInfo = std::make_shared<VectorElementClickInfo>(clickType, hitPos, elementPos, element, intersectedElement.getLayer());
+                auto vectorElementClickInfo = std::make_shared<VectorElementClickInfo>(clickInfo, hitPos, elementPos, element, intersectedElement.getLayer());
                 return vectorElementEventListener->onVectorElementClicked(vectorElementClickInfo);
             }
         }
 
-        return clickType == ClickType::CLICK_TYPE_SINGLE || clickType == ClickType::CLICK_TYPE_LONG; // by default, disable 'click through' for single and long clicks
+        return clickInfo.getClickType() == ClickType::CLICK_TYPE_SINGLE || clickInfo.getClickType() == ClickType::CLICK_TYPE_LONG; // by default, disable 'click through' for single and long clicks
     }
     
     void VectorLayer::refreshElement(const std::shared_ptr<VectorElement>& element, bool remove) {
@@ -273,7 +273,7 @@ namespace carto {
 
         if (const std::shared_ptr<Label>& label = std::dynamic_pointer_cast<Label>(element)) {
             if (!label->getDrawData() || label->getDrawData()->isOffset() || label->getDrawData()->getProjectionSurface() != projectionSurface) {
-                label->setDrawData(std::make_shared<LabelDrawData>(*label, *label->getStyle(), *_dataSource->getProjection(), projectionSurface, _lastCullState->getViewState()));
+                label->setDrawData(std::make_shared<LabelDrawData>(*label, *label->getStyle(), *_dataSource->getProjection(), projectionSurface, viewState));
             }
             _billboardRenderer->addElement(label);
         } else if (const std::shared_ptr<Line>& line = std::dynamic_pointer_cast<Line>(element)) {
@@ -314,7 +314,7 @@ namespace carto {
         } else if (const std::shared_ptr<Popup>& popup = std::dynamic_pointer_cast<Popup>(element)) {
             if (!popup->getDrawData() || popup->getDrawData()->isOffset() || popup->getDrawData()->getProjectionSurface() != projectionSurface) {
                 if (auto options = getOptions()) {
-                    popup->setDrawData(std::make_shared<PopupDrawData>(*popup, *popup->getStyle(), *_dataSource->getProjection(), projectionSurface, options, _lastCullState->getViewState()));
+                    popup->setDrawData(std::make_shared<PopupDrawData>(*popup, *popup->getStyle(), *_dataSource->getProjection(), projectionSurface, options, viewState));
                 } else {
                     return;
                 }

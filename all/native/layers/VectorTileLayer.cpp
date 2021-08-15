@@ -197,6 +197,9 @@ namespace carto {
         {
             std::lock_guard<std::recursive_mutex> lock(_mutex);
 
+            // Reset cullstate. This will force recalculation of visible tiles, which is important if data extent has changed.
+            _lastCullState.reset();
+
             // Invalidate current tasks
             for (const std::shared_ptr<FetchTaskBase>& task : _fetchingTileTasks.getAll()) {
                 task->invalidate();
@@ -396,7 +399,7 @@ namespace carto {
         TileLayer::calculateRayIntersectedElements(ray, viewState, results);
     }
 
-    bool VectorTileLayer::processClick(ClickType::ClickType clickType, const RayIntersectedElement& intersectedElement, const ViewState& viewState) const {
+    bool VectorTileLayer::processClick(const ClickInfo& clickInfo, const RayIntersectedElement& intersectedElement, const ViewState& viewState) const {
         std::shared_ptr<ProjectionSurface> projectionSurface = viewState.getProjectionSurface();
         if (!projectionSurface) {
             return false;
@@ -407,12 +410,12 @@ namespace carto {
         if (eventListener) {
             if (auto tileFeature = intersectedElement.getElement<VectorTileFeature>()) {
                 MapPos hitPos = _dataSource->getProjection()->fromInternal(projectionSurface->calculateMapPos(intersectedElement.getHitPos()));
-                auto clickInfo = std::make_shared<VectorTileClickInfo>(clickType, hitPos, hitPos, tileFeature, intersectedElement.getLayer());
-                return eventListener->onVectorTileClicked(clickInfo);
+                auto vectorClickInfo = std::make_shared<VectorTileClickInfo>(clickInfo, hitPos, hitPos, tileFeature, intersectedElement.getLayer());
+                return eventListener->onVectorTileClicked(vectorClickInfo);
             }
         }
 
-        return TileLayer::processClick(clickType, intersectedElement, viewState);
+        return TileLayer::processClick(clickInfo, intersectedElement, viewState);
     }
 
     void VectorTileLayer::offsetLayerHorizontally(double offset) {
