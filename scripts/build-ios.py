@@ -60,6 +60,8 @@ def buildModuleMap(filename, publicHeaders):
   with open(filename, 'w') as f:
     f.write('framework module CartoMobileSDK {\n')
     f.write('    umbrella header "CartoMobileSDK.h"\n')
+    f.write('    link "c++"\n')
+    f.write('    link "z"\n')
     for header in publicHeaders:
       f.write('    header "%s"\n' % header)
     f.write('    export *\n')
@@ -117,7 +119,6 @@ def buildIOSLib(args, baseArch, outputDir=None):
     '-DWRAPPER_DIR=%s' % ('%s/generated/ios-objc/proxies' % baseDir),
     '-DINCLUDE_OBJC:BOOL=ON',
     '-DSINGLE_LIBRARY:BOOL=ON',
-    '-DENABLE_BITCODE:BOOL=%s' % ('OFF' if args.stripbitcode else 'ON'),
     '-DSHARED_LIBRARY:BOOL=%s' % ('ON' if args.sharedlib else 'OFF'),
     '-DCMAKE_OSX_ARCHITECTURES=%s' % arch,
     '-DCMAKE_OSX_SYSROOT=%s' % ('macosx' if platform == 'MACCATALYST' else 'iphone%s' % platform.lower()),
@@ -132,11 +133,14 @@ def buildIOSLib(args, baseArch, outputDir=None):
     '%s/scripts/build' % baseDir
   ]):
     return False
-  return cmake(args, buildDir, [
-    '--build', '.',
-    '--parallel', '4',
-    '--config', args.configuration
-  ])
+
+  bitcodeOptions = ['ENABLE_BITCODE=NO']
+  if not args.stripbitcode and baseArch in ('armv7', 'arm64'):
+    bitcodeOptions = ['ENABLE_BITCODE=YES', 'BITCODE_GENERATION_MODE=bitcode']
+  return execute('xcodebuild', buildDir,
+    '-project', 'carto_mobile_sdk.xcodeproj', '-arch', arch, '-configuration', args.configuration, 'archive',
+    *list(bitcodeOptions)
+  )
 
 def buildIOSFramework(args, baseArchs, outputDir=None):
   baseDir = getBaseDir()
@@ -209,9 +213,10 @@ def buildIOSXCFramework(args, baseArchs, outputDir=None):
       return False
     frameworkBuildDirs.append(frameworkBuildDir)
 
+  frameworkOptions = itertools.chain(*[['-framework', '%s/CartoMobileSDK.framework' % frameworkBuildDir] for frameworkBuildDir in frameworkBuildDirs])
   if not execute('xcodebuild', baseDir,
     '-create-xcframework', '-output', '%s/CartoMobileSDK.xcframework' % distDir,
-    *list(itertools.chain(*[['-framework', '%s/CartoMobileSDK.framework' % frameworkBuildDir] for frameworkBuildDir in frameworkBuildDirs]))
+    *list(frameworkOptions)
   ):
     return False
 
@@ -219,42 +224,58 @@ def buildIOSXCFramework(args, baseArchs, outputDir=None):
     print("Output available in:\n%s" % distDir)
   return True
 
-def buildIOSCocoapod(args, buildpackage):
+def buildIOSPackage(args, buildCocoapod, buildSwiftPackage):
   baseDir = getBaseDir()
   distDir = getFinalDistDir(args)
   version = args.buildversion
   distName = 'sdk4-ios-%s%s.zip' % (("metal-" if args.metalangle else ""), version)
   frameworkName = 'CartoMobileSDK%s' % ("-Metal" if args.metalangle else "")
   frameworkDir = 'CartoMobileSDK.%s' % ("xcframework" if args.buildxcframework else "framework")
-  iosversion = '9.0'
   frameworks = (["QuartzCore"] if args.metalangle else ["OpenGLES", "GLKit"]) + ["UIKit", "CoreGraphics", "CoreText", "CFNetwork", "Foundation"]
   weakFrameworks = (["Metal"] if args.metalangle else [])
 
-  with open('%s/scripts/ios-cocoapod/Akylas-CartoMobileSDK.podspec.template' % baseDir, 'r') as f:
-    cocoapodFile = string.Template(f.read()).safe_substitute({
-      'baseDir': baseDir,
-      'distDir': distDir,
-      'distName': distName,
-      'frameworkName': frameworkName,
-      'frameworkDir': frameworkDir,
-      'version': version,
-      'license': readLicense(),
-      'iosversion': iosversion,
-      'frameworks': ', '.join('"%s"' % framework for framework in frameworks) if frameworks else 'nil',
-      'weakFrameworks': ', '.join('"%s"' % framework for framework in weakFrameworks) if weakFrameworks else 'nil'
-    })
-  with open('%s/%s.podspec' % (distDir, frameworkName), 'w') as f:
-    f.write(cocoapodFile)
+  try:
+    os.remove('%s/%s' % (distDir, distName))
+  except:
+    pass
+  if not execute('zip', distDir, '-y', '-r', distName, frameworkDir):
+    return False
 
-  if buildpackage:
-    try:
-      os.remove('%s/%s' % (distDir, distName))
-    except:
-      pass
-    frameworkDir = 'CartoMobileSDK.xcframework' if args.buildxcframework else 'CartoMobileSDK.framework'
-    if not execute('zip', distDir, '-y', '-r', distName, frameworkDir):
-      return False
-    print("Output available in:\n%s\n\nTo publish, use:\ncd %s\naws s3 cp %s s3://nutifront/sdk_snapshots/%s --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers\npod trunk push\n" % (distDir, distDir, distName, distName))
+  if buildCocoapod:
+    with open('%s/scripts/ios-cocoapod/Akylas-CartoMobileSDK.podspec.template' % baseDir, 'r') as f:
+      cocoapodFile = string.Template(f.read()).safe_substitute({
+        'baseDir': baseDir,
+        'distDir': distDir,
+        'distName': distName,
+        'frameworkName': frameworkName,
+        'frameworkDir': frameworkDir,
+        'version': version,
+        'license': readLicense(),
+        'frameworks': ', '.join('"%s"' % framework for framework in frameworks) if frameworks else 'nil',
+        'weakFrameworks': ', '.join('"%s"' % framework for framework in weakFrameworks) if weakFrameworks else 'nil'
+      })
+    with open('%s/%s.podspec' % (distDir, frameworkName), 'w') as f:
+      f.write(cocoapodFile)
+
+  if buildSwiftPackage:
+    with open('%s/scripts/ios-swiftpackage/Package.swift.template' % baseDir, 'r') as f:
+      packageFile = string.Template(f.read()).safe_substitute({
+        'baseDir': baseDir,
+        'distDir': distDir,
+        'distName': distName,
+        'frameworkName': frameworkName,
+        'frameworkDir': frameworkDir,
+        'version': version,
+        'checksum': checksumSHA256('%s/%s' % (distDir, distName))
+      })
+    with open('%s/Package.swift' % distDir, 'w') as f:
+      f.write(packageFile)
+
+  print('Output available in:\n%s\n\nTo publish, use:\ncd %s\naws s3 cp %s s3://nutifront/sdk_snapshots/%s --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers\n' % (distDir, distDir, distName, distName))
+  if buildCocoapod:
+    print('pod trunk push\n')
+  if buildSwiftPackage:
+    print('rm -rf mobile-swift-package\ngit clone https://github.com/CartoDB/mobile-swift-package\ncp Package.swift mobile-swift-package\ncd mobile-swift-package\ngit commit -m "Version %s" && git tag %s\ngit push origin master\n' % (version, version))
   return True
 
 parser = argparse.ArgumentParser()
@@ -268,7 +289,7 @@ parser.add_argument('--build-number', dest='buildnumber', default='', help='Buil
 parser.add_argument('--build-version', dest='buildversion', default='%s-devel' % SDK_VERSION, help='Build version, goes to distributions')
 parser.add_argument('--build-xcframework', dest='buildxcframework', default=False, action='store_true', help='Build XCFramework')
 parser.add_argument('--build-cocoapod', dest='buildcocoapod', default=False, action='store_true', help='Build CocoaPod')
-parser.add_argument('--build-cocoapod-package', dest='buildcocoapodpackage', default=False, action='store_true', help='Build CocoaPod')
+parser.add_argument('--build-swiftpackage', dest='buildswiftpackage', default=False, action='store_true', help='Build Swift Package')
 parser.add_argument('--use-metalangle', dest='metalangle', default=False, action='store_true', help='Use MetalANGLE instead of Apple GL')
 parser.add_argument('--strip-bitcode', dest='stripbitcode', default=False, action='store_true', help='Strip bitcode from the built framework')
 parser.add_argument('--shared-framework', dest='sharedlib', default=False, action='store_true', help='Build shared framework instead of static')
@@ -314,6 +335,6 @@ else:
   if not buildIOSFramework(args, args.iosarch):
     sys.exit(-1)
 
-if args.buildcocoapod or args.buildcocoapodpackage:
-  if not buildIOSCocoapod(args, args.buildcocoapodpackage):
+if args.buildcocoapod or args.buildswiftpackage:
+  if not buildIOSPackage(args, args.buildcocoapod, args.buildswiftpackage):
     sys.exit(-1)
