@@ -29,6 +29,7 @@ jobs:
           wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.37/pcre2-10.37.tar.gz
           ./Tools/pcre-build.sh
           ./autogen.sh
+          ./configure
           make
 
       - name: Build swig-java
