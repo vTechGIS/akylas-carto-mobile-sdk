@@ -4,13 +4,7 @@ on: [workflow_dispatch]
 
 jobs:
   build:
-    strategy:
-      # max-parallel: 1
-      matrix:
-        # arch: ['arm' ,'arm64' ,'x86' ,'x64']
-        arch: ['arm']
     runs-on: ubuntu-latest
-    
     steps:
      
 
@@ -28,6 +22,13 @@ jobs:
           ndk-version: r22
 
       - name: Build swig
+        run: |
+          git clone https://github.com/CartoDB/mobile-swig.git
+          cd mobile-swig
+          make
+          make install
+
+      - name: Build swig-java
         run: |
           cd scripts
           python swigpp-java.py --profile standard --swig ../../mobile-swig/swig

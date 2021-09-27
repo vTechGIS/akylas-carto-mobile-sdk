@@ -17,6 +17,13 @@ jobs:
 
       - name: Build swig
         run: |
+          git clone https://github.com/CartoDB/mobile-swig.git
+          cd mobile-swig
+          make
+          make install
+
+      - name: Build swig-objc
+        run: |
           cd scripts
           python swigpp-objc.py --profile standard+valhalla --swig ../../mobile-swig/swig 
       
