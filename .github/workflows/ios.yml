@@ -17,16 +17,17 @@ jobs:
 
       - name: Build swig
         run: |
+          brew install autoconf automake libtool
           git clone https://github.com/CartoDB/mobile-swig.git
           cd mobile-swig
-          ./configure
+          ./autogen.sh
+          ./Tools/pcre-build.sh
           make
-          make install
 
       - name: Build swig-objc
         run: |
           cd scripts
-          python swigpp-objc.py --profile standard+valhalla --swig ../../mobile-swig/swig 
+          python swigpp-objc.py --profile standard+valhalla --swig mobile-swig/swig 
       
       - name: Get branch name
         shell: bash

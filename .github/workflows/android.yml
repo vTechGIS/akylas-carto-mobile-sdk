@@ -23,16 +23,17 @@ jobs:
 
       - name: Build swig
         run: |
+          sudo apt-get -Y install autoconf automake
           git clone https://github.com/CartoDB/mobile-swig.git
           cd mobile-swig
-          ./configure
+          ./autogen.sh
+          ./Tools/pcre-build.sh
           make
-          make install
 
       - name: Build swig-java
         run: |
           cd scripts
-          python swigpp-java.py --profile standard --swig ../../mobile-swig/swig
+          python swigpp-java.py --profile standard --swig mobile-swig/swig
       
       - name: Get branch name
         shell: bash
