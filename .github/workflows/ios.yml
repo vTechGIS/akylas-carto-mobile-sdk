@@ -19,7 +19,6 @@ jobs:
       
       - name: fetch externals
         run: |
-          cd libs-external
           git submodule update --init --remote --recursive
 
       - name: Build swig
