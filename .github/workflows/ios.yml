@@ -20,8 +20,8 @@ jobs:
           brew install autoconf automake libtool
           git clone https://github.com/CartoDB/mobile-swig.git
           cd mobile-swig
-          ./autogen.sh
           ./Tools/pcre-build.sh
+          ./autogen.sh
           make
 
       - name: Build swig-objc
