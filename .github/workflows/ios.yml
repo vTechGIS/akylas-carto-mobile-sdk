@@ -15,7 +15,12 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
-          submodules: recursive
+          submodules: true
+      
+      - name: fetch externals
+        run: |
+          cd libs-external
+          git submodule update --init --remote --recursive
 
       - name: Build swig
         run: |
