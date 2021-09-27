@@ -24,7 +24,7 @@ jobs:
       - name: Build swig
         run: |
           sudo apt-get -y install autoconf automake
-          git clone https://github.com/CartoDB/mobile-swig.git
+          git clone https://github.com/farfromrefug/mobile-swig.git
           cd mobile-swig
           wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.37/pcre2-10.37.tar.gz
           ./Tools/pcre-build.sh
