@@ -20,6 +20,7 @@ jobs:
           brew install autoconf automake libtool
           git clone https://github.com/CartoDB/mobile-swig.git
           cd mobile-swig
+          wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.37/pcre2-10.37.zip
           ./Tools/pcre-build.sh
           ./autogen.sh
           make
