@@ -2,8 +2,15 @@
 #include "core/BinaryData.h"
 #include "core/MapTile.h"
 #include "components/Exceptions.h"
+#include "geometry/Geometry.h"
+#include "geometry/PointGeometry.h"
+#include "geometry/LineGeometry.h"
+#include "geometry/PolygonGeometry.h"
+#include "geometry/MultiGeometry.h"
+#include "geometry/MultiPointGeometry.h"
+#include "geometry/MultiLineGeometry.h"
+#include "geometry/MultiPolygonGeometry.h"
 #include "geometry/FeatureCollection.h"
-#include "geometry/GeoJSONGeometryWriter.h"
 #include "projections/Projection.h"
 #include "utils/Const.h"
 #include "utils/Log.h"
@@ -11,6 +18,33 @@
 #include <mbvtbuilder/MBVTTileBuilder.h>
 
 #include <mapnikvt/mbvtpackage/MBVTPackage.pb.h>
+
+namespace {
+
+    carto::mbvtbuilder::MBVTTileBuilder::Point convertPoint(const std::shared_ptr<carto::Projection>& projection, const carto::MapPos& mapPos) {
+        carto::MapPos wgs84Pos = projection ? projection->toWgs84(mapPos) : mapPos;
+        return carto::mbvtbuilder::MBVTTileBuilder::Point(wgs84Pos.getX(), wgs84Pos.getY());
+    }
+
+    std::vector<carto::mbvtbuilder::MBVTTileBuilder::Point> convertPoints(const std::shared_ptr<carto::Projection>& projection, const std::vector<carto::MapPos>& mapPoses) {
+        std::vector<carto::mbvtbuilder::MBVTTileBuilder::Point> points;
+        points.reserve(mapPoses.size());
+        for (const carto::MapPos& mapPos : mapPoses) {
+            points.push_back(convertPoint(projection, mapPos));
+        }
+        return points;
+    }
+
+    std::vector<std::vector<carto::mbvtbuilder::MBVTTileBuilder::Point> > convertPointsList(const std::shared_ptr<carto::Projection>& projection, const std::vector<std::vector<carto::MapPos> >& mapPosesList) {
+        std::vector<std::vector<carto::mbvtbuilder::MBVTTileBuilder::Point> > pointsList;
+        pointsList.reserve(mapPosesList.size());
+        for (const std::vector<carto::MapPos>& mapPoses : mapPosesList) {
+            pointsList.push_back(convertPoints(projection, mapPoses));
+        }
+        return pointsList;
+    }
+
+}
 
 namespace carto {
 
@@ -72,18 +106,47 @@ namespace carto {
         }
 
         try {
-            GeoJSONGeometryWriter geometryWriter;
-            geometryWriter.setSourceProjection(projection);
-            geometryWriter.setZ(false);
-            picojson::value geoJSON;
-            std::string err = picojson::parse(geoJSON, geometryWriter.writeFeatureCollection(featureCollection));
-            if (!err.empty()) {
-                throw GenericException("Error while serializing feature data", err);
-            }
-
             std::lock_guard<std::mutex> lock(_mutex);
             _tileBuilder->clearLayer(layerIndex);
-            _tileBuilder->importGeoJSONFeatureCollection(layerIndex, geoJSON);
+            for (int n = 0; n < featureCollection->getFeatureCount(); n++) {
+                const std::shared_ptr<Feature>& feature = featureCollection->getFeature(n);
+                const std::shared_ptr<Geometry>& geometry = feature->getGeometry();
+                picojson::value properties = feature->getProperties().toPicoJSON();
+
+                if (auto point = std::dynamic_pointer_cast<PointGeometry>(geometry)) {
+                    mbvtbuilder::MBVTTileBuilder::MultiPoint points = { convertPoint(projection, point->getPos()) };
+                    _tileBuilder->addMultiPoint(layerIndex, std::move(points), std::move(properties));
+                } else if (auto line = std::dynamic_pointer_cast<LineGeometry>(geometry)) {
+                    mbvtbuilder::MBVTTileBuilder::MultiLineString lines = { convertPoints(projection, line->getPoses()) };
+                    _tileBuilder->addMultiLineString(layerIndex, std::move(lines), std::move(properties));
+                } else if (auto polygon = std::dynamic_pointer_cast<PolygonGeometry>(geometry)) {
+                    mbvtbuilder::MBVTTileBuilder::MultiPolygon polygons = { convertPointsList(projection, polygon->getRings()) };
+                    _tileBuilder->addMultiPolygon(layerIndex, std::move(polygons), std::move(properties));
+                } else if (auto multiPoint = std::dynamic_pointer_cast<MultiPointGeometry>(geometry)) {
+                    mbvtbuilder::MBVTTileBuilder::MultiPoint points;
+                    points.reserve(multiPoint->getGeometryCount());
+                    for (int i = 0; i < multiPoint->getGeometryCount(); i++) {
+                        points.push_back(convertPoint(projection, multiPoint->getGeometry(i)->getPos()));
+                    }
+                    _tileBuilder->addMultiPoint(layerIndex, std::move(points), std::move(properties));
+                } else if (auto multiLine = std::dynamic_pointer_cast<MultiLineGeometry>(geometry)) {
+                    mbvtbuilder::MBVTTileBuilder::MultiLineString lines;
+                    lines.reserve(multiLine->getGeometryCount());
+                    for (int i = 0; i < multiLine->getGeometryCount(); i++) {
+                        lines.push_back(convertPoints(projection, multiLine->getGeometry(i)->getPoses()));
+                    }
+                    _tileBuilder->addMultiLineString(layerIndex, std::move(lines), std::move(properties));
+                } else if (auto multiPolygon = std::dynamic_pointer_cast<MultiPolygonGeometry>(geometry)) {
+                    mbvtbuilder::MBVTTileBuilder::MultiPolygon polygons;
+                    polygons.reserve(multiPolygon->getGeometryCount());
+                    for (int i = 0; i < multiPolygon->getGeometryCount(); i++) {
+                        polygons.push_back(convertPointsList(projection, multiPolygon->getGeometry(i)->getRings()));
+                    }
+                    _tileBuilder->addMultiPolygon(layerIndex, std::move(polygons), std::move(properties));
+                } else {
+                    throw GenerateException("Unsupported geometry type");
+                }
+            }
         }
         catch (const std::exception& ex) {
             Log::Errorf("GeoJSONVectorTileDataSource::setLayerGeoJSON: Failed to update layer: %s", ex.what());
