@@ -25,7 +25,8 @@ jobs:
           ndk-version: r22
 
       - name: ANDROID_NDK_HOME
-        run: echo "ANDROID_NDK_HOME: ${{ env.VERSION_NAME }}"
+        run:  | 
+          echo "ANDROID_NDK_HOME: ${{ env.VERSION_NAME }}"
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
