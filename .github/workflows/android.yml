@@ -22,6 +22,7 @@ jobs:
         uses: android-actions/setup-android@v2
 
       - uses: nttld/setup-ndk@v1
+        id: setup-ndk
         with:
           ndk-version: r22
 
@@ -55,6 +56,8 @@ jobs:
         run: |
           cd scripts
           python build-android.py --profile standard+valhalla --build-aar --build-version ${{ env.VERSION_NAME }} --configuration=Release
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - uses: actions/upload-artifact@v2
         with:
