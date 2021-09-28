@@ -14,8 +14,6 @@ jobs:
           xcode-version: latest-stable
 
       - uses: actions/checkout@v2
-        with:
-          submodules: true
       
       - name: fetch externals
         run: |
