@@ -168,7 +168,7 @@ def buildIOSFramework(args, baseArchs, outputDir=None):
   ):
     return False
 
-  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/Info.plist' % outputDir):
+  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/CartoMobileSDK.framework/Info.plist' % distDir):
       return False
 
   if args.sharedlib:
@@ -176,8 +176,6 @@ def buildIOSFramework(args, baseArchs, outputDir=None):
       '-id', '@rpath/CartoMobileSDK.framework/CartoMobileSDK',
       'CartoMobileSDK'
     ):
-      return False
-    if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/Info.plist' % frameworkDir):
       return False
 
   makedirs('%s/Headers' % frameworkDir)
