@@ -13,7 +13,6 @@ jobs:
       - name: fetch externals
         run: |
           git submodule update --init --remote --recursive
-
       - name: Setup JDK
         uses: actions/setup-java@v1
         with:
@@ -25,6 +24,12 @@ jobs:
       - uses: nttld/setup-ndk@v1
         with:
           ndk-version: r22
+
+      - name: prepare boost
+        run: |
+          cd libs-external/boost
+          ./bootstrap.sh
+          ./b2 headers
 
       - name: Build swig
         run: |

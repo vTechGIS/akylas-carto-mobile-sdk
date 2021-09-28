@@ -19,6 +19,12 @@ jobs:
         run: |
           git submodule update --init --remote --recursive
 
+      - name: prepare boost
+        run: |
+          cd libs-external/boost
+          ./bootstrap.sh
+          ./b2 headers
+
       - name: Build swig
         run: |
           brew install autoconf automake libtool
