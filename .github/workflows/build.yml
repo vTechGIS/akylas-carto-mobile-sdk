@@ -4,7 +4,12 @@ on: [workflow_dispatch]
 
 jobs:
   build:
+    strategy:
+      # max-parallel: 1
+      matrix:
+        variant: ['android', 'ios']
     runs-on: macos-latest
+    name: CartoMobileSDK ${{ matrix.variant }}
     steps:
       - uses: actions/checkout@v2
       
@@ -38,7 +43,6 @@ jobs:
 
       - name: Build swig
         run: |
-          sudo apt-get -y install autoconf automake
           git clone https://github.com/farfromrefug/mobile-swig.git
           cd mobile-swig
           wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.37/pcre2-10.37.tar.gz
@@ -47,7 +51,14 @@ jobs:
           ./configure
           make
 
+      - name: Build swig-objc
+        if: matrix.variant != 'android'
+        run: |
+          cd scripts
+          python swigpp-objc.py --profile standard+valhalla --swig ../mobile-swig/swig 
+
       - name: Build swig-java
+        if: matrix.variant == 'android'
         run: |
           cd scripts
           python swigpp-java.py --profile standard --swig ../mobile-swig/swig
@@ -57,6 +68,7 @@ jobs:
         run: echo "VERSION_NAME=$(echo ${GITHUB_HEAD_REF} | tr / - | sed "s/^[a-zA-Z]*-//g" | sed "s/^$/4.4.2/")" >> $GITHUB_ENV
 
       - name: Build CartoSDK
+        if: matrix.variant == 'android'
         run: |
           echo "ANDROID_NDK_HOME: ${{ env.VERSION_NAME }}"
           cd scripts
@@ -64,7 +76,26 @@ jobs:
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
+      - name: Build CartoSDK
+        if: matrix.variant == 'ios'
+        run: |
+          cd scripts
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ env.VERSION_NAME }} --build-xcframework
+
+      - name: Build CartoSDK
+        if: matrix.variant == 'ios-metal'
+        run: |
+          cd scripts
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ env.VERSION_NAME }} --build-xcframework
+
       - uses: actions/upload-artifact@v2
+        if: matrix.variant == 'android'
         with:
           name: dist
           path: dist/android/*.zip
+
+      - uses: actions/upload-artifact@v2
+        if: matrix.variant != 'android'
+        with:
+          name: dist
+          path: dist/ios/*.zip
