@@ -16,20 +16,24 @@ jobs:
       - name: fetch externals
         run: |
           git submodule update --init --remote --recursive
+
       - name: Setup JDK
         uses: actions/setup-java@v1
         with:
           java-version: 11
 
       - name: Setup Android SDK
+        if: matrix.variant == 'android'
         uses: android-actions/setup-android@v2
 
       - uses: nttld/setup-ndk@v1
+        if: matrix.variant == 'android'
         id: setup-ndk
         with:
           ndk-version: r22
 
       - name: ANDROID_NDK_HOME
+        if: matrix.variant == 'android'
         run:  | 
           echo "ANDROID_NDK_HOME: ${{ env.VERSION_NAME }}"
         env:
