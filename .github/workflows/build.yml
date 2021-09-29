@@ -32,13 +32,6 @@ jobs:
         with:
           ndk-version: r22
 
-      - name: ANDROID_NDK_HOME
-        if: matrix.variant == 'android'
-        run:  | 
-          echo "ANDROID_NDK_HOME: ${{ env.VERSION_NAME }}"
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-
       - name: prepare boost
         run: |
           cd libs-external/boost
@@ -75,7 +68,7 @@ jobs:
       - name: Build CartoSDK
         if: matrix.variant == 'android'
         run: |
-          echo "ANDROID_NDK_HOME: ${{ env.VERSION_NAME }}"
+          brew install gradle
           cd scripts
           python build-android.py --profile standard+valhalla --build-aar --build-version ${{ env.VERSION_NAME }} --configuration=Release
         env:
