@@ -1,4 +1,4 @@
-name: Build for Android
+name: Build CartoMobileSDK
 
 on: [workflow_dispatch]
 
