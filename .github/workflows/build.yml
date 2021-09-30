@@ -70,7 +70,7 @@ jobs:
         run: |
           brew install gradle@6
           cd scripts
-          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ env.VERSION_NAME }} --configuration=Release
+          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ env.VERSION_NAME }} --configuration=Release --gradle /usr/local/opt/gradle@6/bin/gradle
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
