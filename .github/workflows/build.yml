@@ -68,7 +68,7 @@ jobs:
       - name: Build CartoSDK
         if: matrix.variant == 'android'
         run: |
-          brew install gradle
+          brew install gradle@6
           cd scripts
           python build-android.py --profile standard+valhalla --build-aar --build-version ${{ env.VERSION_NAME }} --configuration=Release
         env:
