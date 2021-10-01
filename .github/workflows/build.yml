@@ -59,7 +59,7 @@ jobs:
         if: matrix.variant == 'android'
         run: |
           cd scripts
-          python swigpp-java.py --profile standard --swig ../mobile-swig/swig
+          python swigpp-java.py --profile standard+valhalla --swig ../mobile-swig/swig
       
       - name: Get branch name
         shell: bash
