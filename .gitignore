@@ -5,3 +5,5 @@
 /prebuilt
 *.pyc
 *DS_Store
+/.vscode
+/.history
