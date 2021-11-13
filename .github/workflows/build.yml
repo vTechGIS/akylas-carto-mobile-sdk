@@ -34,7 +34,7 @@ jobs:
 
       - name: prepare boost
         run: |
-          curl https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.zip
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.zip
           unzip boost_1_77_0.zip
           ln -s boost_1_77_0 libs-external/boost
           cd boost_1_77_0
