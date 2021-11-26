@@ -138,8 +138,9 @@ def buildIOSLib(args, baseArch, outputDir=None):
   bitcodeOptions = ['ENABLE_BITCODE=NO']
   if not args.stripbitcode and baseArch in ('armv7', 'arm64'):
     bitcodeOptions = ['ENABLE_BITCODE=YES', 'BITCODE_GENERATION_MODE=bitcode']
+  buildMode = ('archive' if args.configuration == 'Release' else 'build')
   return execute('xcodebuild', buildDir,
-    '-project', 'carto_mobile_sdk.xcodeproj', '-arch', arch, '-configuration', args.configuration, 'archive',
+    '-project', 'carto_mobile_sdk.xcodeproj', '-arch', arch, '-configuration', args.configuration, buildMode,
     *list(bitcodeOptions)
   )
 
@@ -275,7 +276,7 @@ def buildIOSPackage(args, buildCocoapod, buildSwiftPackage):
     print('pod trunk push\n')
   if buildSwiftPackage:
     spmPackageName = "mobile-sdk-ios-metal-swift-package" if args.metalangle else "mobile-sdk-ios-swift-package"
-    print('rm -rf %s\ngit clone git@github.com:nutiteq/%s\ncp Package.swift %s\ncd %s\ngit add Package.swift\ngit commit -m "Version %s" && git tag %s\ngit push origin\n' % (spmPackageName, spmPackageName, spmPackageName, spmPackageName, version, version))
+    print('rm -rf %s\ngit clone git@github.com:nutiteq/%s\ncp Package.swift %s\ncd %s\ngit add Package.swift\ngit commit -m "Version %s" && git tag %s\ngit push origin --tags\n' % (spmPackageName, spmPackageName, spmPackageName, spmPackageName, version, version))
   return True
 
 parser = argparse.ArgumentParser()

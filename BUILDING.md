@@ -6,19 +6,27 @@ the [Releases](https://github.com/CartoDB/mobile-sdk/releases) section**
 Getting all the SDK dependencies resolved and waiting for the build to complete can be very time-consuming.
 
 ## Dependencies
+The following instructions assume **Linux** or **MacOS** operating system. For Windows-based builds we
+recommend first installing **Windows Subsystem for Linux (WSL)**. Once installed, the following
+instructions can be used on Windows also. Otherwise minor changes are needed, like using 
+`mklink /D` instead of `ln -s` in the following instructions.
+
+We assume command-line versions of **git**, **unzip** and **curl** are already installed.
+
 Use `git submodule` to resolve source-level dependencies:
 
 ```
 git submodule update --init --remote --recursive
 ```
 
-Download and set up boost library:
+Download and set up 'boost' library:
 
 ```
 curl -o boost_1_77_0.zip -L https://sourceforge.net/projects/boost/files/boost/1.77.0/boost_1_77_0.zip/download
 unzip boost_1_77_0.zip
-ln -s boost_1_77_0 libs-external/boost
-cd boost_1_77_0
+cd libs-external
+ln -s ../boost_1_77_0 boost
+cd ../boost_1_77_0
 ./bootstrap.sh
 ./b2 headers
 cd ..
@@ -35,6 +43,12 @@ Android build requires **Android SDK** and **Android NDK r21** or later.
 iOS build requires **XCode 12** or later.
 
 Universal Windows Platform build requires **Visual Studio 2019**.
+
+## SDK profiles
+CARTO Mobile SDK can be compiled with different features. The feature set is defined by **profiles**,
+which are defined in 'scripts/build/sdk_profiles.json' file. Different profiles can be combined, for
+example the official SDK builds are currently compiled with 'valhalla+nmlmodellodtree' profiles. The
+following instructions use 'standard' profile as an example.
 
 ## Building process
 Be patient - full build will take 1+ hours. You can speed it up by limiting architectures and platforms where it is built.
