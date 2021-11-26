@@ -183,7 +183,7 @@ namespace carto
     void HillshadeRasterTileLayer::setExagerateHeightScaleEnabled(bool enabled)
     {
         _exagerateHeightScaleEnabled.store(enabled);
-        tilesChanged(false);
+        updateTiles(false);
     }
 
     bool HillshadeRasterTileLayer::onDrawFrame(float deltaSeconds, BillboardSorter &billboardSorter, const ViewState &viewState)
