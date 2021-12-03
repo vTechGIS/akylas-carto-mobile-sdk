@@ -38,6 +38,8 @@ namespace carto {
         _normalMapShadowColor(0, 0, 0, 255),
         _normalMapAccentColor(0, 0, 0, 255),
         _normalMapHighlightColor(255, 255, 255, 255),
+        _rendererLayerFilter(),
+        _clickHandlerLayerFilter(),
         _horizontalLayerOffset(0),
         _viewDir(0, 0, 0),
         _mainLightDir(0, 0, 0),
@@ -137,6 +139,16 @@ namespace carto {
         _normalIlluminationMapRotationEnabled = enabled;
     }
 
+    void TileRenderer::setRendererLayerFilter(const std::optional<std::regex>& filter) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _rendererLayerFilter = filter;
+    }
+
+    void TileRenderer::setClickHandlerLayerFilter(const std::optional<std::regex>& filter) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _clickHandlerLayerFilter = filter;
+    }
+
     void TileRenderer::offsetLayerHorizontally(double offset) {
         std::lock_guard<std::mutex> lock(_mutex);
         _horizontalLayerOffset += offset;
@@ -159,6 +171,7 @@ namespace carto {
         tileRenderer->setRasterFilterMode(_rasterFilterMode);
         tileRenderer->setLayerBlendingSpeed(_layerBlendingSpeed);
         tileRenderer->setLabelBlendingSpeed(_labelBlendingSpeed);
+        tileRenderer->setRendererLayerFilter(_rendererLayerFilter);
 
 
         _mapRotation = viewState.getRotation();
@@ -313,6 +326,8 @@ namespace carto {
         if (!tileRenderer) {
             return;
         }
+
+        tileRenderer->setClickHandlerLayerFilter(_clickHandlerLayerFilter);
 
         std::vector<cglib::ray3<double> > rays = { ray };
         tileRenderer->findGeometryIntersections(rays, radius, radius, true, false, results);
