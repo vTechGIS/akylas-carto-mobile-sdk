@@ -107,7 +107,7 @@ public class SecondFragment extends Fragment {
 
     public void toggleSlopes(boolean activated) {
         hillshadeLayer.setExagerateHeightScaleEnabled(!activated);
-        hillshadeLayer.setNormalMapLightingShader(activated? "uniform vec4 u_shadowColor;\n" +
+        hillshadeLayer.setNormalMapLightingShader(activated ? "uniform vec4 u_shadowColor;\n" +
                 "        uniform vec4 u_highlightColor;\n" +
                 "        uniform vec4 u_accentColor;\n" +
                 "        uniform vec3 u_lightDir;\n" +
@@ -148,7 +148,7 @@ public class SecondFragment extends Fragment {
         layer.setHeightScale(0.0625f);
         layer.setVisibleZoomRange(new MapRange(5, 16));
         layer.setIlluminationMapRotationEnabled(true);
-        layer.setIlluminationDirection(new MapVec(-1,0, 0));
+        layer.setIlluminationDirection(new MapVec(-1, 0, 0));
         layer.setHighlightColor(new Color((short) 125, (short) 216, (short) 79, (short) 255));
         layer.setShadowColor(new Color((short) 176, (short) 145, (short) 91, (short) 255));
         layer.setAccentColor(new Color((short) 34, (short) 67, (short) 252, (short) 255));
@@ -185,9 +185,9 @@ public class SecondFragment extends Fragment {
         final AppCompatSeekBar illuminationDirectionSeekBar = (AppCompatSeekBar) view.findViewById(R.id.illuminationDirectionSeekBar); // initiate the Seek bar
         final TextView textIlluminationDirection = (TextView) view.findViewById(R.id.textIlluminationDirection); // initiate the Seek bar
 
-        final double degrees = (Math.acos(layer.getIlluminationDirection().getY()) * 180 / Math.PI) ;
-        illuminationDirectionSeekBar.setProgress((int)degrees);
-        textIlluminationDirection.setText((int)degrees + "");
+        final double degrees = (Math.acos(layer.getIlluminationDirection().getY()) * 180 / Math.PI);
+        illuminationDirectionSeekBar.setProgress((int) degrees);
+        textIlluminationDirection.setText((int) degrees + "");
         illuminationDirectionSeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -242,7 +242,7 @@ public class SecondFragment extends Fragment {
         highlightOpacitySeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                Color color  = layer.getHighlightColor();
+                Color color = layer.getHighlightColor();
                 Color highlightColor = new Color(color.getR(), color.getG(), color.getB(), (short) i);
                 layer.setHighlightColor(highlightColor);
                 textHighlightOpacity.setText(i + "");
@@ -265,7 +265,7 @@ public class SecondFragment extends Fragment {
         shadowOpacitySeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                Color color  = layer.getShadowColor();
+                Color color = layer.getShadowColor();
                 Color shadowColor = new Color(color.getR(), color.getG(), color.getB(), (short) i);
                 layer.setShadowColor(shadowColor);
                 textShadowOpacity.setText(i + "");
@@ -305,7 +305,7 @@ public class SecondFragment extends Fragment {
                 super.onMapClicked(mapClickInfo);
                 MapPos clickPos = mapClickInfo.getClickPos();
                 Log.d(TAG, "onMapClicked " + clickPos);
-                Log.d(TAG, "elevation " + layer.getElevation(new MapPos(5.722772489758224 ,45.182362864932706)));
+                Log.d(TAG, "elevation " + layer.getElevation(new MapPos(5.722772489758224, 45.182362864932706)));
             }
         });
 
@@ -316,7 +316,7 @@ public class SecondFragment extends Fragment {
             public void onClick(View v) {
                 new Thread() {
                     public void run() {
-                testValhalla(hillshadeLayer, options);
+                        testValhalla(hillshadeLayer, options);
                     }
                 }.start();
                 // Code here executes on main thread after user presses button
@@ -332,7 +332,8 @@ public class SecondFragment extends Fragment {
 
 
     }
-    public void testVectoTileSearch(final VectorTileLayer layer, final Options options, final MapPos location ) {
+
+    public void testVectoTileSearch(final VectorTileLayer layer, final Options options, final MapPos location) {
 
         final VectorTileSearchService searchService = new VectorTileSearchService(layer.getDataSource(), layer.getTileDecoder());
         searchService.setMaxZoom(14);
@@ -356,44 +357,51 @@ public class SecondFragment extends Fragment {
         }.start();
     }
 
+
+    public void runValhallaInThread(final ValhallaOfflineRoutingService routingService, final RoutingRequest request, String profile, final LocalVectorDataSource localSource) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    RoutingResult result = routingService.calculateRoute(request);
+                    MapPosVector pointsWithAltitude = new MapPosVector();
+                    if (result != null) {
+                        MapPosVector points = result.getPoints();
+                        Log.d(TAG, "showing route " + points.size());
+                        LineStyleBuilder builder = new LineStyleBuilder();
+                        builder.setWidth(4);
+                        builder.setColor(new Color((short) 255, (short) 0, (short) 0, (short) 255));
+                        Line line = new Line(points, builder.buildStyle());
+                        localSource.add(line);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+    }
+
     public void testValhalla(HillshadeRasterTileLayer layer, Options options) {
         Projection projection = options.getBaseProjection();
         ValhallaOfflineRoutingService routingService;
         try {
             routingService = new ValhallaOfflineRoutingService("/storage/10E7-1004/alpimaps_mbtiles/france.vtiles");
-//            routingService = new ValhallaOnlineRoutingService("toto");
-//            routingService.setCustomServiceURL("http://192.168.1.45:8081/{service}");
-            routingService.setProfile("pedestrian");
-
             LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
             VectorLayer vectorLayer = new VectorLayer(localSource);
             mapView.getLayers().add(vectorLayer);
             MapPosVector vector = new MapPosVector();
-            vector.add(new MapPos(5.73018952319828, 45.19395768156221));
-            vector.add(new MapPos(5.725817787850285, 45.19885075467135));
+            vector.add(new MapPos(5.720614, 45.174683));
+            vector.add(new MapPos(5.726890, 45.201224));
             RoutingRequest request = new RoutingRequest(projection, vector);
-            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_hills\":0,\"use_roads\":0,\"max_hiking_difficulty\":6}}"));
-            RoutingResult result = routingService.calculateRoute(request);
-            MapPosVector pointsWithAltitude = new MapPosVector();
-            if (result != null) {
-                MapPosVector points = result.getPoints();
-                Log.d(TAG, "showing route " + points.size());
-                DoubleVector elevations = layer.getElevations(points);
-                for (int i = (int) (elevations.size() - 1); i >= 0; i--) {
-                    MapPos point = points.get(i);
-//                    Log.d(TAG, "elevations2 " + i + "  " + point.getX() + "  " +  point.getY() + "  " +  elevations.get(i));
-//                    int computedElevation = layer.getElevation(point);
-                    pointsWithAltitude.add(new MapPos(point.getX(), point.getY(), elevations.get(i)));
-                }
-                LineStyleBuilder builder = new LineStyleBuilder();
-                builder.setWidth(4);
-                builder.setColor(new Color((short) 255, (short) 0, (short) 0, (short) 255));
-                Line line = new Line(pointsWithAltitude, builder.buildStyle());
-                localSource.add(line);
-            }
-//            Log.d(TAG, "elevations " + elevations.toString());
-
-
+            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":0,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+            runValhallaInThread(routingService, request, "pedestrian", localSource);
+            request = new RoutingRequest(projection, vector);
+            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":1,\"use_ferry\":0,\"use_hills\":0,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+            runValhallaInThread(routingService, request, "pedestrian", localSource);
+            request = new RoutingRequest(projection, vector);
+            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":true,\"step_penalty\":5,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+            runValhallaInThread(routingService, request, "pedestrian", localSource);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -436,7 +444,7 @@ public class SecondFragment extends Fragment {
 
 
         //        MapView.registerLicense("XTUMwQ0ZRQ0RLZEM4Z1dMdkc1TDZkZy83RlN3Z0V2aTB5d0lVSlEwbGZNZjV5bDJLMnlPWXFJYWpVWmhuQWtZPQoKYXBwVG9rZW49OWYwZjBhMDgtZGQ1Mi00NjVkLTg5N2YtMTg0MDYzODQxMDBiCnBhY2thZ2VOYW1lPWNvbS5ha3lsYXMuY2FydG90ZXN0Cm9ubGluZUxpY2Vuc2U9MQpwcm9kdWN0cz1zZGstYW5kcm9pZC00LioKd2F0ZXJtYXJrPWNhcnRvZGIK", this.getContext());
-        HTTPTileDataSource source =  new HTTPTileDataSource(1, 20, "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png");
+        HTTPTileDataSource source = new HTTPTileDataSource(1, 20, "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png");
 //        HTTPTileDataSource source = new HTTPTileDataSource(1, 20, "https://1.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/normal.day.grey/{z}/{x}/{y}/512/png8?app_id=9QKPJz6sIj9MkeeUmpfc&app_code=iD7QuqOFDMJS_nNtlKdp1A");
         StringVector subdomains = new StringVector();
         subdomains.add("a");
