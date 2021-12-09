@@ -22,11 +22,11 @@ git submodule update --init --remote --recursive
 Download and set up 'boost' library:
 
 ```
-curl -o boost_1_77_0.zip -L https://sourceforge.net/projects/boost/files/boost/1.77.0/boost_1_77_0.zip/download
-unzip boost_1_77_0.zip
+curl -o boost_1_78_0.zip -L https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.zip/download
+unzip boost_1_78_0.zip
 cd libs-external
-ln -s ../boost_1_77_0 boost
-cd ../boost_1_77_0
+ln -s ../boost_1_78_0 boost
+cd ../boost_1_78_0
 ./bootstrap.sh
 ./b2 headers
 cd ..
@@ -42,7 +42,7 @@ Android build requires **Android SDK**, **JDK 10** or newer and **Android NDK r2
 
 iOS build requires **XCode 12** or later.
 
-Universal Windows Platform build requires **Visual Studio 2019**.
+Universal Windows Platform build requires **Visual Studio 2022** and **Microsoft Windows SDK**.
 
 ## SDK profiles
 CARTO Mobile SDK can be compiled with different features. The feature set is defined by **profiles**,
