@@ -56,6 +56,22 @@ namespace carto {
         }
 
         setCullDelay(DEFAULT_CULL_DELAY);
+
+        if (auto clickRadius = readDecoderParameter<float>("_clickradius")) {
+            setClickRadius(*clickRadius);
+        }
+        if (auto layerBlendingSpeed = readDecoderParameter<float>("_layerblendingspeed")) {
+            setLayerBlendingSpeed(*layerBlendingSpeed);
+        }
+        if (auto labelBlendingSpeed = readDecoderParameter<float>("_labelblendingspeed")) {
+            setLabelBlendingSpeed(*labelBlendingSpeed);
+        }
+        if (auto rendererLayerFilter = readDecoderParameter<std::string>("_rendererlayerfilter")) {
+            setRendererLayerFilter(*rendererLayerFilter);
+        }
+        if (auto clickHandlerLayerFilter = readDecoderParameter<std::string>("_clickhandlerlayerfilter")) {
+            setClickHandlerLayerFilter(*clickHandlerLayerFilter);
+        }
     }
     
     VectorTileLayer::~VectorTileLayer() {
@@ -473,10 +489,7 @@ namespace carto {
     std::shared_ptr<Bitmap> VectorTileLayer::getBackgroundBitmap() const {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
 
-        Color backgroundColor = _backgroundColor;
-        if (std::shared_ptr<mvt::Map::Settings> mapSettings = _tileDecoder->getMapSettings()) {
-            backgroundColor = Color(mapSettings->backgroundColor.value());
-        }
+        Color backgroundColor = Color(_tileDecoder->getMapSettings()->backgroundColor.value());
         if (backgroundColor != _backgroundColor || !_backgroundBitmap) {
             if (backgroundColor != Color(0, 0, 0, 0)) {
                 _backgroundBitmap = BackgroundBitmapGenerator(BACKGROUND_BLOCK_SIZE, BACKGROUND_BLOCK_COUNT).generateBitmap(backgroundColor);
@@ -496,10 +509,7 @@ namespace carto {
             return std::shared_ptr<Bitmap>();
         }
 
-        Color skyGroundColor = _skyGroundColor;
-        if (std::shared_ptr<mvt::Map::Settings> mapSettings = _tileDecoder->getMapSettings()) {
-            skyGroundColor = Color(mapSettings->backgroundColor.value());
-        }
+        Color skyGroundColor = Color(_tileDecoder->getMapSettings()->backgroundColor.value());
         Color skyColor = options->getSkyColor();
         if (skyGroundColor != _skyGroundColor || skyColor != _skyColor || !_skyBitmap) {
             if (skyColor == Color(0, 0, 0, 0)) {
