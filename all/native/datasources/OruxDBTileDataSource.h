@@ -10,6 +10,7 @@
 #ifdef _CARTO_OFFLINE_SUPPORT
 
 #include "datasources/TileDataSource.h"
+#include "datasources/MBTilesTileDataSource.h"
 
 #include <map>
 #include <memory>
@@ -20,23 +21,6 @@ namespace sqlite3pp {
 }
     
 namespace carto {
-    
-    namespace MBTilesScheme {
-        /**
-         * MBTiles tile schemes.
-         */
-        enum MBTilesScheme {
-            /**
-             * The default scheme. Vertical coordinate is not flipped.
-             */
-            MBTILES_SCHEME_TMS,
-        
-            /**
-             * Alternative to TMS scheme. Vertical coordinate is flipped.
-             */
-            MBTILES_SCHEME_XYZ
-        };
-    }
     
     /**
      * A tile data source that loads tiles from a local Sqlite database.
