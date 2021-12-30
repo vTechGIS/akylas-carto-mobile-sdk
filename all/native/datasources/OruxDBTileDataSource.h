@@ -4,13 +4,12 @@
  * to license terms, as given in https://cartodb.com/terms/
  */
 
-#ifndef _CARTO_MBTILESTILEDATASOURCE_H_
-#define _CARTO_MBTILESTILEDATASOURCE_H_
+#ifndef _CARTO__ORUXDBDATASOURCE_H_
+#define _CARTO__ORUXDBDATASOURCE_H_
 
 #ifdef _CARTO_OFFLINE_SUPPORT
 
 #include "datasources/TileDataSource.h"
-#include "datasources/MBTilesTileDataSource.h"
 
 #include <map>
 #include <memory>
@@ -21,6 +20,23 @@ namespace sqlite3pp {
 }
     
 namespace carto {
+    
+    namespace OruxScheme {
+        /**
+         * MBTiles tile schemes.
+         */
+        enum OruxScheme {
+            /**
+             * The default scheme. Vertical coordinate is not flipped.
+             */
+            MBTILES_SCHEME_TMS,
+        
+            /**
+             * Alternative to TMS scheme. Vertical coordinate is flipped.
+             */
+            MBTILES_SCHEME_XYZ
+        };
+    }
     
     /**
      * A tile data source that loads tiles from a local Sqlite database.
@@ -55,7 +71,7 @@ namespace carto {
          * @param scheme Tile scheme to use.
          * @throws std::exception If the the file could not be opened.
          */
-        OruxDBTileDataSource(int minZoom, int maxZoom, const std::string& path, MBTilesScheme::MBTilesScheme scheme);
+        OruxDBTileDataSource(int minZoom, int maxZoom, const std::string& path, OruxScheme::OruxScheme scheme);
     
         virtual ~OruxDBTileDataSource();
         
@@ -80,7 +96,7 @@ namespace carto {
         bool loadZoomLevels(int& minZoom, int& maxZoom) const;
         bool loadDataExtent(MapBounds& mapBounds) const;
 
-        MBTilesScheme::MBTilesScheme _scheme;
+        OruxScheme::OruxScheme _scheme;
         std::unique_ptr<sqlite3pp::database> _database;
         mutable std::optional<int> _cachedMinZoom;
         mutable std::optional<int> _cachedMaxZoom;

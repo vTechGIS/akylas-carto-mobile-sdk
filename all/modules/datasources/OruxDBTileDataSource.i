@@ -1,5 +1,5 @@
-#ifndef _MBTILESTILEDATASOURCE_I
-#define _MBTILESTILEDATASOURCE_I
+#ifndef _ORUXDBDATASOURCE_I
+#define _ORUXDBDATASOURCE_I
 
 %module(directors="1") OruxDBTileDataSource
 
@@ -22,7 +22,7 @@
 %import "datasources/TileDataSource.i"
 %import "datasources/components/TileData.i"
 
-!enum(carto::MBTilesScheme::MBTilesScheme)
+!enum(carto::OruxScheme::OruxScheme)
 !polymorphic_shared_ptr(carto::OruxDBTileDataSource, datasources.OruxDBTileDataSource)
 
 %std_io_exceptions(carto::OruxDBTileDataSource::OruxDBTileDataSource)
