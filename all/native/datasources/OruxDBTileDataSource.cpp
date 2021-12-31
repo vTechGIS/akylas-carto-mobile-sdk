@@ -17,7 +17,7 @@ namespace carto {
 
     OruxDBTileDataSource::OruxDBTileDataSource(const std::string& path) :
         TileDataSource(),
-        _scheme(OruxScheme::MBTILES_SCHEME_TMS),
+        _scheme(OruxScheme::ORUX_SCHEME_TMS),
         _database(OpenDatabase(path)),
         _cachedMinZoom(),
         _cachedMaxZoom(),
@@ -28,7 +28,7 @@ namespace carto {
 
     OruxDBTileDataSource::OruxDBTileDataSource(int minZoom, int maxZoom, const std::string& path) :
         TileDataSource(minZoom, maxZoom),
-        _scheme(OruxScheme::MBTILES_SCHEME_TMS),
+        _scheme(OruxScheme::ORUX_SCHEME_TMS),
         _database(OpenDatabase(path)),
         _cachedMinZoom(minZoom),
         _cachedMaxZoom(maxZoom),
@@ -140,7 +140,7 @@ namespace carto {
             sqlite3pp::query query(*_database, "SELECT image FROM tiles WHERE z=:zoom AND x=:x AND y=:y");
             query.bind(":zoom", mapTile.getZoom());
             query.bind(":x", mapTile.getX());
-            query.bind(":y", _scheme == OruxScheme::MBTILES_SCHEME_XYZ ? mapTile.getY() : (1 << (mapTile.getZoom())) - 1 - mapTile.getY());
+            query.bind(":y", _scheme == OruxScheme::ORUX_SCHEME_XYZ ? mapTile.getY() : (1 << (mapTile.getZoom())) - 1 - mapTile.getY());
             
             auto it = query.begin();
             if (it == query.end()) {
@@ -261,7 +261,7 @@ namespace carto {
                     int tileX1 = (*it).get<int>(2) + 1;
                     int tileY1 = (*it).get<int>(3) + 1;
                     int maxZoom = (*it).get<int>(4);
-                    if (_scheme == OruxScheme::MBTILES_SCHEME_XYZ) { // NOTE: vertically flipped
+                    if (_scheme == OruxScheme::ORUX_SCHEME_XYZ) { // NOTE: vertically flipped
                         tileY0 = (1 << maxZoom) - 1 - tileY0;
                         tileY1 = (1 << maxZoom) - 1 - tileY1;
                         std::swap(tileY0, tileY1);

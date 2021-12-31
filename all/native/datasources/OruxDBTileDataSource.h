@@ -29,12 +29,12 @@ namespace carto {
             /**
              * The default scheme. Vertical coordinate is not flipped.
              */
-            MBTILES_SCHEME_TMS,
+            ORUX_SCHEME_TMS,
         
             /**
              * Alternative to TMS scheme. Vertical coordinate is flipped.
              */
-            MBTILES_SCHEME_XYZ
+            ORUX_SCHEME_XYZ
         };
     }
     
