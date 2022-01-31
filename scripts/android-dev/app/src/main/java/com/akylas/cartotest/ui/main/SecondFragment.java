@@ -3,7 +3,6 @@ package com.akylas.cartotest.ui.main;
 import android.Manifest;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,35 +21,34 @@ import com.akylas.cartotest.R;
 import com.carto.components.Options;
 import com.carto.components.PanningMode;
 import com.carto.components.RenderProjectionMode;
-import com.carto.core.DoubleVector;
 import com.carto.core.MapPos;
 import com.carto.core.MapPosVector;
+import com.carto.core.MapPosVectorVector;
 import com.carto.core.MapRange;
 import com.carto.core.MapVec;
 import com.carto.core.StringVector;
 import com.carto.core.Variant;
-import com.carto.core.VariantObjectBuilder;
 import com.carto.datasources.HTTPTileDataSource;
 import com.carto.datasources.LocalVectorDataSource;
 import com.carto.datasources.MBTilesTileDataSource;
 import com.carto.datasources.TileDataSource;
+import com.carto.geometry.Feature;
+import com.carto.geometry.Geometry;
+import com.carto.geometry.LineGeometry;
+import com.carto.geometry.MultiLineGeometry;
+import com.carto.geometry.PolygonGeometry;
 import com.carto.geometry.VectorTileFeatureCollection;
 import com.carto.graphics.Color;
-import com.carto.layers.CartoBaseMapStyle;
-import com.carto.layers.CartoOnlineVectorTileLayer;
 import com.carto.layers.HillshadeRasterTileLayer;
 import com.carto.layers.RasterTileLayer;
-import com.carto.layers.TileLayer;
 import com.carto.layers.VectorLayer;
 import com.carto.layers.VectorTileLayer;
 import com.carto.projections.EPSG4326;
 import com.carto.projections.Projection;
-import com.carto.rastertiles.ElevationDecoder;
 import com.carto.rastertiles.MapBoxElevationDataDecoder;
 import com.carto.routing.RoutingRequest;
 import com.carto.routing.RoutingResult;
 import com.carto.routing.ValhallaOfflineRoutingService;
-import com.carto.routing.ValhallaOnlineRoutingService;
 import com.carto.search.SearchRequest;
 import com.carto.search.VectorTileSearchService;
 import com.carto.styles.CompiledStyleSet;
@@ -58,7 +56,6 @@ import com.carto.styles.LineStyleBuilder;
 import com.carto.ui.MapClickInfo;
 import com.carto.ui.MapEventListener;
 import com.carto.ui.MapView;
-import com.carto.utils.AssetUtils;
 import com.carto.utils.ZippedAssetPackage;
 import com.carto.vectorelements.Line;
 import com.carto.vectortiles.MBVectorTileDecoder;
@@ -67,13 +64,11 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatSeekBar;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 public class SecondFragment extends Fragment {
@@ -86,7 +81,6 @@ public class SecondFragment extends Fragment {
     private static final int REQUEST_PERMISSIONS_CODE_WRITE_STORAGE = 1435;
     MapView mapView;
     TileDataSource hillshadeSource;
-    TileLayer backlayer;
     MapBoxElevationDataDecoder elevationDecoder;
     HillshadeRasterTileLayer hillshadeLayer;
 
@@ -142,8 +136,8 @@ public class SecondFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        final MapBoxElevationDataDecoder decoder = elevationDecoder = new MapBoxElevationDataDecoder();
-        final HillshadeRasterTileLayer layer = hillshadeLayer = new HillshadeRasterTileLayer(hillshadeSource, decoder);
+        final MapBoxElevationDataDecoder elevationDecoder = new MapBoxElevationDataDecoder();
+        final HillshadeRasterTileLayer layer = hillshadeLayer = new HillshadeRasterTileLayer(hillshadeSource, elevationDecoder);
         layer.setContrast(1.0f);
         layer.setHeightScale(0.0625f);
         layer.setVisibleZoomRange(new MapRange(5, 16));
@@ -153,7 +147,7 @@ public class SecondFragment extends Fragment {
         layer.setShadowColor(new Color((short) 176, (short) 145, (short) 91, (short) 255));
         layer.setAccentColor(new Color((short) 34, (short) 67, (short) 252, (short) 255));
         toggleSlopes(true);
-        final CheckBox slopesCheckBox = (CheckBox) view.findViewById(R.id.slopesCheckBox); // initiate the Seek bar
+        final CheckBox slopesCheckBox = view.findViewById(R.id.slopesCheckBox); // initiate the Seek bar
         slopesCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -286,6 +280,23 @@ public class SecondFragment extends Fragment {
 //        layer.setOpacity(0.5f);
         mapView.getLayers().add(layer);
 
+        TileDataSource source = null;
+        MBVectorTileDecoder decoder = null;
+        try {
+            source = new MBTilesTileDataSource( "/storage/10E7-1004/alpimaps_mbtiles/france/tiles.mbtiles");
+            final File file = new File("/storage/10E7-1004/alpimaps_mbtiles/inner.zip");
+            final FileInputStream stream = new java.io.FileInputStream(file);
+            final DataInputStream dataInputStream = new java.io.DataInputStream(stream);
+            final byte[] bytes = new byte[(int)file.length()];
+            dataInputStream.readFully(bytes);
+            decoder = new MBVectorTileDecoder(new CompiledStyleSet(new ZippedAssetPackage(new com.carto.core.BinaryData(bytes))));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        VectorTileLayer backlayer  = new VectorTileLayer(source, decoder);
+        mapView.getLayers().add(backlayer);
+
+
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
             @Override
@@ -314,7 +325,8 @@ public class SecondFragment extends Fragment {
         final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                testValhalla(hillshadeLayer, options);
+//                testValhalla(hillshadeLayer, options);
+                testVectoTileSearch(backlayer, options);
                 // Code here executes on main thread after user presses button
 //                if (options.getRenderProjectionMode() == RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL) {
 //                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_PLANAR);
@@ -329,19 +341,39 @@ public class SecondFragment extends Fragment {
 
     }
 
-    public void testVectoTileSearch(final VectorTileLayer layer, final Options options, final MapPos location) {
+    public void testVectoTileSearch(final VectorTileLayer layer, final Options options) {
 
         final VectorTileSearchService searchService = new VectorTileSearchService(layer.getDataSource(), layer.getTileDecoder());
         searchService.setMaxZoom(14);
         searchService.setMinZoom(14);
+        MapPosVector vector = new MapPosVector();
+        vector.add(new MapPos(5.853,45.096));
+        vector.add(new MapPos(6.009,45.225));
+        PolygonGeometry boundsGeo = new PolygonGeometry(vector);
         final SearchRequest request = new SearchRequest();
-        request.setRegexFilter(".*dame.*");
+        request.setFilterExpression("layer::name='route' AND osmid=-2535348");
+        request.setGeometry(boundsGeo);
         request.setProjection(options.getBaseProjection());
-        request.setSearchRadius(500);
-        request.setGeometry(new com.carto.geometry.PointGeometry(location));
         new Thread() {
             public void run() {
                 final VectorTileFeatureCollection result = searchService.findFeatures(request);
+                MapPosVectorVector points = new MapPosVectorVector();
+                for (int i=0; i < result.getFeatureCount(); i++){
+                    Feature feature = result.getFeature(i);
+                    Geometry geometry = feature.getGeometry();
+                    if (geometry instanceof MultiLineGeometry) {
+                        for (int j=0; j < ((MultiLineGeometry)geometry).getGeometryCount(); j++) {
+                            points.add(((MultiLineGeometry) geometry).getGeometry(j).getPoses());
+                        }
+                    } else {
+                        points.add(((LineGeometry)geometry).getPoses());
+                    }
+                }
+//                LineStyleBuilder builder = new LineStyleBuilder();
+//                builder.setWidth(4);
+//                builder.setColor(new Color((short) 255, (short) 0, (short) 0, (short) 255));
+//                Line line = new Line(points, builder.buildStyle());
+//                localSource.add(line);
                 new Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
@@ -420,24 +452,6 @@ public class SecondFragment extends Fragment {
         com.carto.utils.Log.setShowError(true);
 
         final MapView mapView = this.mapView = (MapView) view.findViewById(R.id.mapView);
-
-
-//        TileDataSource source = null;
-//        MBVectorTileDecoder decoder = null;
-//        try {
-//            source = new MBTilesTileDataSource( "/storage/10E7-1004/alpimaps_mbtiles/Rhone_alpes/tiles.mbtiles");
-//            final File file = new File("/storage/10E7-1004/alpimaps_mbtiles/osm.zip");
-//            final FileInputStream stream = new java.io.FileInputStream(file);
-//            final DataInputStream dataInputStream = new java.io.DataInputStream(stream);
-//            final byte[] bytes = new byte[(int)file.length()];
-//            dataInputStream.readFully(bytes);
-//            decoder = new MBVectorTileDecoder(new CompiledStyleSet(new ZippedAssetPackage(new com.carto.core.BinaryData(bytes))));
-//            decoder.setStyleParameter("routes", "1");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        backlayer  = new VectorTileLayer(source, decoder);
-
 
         //        MapView.registerLicense("XTUMwQ0ZRQ0RLZEM4Z1dMdkc1TDZkZy83RlN3Z0V2aTB5d0lVSlEwbGZNZjV5bDJLMnlPWXFJYWpVWmhuQWtZPQoKYXBwVG9rZW49OWYwZjBhMDgtZGQ1Mi00NjVkLTg5N2YtMTg0MDYzODQxMDBiCnBhY2thZ2VOYW1lPWNvbS5ha3lsYXMuY2FydG90ZXN0Cm9ubGluZUxpY2Vuc2U9MQpwcm9kdWN0cz1zZGstYW5kcm9pZC00LioKd2F0ZXJtYXJrPWNhcnRvZGIK", this.getContext());
         HTTPTileDataSource source = new HTTPTileDataSource(1, 20, "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png");
