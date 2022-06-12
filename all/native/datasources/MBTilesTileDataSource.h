@@ -82,6 +82,8 @@ namespace carto {
          */
         std::map<std::string, std::string> getMetaData() const;
         
+        std::string getMetaData(const std::string & key) const;
+
         virtual int getMinZoom() const;
 
         virtual int getMaxZoom() const;
