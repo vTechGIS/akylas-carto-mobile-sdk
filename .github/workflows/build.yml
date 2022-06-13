@@ -63,17 +63,13 @@ jobs:
         run: |
           cd scripts
           python swigpp-java.py --profile standard+valhalla --swig ../mobile-swig/swig
-      
-      - name: Get branch name
-        shell: bash
-        run: echo "VERSION_NAME=$(echo ${GITHUB_HEAD_REF} | tr / - | sed "s/^[a-zA-Z]*[-_\/]//g" | sed "s/^$/4.4.6-rc.1/")" >> $GITHUB_ENV
 
       - name: Build CartoSDK
         if: matrix.variant == 'android'
         run: |
           brew install gradle@6
           cd scripts
-          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ env.VERSION_NAME }} --configuration=Release --gradle /usr/local/opt/gradle@6/bin/gradle
+          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ steps.get_version.outputs.version-without-v }} --configuration=Release --gradle /usr/local/opt/gradle@6/bin/gradle
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -81,18 +77,18 @@ jobs:
         if: matrix.variant == 'ios'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ env.VERSION_NAME }} --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version.outputs.version-without-v }} --build-xcframework
 
       - name: Build CartoSDK
         if: matrix.variant == 'ios-metal'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ env.VERSION_NAME }} --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version.outputs.version-without-v }} --build-xcframework
 
       - uses: actions/upload-artifact@v2
         if: matrix.variant == 'android'
         with:
-          name: CartoMobileSDK-android-${{env.VERSION_NAME}}.zip
+          name: CartoMobileSDK-android-${{steps.get_version.outputs.version-without-v}}.zip
           path: |
             dist/android/*.aar
             dist/android/*.jar
@@ -101,5 +97,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: matrix.variant != 'android'
         with:
-          name: CartoMobileSDK-ios-${{env.VERSION_NAME}}.zip
+          name: CartoMobileSDK-ios-${{steps.get_version.outputs.version-without-v}}.zip
           path: dist/ios/*.zip
