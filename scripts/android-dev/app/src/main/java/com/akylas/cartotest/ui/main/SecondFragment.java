@@ -29,6 +29,7 @@ import com.carto.core.MapVec;
 import com.carto.core.StringVector;
 import com.carto.core.Variant;
 import com.carto.datasources.HTTPTileDataSource;
+import com.carto.datasources.LocalPackageManagerTileDataSource;
 import com.carto.datasources.LocalVectorDataSource;
 import com.carto.datasources.MBTilesTileDataSource;
 import com.carto.datasources.TileDataSource;
@@ -80,7 +81,6 @@ public class SecondFragment extends Fragment {
 
     private static final int REQUEST_PERMISSIONS_CODE_WRITE_STORAGE = 1435;
     MapView mapView;
-    TileDataSource hillshadeSource;
     MapBoxElevationDataDecoder elevationDecoder;
     HillshadeRasterTileLayer hillshadeLayer;
 
@@ -126,27 +126,31 @@ public class SecondFragment extends Fragment {
             }
         }
     }
-
-    void proceedWithSdCard(View view) {
-        TileDataSource hillshadeSource = null;
+    void addHillshadeLayer(View view) {
+        MBTilesTileDataSource hillshadeSourceFrance = null;
+        MBTilesTileDataSource hillshadeSourceWorld = null;
+        LocalPackageManagerTileDataSource  dataSource = new LocalPackageManagerTileDataSource();
         try {
-            hillshadeSource = this.hillshadeSource = new MBTilesTileDataSource(5, 11, "/storage/10E7-1004/alpimaps_mbtiles/terrain_25m_webp.etiles");
+            hillshadeSourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/terrain_25m_webp.etiles");
+            hillshadeSourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world_terrain.etiles");
 //            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
             //        HTTPTileDataSource hillshadeSource =   new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        dataSource.add(hillshadeSourceFrance);
+        dataSource.add(hillshadeSourceWorld);
         final MapBoxElevationDataDecoder elevationDecoder = new MapBoxElevationDataDecoder();
-        final HillshadeRasterTileLayer layer = hillshadeLayer = new HillshadeRasterTileLayer(hillshadeSource, elevationDecoder);
+        final HillshadeRasterTileLayer layer = hillshadeLayer = new HillshadeRasterTileLayer(dataSource, elevationDecoder);
         layer.setContrast(1.0f);
         layer.setHeightScale(0.0625f);
-        layer.setVisibleZoomRange(new MapRange(5, 16));
+        layer.setVisibleZoomRange(new MapRange(0, 14));
         layer.setIlluminationMapRotationEnabled(true);
         layer.setIlluminationDirection(new MapVec(-1, 0, 0));
         layer.setHighlightColor(new Color((short) 125, (short) 216, (short) 79, (short) 255));
         layer.setShadowColor(new Color((short) 176, (short) 145, (short) 91, (short) 255));
         layer.setAccentColor(new Color((short) 34, (short) 67, (short) 252, (short) 255));
-        toggleSlopes(true);
+//        toggleSlopes(true);
         final CheckBox slopesCheckBox = view.findViewById(R.id.slopesCheckBox); // initiate the Seek bar
         slopesCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -279,12 +283,17 @@ public class SecondFragment extends Fragment {
 //        layer.setZoomLevelBias(1);
 //        layer.setOpacity(0.5f);
         mapView.getLayers().add(layer);
+    }
+    void proceedWithSdCard(View view) {
 
-        TileDataSource source = null;
+        LocalPackageManagerTileDataSource  dataSource = new LocalPackageManagerTileDataSource();
+        MBTilesTileDataSource sourceFrance = null;
+        MBTilesTileDataSource sourceWorld = null;
         MBVectorTileDecoder decoder = null;
         try {
-            source = new MBTilesTileDataSource( "/storage/10E7-1004/alpimaps_mbtiles/france/tiles.mbtiles");
-            final File file = new File("/storage/10E7-1004/alpimaps_mbtiles/inner.zip");
+            sourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/output.mbtiles");
+            sourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world.mbtiles");
+            final File file = new File("/storage/1C05-0202/alpimaps_mbtiles/osm.zip");
             final FileInputStream stream = new java.io.FileInputStream(file);
             final DataInputStream dataInputStream = new java.io.DataInputStream(stream);
             final byte[] bytes = new byte[(int)file.length()];
@@ -293,9 +302,13 @@ public class SecondFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        VectorTileLayer backlayer  = new VectorTileLayer(source, decoder);
+        dataSource.add(sourceFrance);
+        dataSource.add(sourceWorld);
+        VectorTileLayer backlayer  = new VectorTileLayer(dataSource, decoder);
+        backlayer.setMaxOverzoomLevel(1);
         mapView.getLayers().add(backlayer);
 
+        addHillshadeLayer(view);
 
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
@@ -316,7 +329,7 @@ public class SecondFragment extends Fragment {
                 super.onMapClicked(mapClickInfo);
                 MapPos clickPos = mapClickInfo.getClickPos();
                 Log.d(TAG, "onMapClicked " + clickPos);
-                Log.d(TAG, "elevation " + layer.getElevation(new MapPos(5.722772489758224, 45.182362864932706)));
+//                Log.d(TAG, "elevation " + layer.getElevation(new MapPos(5.722772489758224, 45.182362864932706)));
             }
         });
 
@@ -414,7 +427,7 @@ public class SecondFragment extends Fragment {
         Projection projection = options.getBaseProjection();
         ValhallaOfflineRoutingService routingService;
         try {
-            routingService = new ValhallaOfflineRoutingService("/storage/10E7-1004/alpimaps_mbtiles/france.vtiles");
+            routingService = new ValhallaOfflineRoutingService("/storage/1C05-0202/alpimaps_mbtiles/france.vtiles");
             LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
             VectorLayer vectorLayer = new VectorLayer(localSource);
             mapView.getLayers().add(vectorLayer);
@@ -444,7 +457,7 @@ public class SecondFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.second_fragment, container, false);
 
-        MapView.registerLicense("XTUMwQ0ZRQ0RLZEM4Z1dMdkc1TDZkZy83RlN3Z0V2aTB5d0lVSlEwbGZNZjV5bDJLMnlPWXFJYWpVWmhuQWtZPQoKYXBwVG9rZW49OWYwZjBhMDgtZGQ1Mi00NjVkLTg5N2YtMTg0MDYzODQxMDBiCnBhY2thZ2VOYW1lPWNvbS5ha3lsYXMuY2FydG90ZXN0Cm9ubGluZUxpY2Vuc2U9MQpwcm9kdWN0cz1zZGstYW5kcm9pZC00LioKd2F0ZXJtYXJrPWNhcnRvZGIK", this.getContext());
+//        MapView.registerLicense("XTUMwQ0ZRQ0RLZEM4Z1dMdkc1TDZkZy83RlN3Z0V2aTB5d0lVSlEwbGZNZjV5bDJLMnlPWXFJYWpVWmhuQWtZPQoKYXBwVG9rZW49OWYwZjBhMDgtZGQ1Mi00NjVkLTg5N2YtMTg0MDYzODQxMDBiCnBhY2thZ2VOYW1lPWNvbS5ha3lsYXMuY2FydG90ZXN0Cm9ubGluZUxpY2Vuc2U9MQpwcm9kdWN0cz1zZGstYW5kcm9pZC00LioKd2F0ZXJtYXJrPWNhcnRvZGIK", this.getContext());
 
         com.carto.utils.Log.setShowInfo(true);
         com.carto.utils.Log.setShowDebug(true);
@@ -454,36 +467,35 @@ public class SecondFragment extends Fragment {
         final MapView mapView = this.mapView = (MapView) view.findViewById(R.id.mapView);
 
         //        MapView.registerLicense("XTUMwQ0ZRQ0RLZEM4Z1dMdkc1TDZkZy83RlN3Z0V2aTB5d0lVSlEwbGZNZjV5bDJLMnlPWXFJYWpVWmhuQWtZPQoKYXBwVG9rZW49OWYwZjBhMDgtZGQ1Mi00NjVkLTg5N2YtMTg0MDYzODQxMDBiCnBhY2thZ2VOYW1lPWNvbS5ha3lsYXMuY2FydG90ZXN0Cm9ubGluZUxpY2Vuc2U9MQpwcm9kdWN0cz1zZGstYW5kcm9pZC00LioKd2F0ZXJtYXJrPWNhcnRvZGIK", this.getContext());
-        HTTPTileDataSource source = new HTTPTileDataSource(1, 20, "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png");
-//        HTTPTileDataSource source = new HTTPTileDataSource(1, 20, "https://1.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/normal.day.grey/{z}/{x}/{y}/512/png8?app_id=9QKPJz6sIj9MkeeUmpfc&app_code=iD7QuqOFDMJS_nNtlKdp1A");
-        StringVector subdomains = new StringVector();
-        subdomains.add("a");
-        subdomains.add("b");
-        subdomains.add("c");
-        source.setSubdomains(subdomains);
-        final RasterTileLayer backlayer = new RasterTileLayer(source);
-//        final CartoOnlineVectorTileLayer backlayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_POSITRON);
-        final AppCompatSeekBar opacitySeekBar = (AppCompatSeekBar) view.findViewById(R.id.opacitySeekBar); // initiate the Seek bar
-        final TextView textOpacity = (TextView) view.findViewById(R.id.textOpacity); // initiate the Seek bar
-        opacitySeekBar.setProgress(100);
-        textOpacity.setText(backlayer.getOpacity() + "");
-        opacitySeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                backlayer.setOpacity(i / 100.0f);
-                textOpacity.setText(backlayer.getOpacity() + "");
-                mapView.requestRender();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-
-        });
+//        HTTPTileDataSource source = new HTTPTileDataSource(1, 20, "http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png");
+//        StringVector subdomains = new StringVector();
+//        subdomains.add("a");
+//        subdomains.add("b");
+//        subdomains.add("c");
+//        source.setSubdomains(subdomains);
+//        final RasterTileLayer backlayer = new RasterTileLayer(source);
+////        final CartoOnlineVectorTileLayer backlayer = new CartoOnlineVectorTileLayer(CartoBaseMapStyle.CARTO_BASEMAP_STYLE_POSITRON);
+//        final AppCompatSeekBar opacitySeekBar = (AppCompatSeekBar) view.findViewById(R.id.opacitySeekBar); // initiate the Seek bar
+//        final TextView textOpacity = (TextView) view.findViewById(R.id.textOpacity); // initiate the Seek bar
+//        opacitySeekBar.setProgress(100);
+//        textOpacity.setText(backlayer.getOpacity() + "");
+//        opacitySeekBar.setOnSeekBarChangeListener(new AppCompatSeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+//                backlayer.setOpacity(i / 100.0f);
+//                textOpacity.setText(backlayer.getOpacity() + "");
+//                mapView.requestRender();
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//            }
+//
+//        });
 
 
         final EPSG4326 projection = new EPSG4326();
@@ -493,10 +505,10 @@ public class SecondFragment extends Fragment {
         options.setRestrictedPanning(true);
         options.setSeamlessPanning(true);
         options.setRotatable(true);
-        options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL);
+//        options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL);
         options.setPanningMode(PanningMode.PANNING_MODE_STICKY);
         options.setBaseProjection(projection);
-        mapView.getLayers().add(backlayer);
+//        mapView.getLayers().add(backlayer);
         mapView.setFocusPos(new MapPos(5.7562, 45.175), 0);
         mapView.setZoom(13, 0);
         com.carto.utils.Log.setShowInfo(true);
