@@ -15,8 +15,11 @@
 %include <std_string.i>
 %include <cartoswig.i>
 
+%import "core/MapTile.i"
+%import "core/StringMap.i"
 %import "datasources/TileDataSource.i"
 %import "datasources/MBTilesTileDataSource.i"
+%import "datasources/components/TileData.i"
 
 !polymorphic_shared_ptr(carto::LocalPackageManagerTileDataSource, datasources.LocalPackageManagerTileDataSource)
 

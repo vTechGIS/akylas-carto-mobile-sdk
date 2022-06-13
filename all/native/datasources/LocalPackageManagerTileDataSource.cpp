@@ -10,8 +10,7 @@
 
 #include <memory>
 
-namespace carto
-{
+namespace carto {
 
     LocalPackageManagerTileDataSource::LocalPackageManagerTileDataSource(int maxOpenedPackages) : TileDataSource(0, Const::MAX_SUPPORTED_ZOOM_LEVEL),
                                                                                                   _dataSources(),
@@ -28,6 +27,13 @@ namespace carto
     {
     }
 
+    LocalPackageManagerTileDataSource::~LocalPackageManagerTileDataSource() {
+    }
+
+    bool compare_datasource (std::pair<std::shared_ptr<PackageTileMask>, std::shared_ptr<MBTilesTileDataSource>> dataSource1, std::pair<std::shared_ptr<PackageTileMask>, std::shared_ptr<MBTilesTileDataSource>> dataSource2) {
+        return std::dynamic_pointer_cast<MBTilesTileDataSource>(dataSource1.second) == std::dynamic_pointer_cast<MBTilesTileDataSource>(dataSource2.second);
+    };
+
     std::shared_ptr<TileData> LocalPackageManagerTileDataSource::loadTile(const MapTile &mapTile)
     {
         Log::Infof("LocalPackageManagerTileDataSource::loadTile: Loading %s", mapTile.toString().c_str());
@@ -37,7 +43,7 @@ namespace carto
 
             std::shared_ptr<TileData> tileData;
             std::lock_guard<std::mutex> lock(_mutex);
-
+            bool tileOk = false;
             // Fast path: try already open packages
             for (auto it = _cachedOpenDataSources.begin(); it != _cachedOpenDataSources.end(); it++)
             {
@@ -50,20 +56,27 @@ namespace carto
                     }
                 }
 
-                tileData = it->second->loadTile(mapTileFlipped);
-                if (tileData || tileMask)
+                tileData = it->second->loadTile(mapTile);
+                tileOk = tileData && tileData->getData();
+                if (tileOk)
                 {
                     std::rotate(_cachedOpenDataSources.begin(), it, it + 1);
                     break;
                 }
             }
-            if (!tileData)
+            if (!tileOk)
             {
                 // Slow path: try other packages
                 for (auto it = _dataSources.begin(); it != _dataSources.end(); it++)
                 {
+
                     if (auto dataSource = std::dynamic_pointer_cast<MBTilesTileDataSource>(it->second))
                     {
+                        auto it2 = std::find_if(_cachedOpenDataSources.begin(), _cachedOpenDataSources.end(), [&it](const std::pair<std::shared_ptr<PackageTileMask>, std::shared_ptr<MBTilesTileDataSource>> pair)
+                        {  return pair.second == it->second; });
+                        if (it2 != _cachedOpenDataSources.end() && it2->second == it->second) {
+                            continue;
+                        }
                         std::shared_ptr<PackageTileMask> tileMask = it->first;
                         if (tileMask)
                         {
@@ -73,9 +86,9 @@ namespace carto
                             }
                         }
 
-                        tileData = dataSource->loadTile(mapTileFlipped);
-                        if (tileData || tileMask)
-                        {
+                        tileData = dataSource->loadTile(mapTile);
+                        tileOk = tileData && tileData->getData();
+                        if (tileOk) {
                             _cachedOpenDataSources.insert(_cachedOpenDataSources.begin(), std::make_pair(tileMask, dataSource));
                             if (_cachedOpenDataSources.size() > _maxOpenedPackages)
                             {
@@ -87,16 +100,16 @@ namespace carto
                 }
             }
 
-            if (!tileData)
+            if (!tileOk)
             {
-                if (mapTileFlipped.getZoom() > getMinZoom())
+                if (tileData && mapTile.getZoom() > getMinZoom())
                 {
-                    Log::Infof("PackageManagerTileDataSource::loadTile: Tile data doesn't exist in the database, redirecting to parent");
+                    Log::Infof("LocalPackageManagerTileDataSource::loadTile: Tile data doesn't exist in the database, redirecting to parent");
                     tileData->setReplaceWithParent(true);
                 }
                 else
                 {
-                    Log::Infof("PackageManagerTileDataSource::loadTile: Tile data doesn't exist in the database");
+                    Log::Infof("LocalPackageManagerTileDataSource::loadTile: Tile data doesn't exist in the database");
                     return std::shared_ptr<TileData>();
                 }
             }
@@ -140,24 +153,24 @@ namespace carto
                 if (it == _dataSources.end())
                 {
                     std::shared_ptr<PackageTileMask> tileMask;
-                    std::string tileMaskStr = dataSource->getMetaData("tilemask");
-                    if (!tileMaskStr.empty())
-                    {
-                        std::vector<std::string> parts = GeneralUtils::Split(tileMaskStr, ':');
-                        if (!parts.empty())
-                        {
-                             int zoomLevel;
-                            if (parts.size() > 1)
-                            {
-                                zoomLevel = boost::lexical_cast<int>(parts[1]);
-                            }
-                            else
-                            {
-                                zoomLevel = dataSource->getMaxZoom();
-                            }
-                            tileMask = std::make_shared<PackageTileMask>(parts[0], zoomLevel);
-                        }
-                    }
+//                    std::string tileMaskStr = dataSource->getMetaData("tilemask");
+//                    if (!tileMaskStr.empty())
+//                    {
+//                        std::vector<std::string> parts = GeneralUtils::Split(tileMaskStr, ':');
+//                        if (!parts.empty())
+//                        {
+//                             int zoomLevel;
+//                            if (parts.size() > 1)
+//                            {
+//                                zoomLevel = boost::lexical_cast<int>(parts[1]);
+//                            }
+//                            else
+//                            {
+//                                zoomLevel = dataSource->getMaxZoom();
+//                            }
+//                            tileMask = std::make_shared<PackageTileMask>(parts[0], zoomLevel);
+//                        }
+//                    }
                     _dataSources.emplace_back(tileMask, dataSource);
                 }
             }
