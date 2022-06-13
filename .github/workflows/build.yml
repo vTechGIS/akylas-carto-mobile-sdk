@@ -63,6 +63,12 @@ jobs:
         run: |
           cd scripts
           python swigpp-java.py --profile standard+valhalla --swig ../mobile-swig/swig
+      
+      - id: get_version
+        uses: battila7/get-version-action@v2
+      - name: Get branch name
+        shell: bash
+        run: echo "VERSION_NAME=$(echo ${GITHUB_HEAD_REF} | tr / - | sed "s/^[a-zA-Z]*[-_\/]//g" | sed "s/^$/4.4.6-rc.1/")" >> $GITHUB_ENV
 
       - name: Build CartoSDK
         if: matrix.variant == 'android'
