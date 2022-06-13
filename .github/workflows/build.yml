@@ -1,6 +1,10 @@
 name: Build CartoMobileSDK
 
-on: [workflow_dispatch]
+on: 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'version number'
 
 jobs:
   build:
@@ -66,9 +70,11 @@ jobs:
       
       - id: get_version
         uses: battila7/get-version-action@v2
-      - name: Get branch name
+
+
+      - name: Get Version
         shell: bash
-        run: echo "VERSION_NAME=$(echo ${GITHUB_HEAD_REF} | tr / - | sed "s/^[a-zA-Z]*[-_\/]//g" | sed "s/^$/4.4.6-rc.1/")" >> $GITHUB_ENV
+        run: echo "VERSION_NAME=$(echo${{ github.event.inputs.tags }} | tr / - | sed "s/^[a-zA-Z]*[-_\/]//g" | sed "s/^$/4.4.6-rc.1/")" >> $GITHUB_ENV
 
       - name: Build CartoSDK
         if: matrix.variant == 'android'
