@@ -34,6 +34,17 @@ cd ..
 
 Special **swig** version (swig-2.0.11-nutiteq branch) is needed for generating language-specific wrappers, this can be downloaded from https://github.com/CartoDB/swig. Clone it and compile it using usual `./autogen.sh; ./configure; make` routine. Make sure build script refers to this one.
 
+```
+brew install autoconf automake libtool
+git clone https://github.com/farfromrefug/mobile-swig.git
+cd mobile-swig
+wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz
+./Tools/pcre-build.sh
+./autogen.sh
+./configure
+make
+```
+
 **Python 2.7.x** or **Python 3.x** is used for build scripts
 
 **CMake 3.14 or later** is required by build scripts
@@ -64,31 +75,31 @@ cd scripts
 
 ## Android build 
 ```
-python swigpp-java.py --profile standard
-python build-android.py --profile standard
+python swigpp-java.py --profile standard --swig ../mobile-swig/swig
+python build-android.py --profile standard --build-aar --configuration=Release
 ```
 
 ## iOS build
 ```
-python swigpp-objc.py --profile standard
+python swigpp-objc.py --profile standard --swig ../mobile-swig/swig
 python build-ios.py --profile standard
 ```
 
 ## Xamarin Android build
 ```
-python swigpp-csharp.py --profile standard android
+python swigpp-csharp.py --profile standard android --swig ../mobile-swig/swig
 python build-xamarin.py --profile standard android
 ```
 
 ## Xamarin iOS build
 ```
-python swigpp-csharp.py --profile standard ios
+python swigpp-csharp.py --profile standard ios --swig ../mobile-swig/swig
 python build-xamarin.py --profile standard ios
 ```
 
 ## Universal Windows Platform build
 ```
-python swigpp-csharp.py --profile standard winphone
+python swigpp-csharp.py --profile standard winphone --swig ../mobile-swig/swig
 python build-winphone.py --profile standard
 ```
 
