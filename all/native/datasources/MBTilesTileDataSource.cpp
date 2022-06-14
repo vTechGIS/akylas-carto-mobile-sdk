@@ -291,8 +291,8 @@ namespace carto {
         // As a first step, try to use metadata
         std::string result;
         try {
-            sqlite3pp::query query(*_database, "SELECT value FROM metadata WHERE name=':name'");
-            query.bind(":name", key);
+            sqlite3pp::query query(*_database, "SELECT value FROM metadata WHERE name=:name");
+            query.bind(":name", key.c_str());
            for (auto it = query.begin(); it != query.end(); it++) {
                result = (*it).get<const char*>(0);
            }

@@ -1,12 +1,12 @@
 #ifndef _LOCALPACKAGEMANAGERTILEDATASOURCE_I
 #define _LOCALPACKAGEMANAGERTILEDATASOURCE_I
 
-%module(directors="1") LocalPackageManagerTileDataSource
+%module(directors="1") MultiTileDataSource
 
-!proxy_imports(carto::LocalPackageManagerTileDataSource, core.MapTile, core.MapBounds, core.StringMap, datasources.TileDataSource, datasources.MBTilesTileDataSource, datasources.components.TileData)
+!proxy_imports(carto::MultiTileDataSource, core.MapTile, core.MapBounds, core.StringMap, datasources.TileDataSource, datasources.MBTilesTileDataSource, datasources.components.TileData)
 
 %{
-#include "datasources/LocalPackageManagerTileDataSource.h"
+#include "datasources/MultiTileDataSource.h"
 #include "components/Exceptions.h"
 #include <memory>
 %}
@@ -21,9 +21,9 @@
 %import "datasources/MBTilesTileDataSource.i"
 %import "datasources/components/TileData.i"
 
-!polymorphic_shared_ptr(carto::LocalPackageManagerTileDataSource, datasources.LocalPackageManagerTileDataSource)
+!polymorphic_shared_ptr(carto::MultiTileDataSource, datasources.MultiTileDataSource)
 
-%std_exceptions(carto::LocalPackageManagerTileDataSource::LocalPackageManagerTileDataSource)
+%std_exceptions(carto::MultiTileDataSource::MultiTileDataSource)
 %std_exceptions(carto::LocalVectorDataSource::add)
 // %std_exceptions(carto::LocalVectorDataSource::addAll)
 %std_exceptions(carto::LocalVectorDataSource::remove)
@@ -32,8 +32,8 @@
 %ignore carto::LocalVectorDataSource::addAll;
 %ignore carto::LocalVectorDataSource::removeAll;
 
-%feature("director") carto::LocalPackageManagerTileDataSource;
+%feature("director") carto::MultiTileDataSource;
 
-%include "datasources/LocalPackageManagerTileDataSource.h"
+%include "datasources/MultiTileDataSource.h"
 
 #endif
