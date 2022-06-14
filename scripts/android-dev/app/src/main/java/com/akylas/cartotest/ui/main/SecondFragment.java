@@ -29,7 +29,7 @@ import com.carto.core.MapVec;
 import com.carto.core.StringVector;
 import com.carto.core.Variant;
 import com.carto.datasources.HTTPTileDataSource;
-import com.carto.datasources.LocalPackageManagerTileDataSource;
+import com.carto.datasources.MultiTileDataSource;
 import com.carto.datasources.LocalVectorDataSource;
 import com.carto.datasources.MBTilesTileDataSource;
 import com.carto.datasources.TileDataSource;
@@ -129,7 +129,7 @@ public class SecondFragment extends Fragment {
     void addHillshadeLayer(View view) {
         MBTilesTileDataSource hillshadeSourceFrance = null;
         MBTilesTileDataSource hillshadeSourceWorld = null;
-        LocalPackageManagerTileDataSource  dataSource = new LocalPackageManagerTileDataSource();
+        MultiTileDataSource  dataSource = new MultiTileDataSource();
         try {
             hillshadeSourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/terrain_25m_webp.etiles");
             hillshadeSourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world_terrain.etiles");
@@ -286,7 +286,7 @@ public class SecondFragment extends Fragment {
     }
     void proceedWithSdCard(View view) {
 
-        LocalPackageManagerTileDataSource  dataSource = new LocalPackageManagerTileDataSource();
+        MultiTileDataSource  dataSource = new MultiTileDataSource();
         MBTilesTileDataSource sourceFrance = null;
         MBTilesTileDataSource sourceWorld = null;
         MBVectorTileDecoder decoder = null;
@@ -302,13 +302,13 @@ public class SecondFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        dataSource.add(sourceFrance);
+        dataSource.add(sourceFrance, "wzAzMzDAwMBwwwXFfBcVXAzAxE8BcVfMxXFXMBFfxVVVwMzMBMVwMB8RVPHFV9QQ1xDUPwMDFfMRwFVzwFXMVxFVUz/MQD1BAPXENQTMQAP1dA1xV9AxExFc1NQDXNQDUxAAAPD/ww3BV8FxVfDAcVwVcwMMFwXwxV8BwVV/FVVV/DMBXwXFV8DBcMFVX/AcEXBV8MED0Q0QH9ENED0Q0AN1fVNQDV1dU/VNQA9EAP1dU11AAB9/RDRAw0QN1dEfBDRcEDfDRcEEdw0QfRR0QP1111FXdXV0DXV1T1TUNAPXRNQA/MQD1FMQDdXRM1EN0DUAP9Q0AAAP3V1DUPUAPXUNA3QAAAAAAAAA%");
         dataSource.add(sourceWorld);
         VectorTileLayer backlayer  = new VectorTileLayer(dataSource, decoder);
-        backlayer.setMaxOverzoomLevel(1);
+//        backlayer.setMaxOverzoomLevel(1);
         mapView.getLayers().add(backlayer);
 
-        addHillshadeLayer(view);
+//        addHillshadeLayer(view);
 
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
