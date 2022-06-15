@@ -41,6 +41,7 @@ import com.carto.geometry.PolygonGeometry;
 import com.carto.geometry.VectorTileFeatureCollection;
 import com.carto.graphics.Color;
 import com.carto.layers.HillshadeRasterTileLayer;
+import com.carto.layers.RasterTileFilterMode;
 import com.carto.layers.RasterTileLayer;
 import com.carto.layers.VectorLayer;
 import com.carto.layers.VectorTileLayer;
@@ -147,6 +148,7 @@ public class SecondFragment extends Fragment {
         layer.setVisibleZoomRange(new MapRange(0, 14));
         layer.setIlluminationMapRotationEnabled(true);
         layer.setIlluminationDirection(new MapVec(-1, 0, 0));
+//        layer.setTileFilterMode(RasterTileFilterMode.RASTER_TILE_FILTER_MODE_BICUBIC);
         layer.setHighlightColor(new Color((short) 125, (short) 216, (short) 79, (short) 255));
         layer.setShadowColor(new Color((short) 176, (short) 145, (short) 91, (short) 255));
         layer.setAccentColor(new Color((short) 34, (short) 67, (short) 252, (short) 255));
@@ -291,9 +293,9 @@ public class SecondFragment extends Fragment {
         MBTilesTileDataSource sourceWorld = null;
         MBVectorTileDecoder decoder = null;
         try {
-            sourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/output.mbtiles");
+            sourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/routes.mbtiles");
             sourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world.mbtiles");
-            final File file = new File("/storage/1C05-0202/alpimaps_mbtiles/osm.zip");
+            final File file = new File("/storage/1C05-0202/alpimaps_mbtiles/inner.zip");
             final FileInputStream stream = new java.io.FileInputStream(file);
             final DataInputStream dataInputStream = new java.io.DataInputStream(stream);
             final byte[] bytes = new byte[(int)file.length()];
@@ -306,9 +308,9 @@ public class SecondFragment extends Fragment {
         dataSource.add(sourceWorld);
         VectorTileLayer backlayer  = new VectorTileLayer(dataSource, decoder);
 //        backlayer.setMaxOverzoomLevel(1);
-        mapView.getLayers().add(backlayer);
+//        mapView.getLayers().add(backlayer);
 
-//        addHillshadeLayer(view);
+        addHillshadeLayer(view);
 
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
@@ -510,7 +512,7 @@ public class SecondFragment extends Fragment {
         options.setBaseProjection(projection);
 //        mapView.getLayers().add(backlayer);
         mapView.setFocusPos(new MapPos(5.7562, 45.175), 0);
-        mapView.setZoom(13, 0);
+        mapView.setZoom(13.4f, 0);
         com.carto.utils.Log.setShowInfo(true);
         com.carto.utils.Log.setShowDebug(true);
         com.carto.utils.Log.setShowWarn(true);
