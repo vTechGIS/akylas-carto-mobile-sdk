@@ -308,9 +308,9 @@ public class SecondFragment extends Fragment {
         dataSource.add(sourceWorld);
         VectorTileLayer backlayer  = new VectorTileLayer(dataSource, decoder);
 //        backlayer.setMaxOverzoomLevel(1);
-//        mapView.getLayers().add(backlayer);
+        mapView.getLayers().add(backlayer);
 
-        addHillshadeLayer(view);
+//        addHillshadeLayer(view);
 
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
