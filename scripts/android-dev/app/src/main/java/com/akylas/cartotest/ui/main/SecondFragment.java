@@ -293,9 +293,9 @@ public class SecondFragment extends Fragment {
         MBTilesTileDataSource sourceWorld = null;
         MBVectorTileDecoder decoder = null;
         try {
-            sourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/routes.mbtiles");
+            sourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/france.mbtiles");
             sourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world.mbtiles");
-            final File file = new File("/storage/1C05-0202/alpimaps_mbtiles/inner.zip");
+            final File file = new File("/storage/1C05-0202/alpimaps_mbtiles/osm.zip");
             final FileInputStream stream = new java.io.FileInputStream(file);
             final DataInputStream dataInputStream = new java.io.DataInputStream(stream);
             final byte[] bytes = new byte[(int)file.length()];
