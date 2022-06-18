@@ -150,10 +150,25 @@ namespace carto {
         /**
          * Sets the maximum overzoom level for this layer.
          * If a tile for the given zoom level Z is not available, SDK will try to use tiles with zoom levels Z-1, ..., Z-MaxOverzoomLevel.
-         * The default is 6.
+         * The default is -1 (disabled).
          * @param overzoomLevel The new maximum overzoom value.
          */
         void setMaxOverzoomLevel(int overzoomLevel);
+
+        /**
+         * Gets the current maximum overzoom level for this layer's datasource.
+         * Over it the datasource will not be "drawn"
+         * @return The current maximum overzoom level for this layer's datasource.
+         */
+        int getMaxSourceOverzoomLevel() const;
+        /**
+         * Sets the maximum overzoom level for this layer's datasource.
+         * If a tile for the given zoom level Z is not available, SDK will try to use tiles with zoom levels Z-1, ..., Z-MaxOverzoomLevel.
+         * If above the datasource will not be "drawn"
+         * The default is 6.
+         * @param overzoomLevel The new maximum overzoom value.
+         */
+        void setMaxSourceOverzoomLevel(int overzoomLevel);
         
         /**
          * Gets the current maximum underzoom level for this layer.
@@ -424,6 +439,7 @@ namespace carto {
         float _zoomLevelBias;
         int _maxOverzoomLevel;
         int _maxUnderzoomLevel;
+        int _maxSourceOverzoomLevel;
 
         std::vector<MapTile> _visibleTiles;
         std::vector<MapTile> _preloadingTiles;
