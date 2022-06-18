@@ -188,9 +188,11 @@ namespace carto {
             std::shared_ptr<PackageTileMask> tileMask;
             std::string tileMaskStr = tileMaskArg;
             if (tileMaskStr.empty()) {
+#ifdef _CARTO_OFFLINE_SUPPORT
                 if (auto mbtilesDatasource = std::dynamic_pointer_cast<MBTilesTileDataSource>(dataSource)) {
                     tileMaskStr = mbtilesDatasource->getMetaData("tilemask");
                 }
+ #endif
             }
             if (!tileMaskStr.empty())
             {
