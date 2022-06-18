@@ -77,13 +77,13 @@ jobs:
         with:
           result-encoding: string
           script: |
-            console.log("inputs.version", ${{ github.event.inputs.version }});
-            console.log("get_version", ${{ steps.get_version.outputs.is-semver }}, ${{ steps.get_version.outputs.version-without-v }});
-            if (${{ github.event.inputs.version }} && ${{ github.event.inputs.version }}.length) {
-             return ${{ github.event.inputs.version }};
+            console.log("inputs.version", "${{ github.event.inputs.version }}");
+            console.log("get_version", "${{ steps.get_version.outputs.is-semver }}", "${{ steps.get_version.outputs.version-without-v }}");
+            if ("${{ github.event.inputs.version }}".length) {
+             return "${{ github.event.inputs.version }}";
             }
-            if (${{ steps.get_version.outputs.is-semver }} === 'true') {
-              return ${{ steps.get_version.outputs.version-without-v }};
+            if ("${{ steps.get_version.outputs.is-semver }}" === 'true') {
+              return" ${{ steps.get_version.outputs.version-without-v }}";
             }
 
       - name: Build CartoSDK
