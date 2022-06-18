@@ -1,3 +1,35 @@
+CARTO Mobile SDK 4.4.6
+-------------------
+
+### Changes, fixes:
+
+* Fixed minor rendering issue with lines joined at steep angles when BEVEL/ROUND join modes were used
+
+
+CARTO Mobile SDK 4.4.6RC1
+-------------------
+
+### New features:
+
+* Added 'getTimeout', 'setTimeout' methods to 'CartoOnlineTileDataSource', 'MapTilerOnlineTileDataSource' and 'HTTPTileDataSource'
+
+### Changes, fixes:
+
+* Fixed iOS specific issue related to SDK not properly handling 'didBecomeActive' notifications, resulting in MapView not being rendered.
+* Fixed critical synchronization issue on UWP platform related to stopping rendering loop.
+* Fixed flickering issues when MapView was resized on UWP platform.
+* Fix global pattern alignment when using 'polygon-pattern' symbolizer.
+
+
+CARTO Mobile SDK 4.4.5
+-------------------
+
+### Changes, fixes:
+
+* Fixed 'PersistentCacheTileDataSource' tile preload canceling not working
+* Fixed several cases where tile datasources could be accessed with tile coordinates out of bounds
+
+
 CARTO Mobile SDK 4.4.5RC1
 -------------------
 
