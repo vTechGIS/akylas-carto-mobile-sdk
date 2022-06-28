@@ -425,12 +425,7 @@ namespace carto {
             if (isCanceled()) {
                 break;
             }
-            auto dataSource = layer->_dataSource;
-            if (layer->getMaxSourceOverzoomLevel() >= 0 && 
-               dataSourceTile.getZoom() > (dataSource->getMaxZoom() + layer->getMaxSourceOverzoomLevel())) {
-                break;
-            }
-            std::shared_ptr<TileData> tileData = dataSource->loadTile(dataSourceTile);
+            std::shared_ptr<TileData> tileData = layer->_dataSource->loadTile(dataSourceTile);
             if (!tileData) {
                 break;
             }
