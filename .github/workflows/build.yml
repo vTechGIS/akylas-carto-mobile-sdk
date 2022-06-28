@@ -26,7 +26,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
       - name: Setup Android SDK
         if: matrix.variant == 'android'
         uses: android-actions/setup-android@v2
