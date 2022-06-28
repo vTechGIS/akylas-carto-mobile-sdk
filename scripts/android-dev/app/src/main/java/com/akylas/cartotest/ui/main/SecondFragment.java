@@ -43,6 +43,7 @@ import com.carto.graphics.Color;
 import com.carto.layers.HillshadeRasterTileLayer;
 import com.carto.layers.RasterTileFilterMode;
 import com.carto.layers.RasterTileLayer;
+import com.carto.layers.TileSubstitutionPolicy;
 import com.carto.layers.VectorLayer;
 import com.carto.layers.VectorTileLayer;
 import com.carto.projections.EPSG4326;
@@ -132,22 +133,24 @@ public class SecondFragment extends Fragment {
         MBTilesTileDataSource hillshadeSourceWorld = null;
         MultiTileDataSource  dataSource = new MultiTileDataSource();
         try {
-            hillshadeSourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/terrain_25m_webp.etiles");
+            hillshadeSourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/test_rgb_webp_4.etiles");
             hillshadeSourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world_terrain.etiles");
 //            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
             //        HTTPTileDataSource hillshadeSource =   new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        dataSource.add(hillshadeSourceFrance);
+        hillshadeSourceWorld.setMaxOverzoomLevel(1);
+        dataSource.add(hillshadeSourceFrance, "wzAzMzDAwMBwwwXFfBcVXAzAxE8BcVfMxXFXMBFfxVVVwMzMBMVwMB8RVPHFV9QQ1xDUPwMDFfMRwFVzwFXMVxFVUz/MQD1BAPXENQTMQAP1dA1xV9AxExFc1NQDXNQDUxAAAPD/ww3BV8FxVfDAcVwVcwMMFwXwxV8BwVV/FVVV/DMBXwXFV8DBcMFVX/AcEXBV8MED0Q0QH9ENED0Q0AN1fVNQDV1dU/VNQA9EAP1dU11AAB9/RDRAw0QN1dEfBDRcEDfDRcEEdw0QfRR0QP1111FXdXV0DXV1T1TUNAPXRNQA/MQD1FMQDdXRM1EN0DUAP9Q0AAAP3V1DUPUAPXUNA3QAAAAAAAAA%");
         dataSource.add(hillshadeSourceWorld);
         final MapBoxElevationDataDecoder elevationDecoder = new MapBoxElevationDataDecoder();
         final HillshadeRasterTileLayer layer = hillshadeLayer = new HillshadeRasterTileLayer(dataSource, elevationDecoder);
-        layer.setContrast(1.0f);
-        layer.setHeightScale(0.0625f);
-        layer.setVisibleZoomRange(new MapRange(0, 14));
+        layer.setContrast( 0.58f);
+        layer.setHeightScale(0.11f);
+        layer.setVisibleZoomRange(new MapRange(5, 16));
         layer.setIlluminationMapRotationEnabled(true);
         layer.setIlluminationDirection(new MapVec(-1, 0, 0));
+//        layer.setTileSubstitutionPolicy(TileSubstitutionPolicy.TILE_SUBSTITUTION_POLICY_VISIBLE);
 //        layer.setTileFilterMode(RasterTileFilterMode.RASTER_TILE_FILTER_MODE_BICUBIC);
         layer.setHighlightColor(new Color((short) 125, (short) 216, (short) 79, (short) 255));
         layer.setShadowColor(new Color((short) 176, (short) 145, (short) 91, (short) 255));
@@ -293,7 +296,7 @@ public class SecondFragment extends Fragment {
         MBTilesTileDataSource sourceWorld = null;
         MBVectorTileDecoder decoder = null;
         try {
-            sourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/france.mbtiles");
+            sourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/france_full.mbtiles");
             sourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world.mbtiles");
             final File file = new File("/storage/1C05-0202/alpimaps_mbtiles/osm.zip");
             final FileInputStream stream = new java.io.FileInputStream(file);
@@ -310,7 +313,7 @@ public class SecondFragment extends Fragment {
 //        backlayer.setMaxOverzoomLevel(1);
         mapView.getLayers().add(backlayer);
 
-//        addHillshadeLayer(view);
+        addHillshadeLayer(view);
 
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {

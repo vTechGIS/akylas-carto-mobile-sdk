@@ -109,19 +109,6 @@ namespace carto {
         refresh();
     }
     
-    int TileLayer::getMaxSourceOverzoomLevel() const {
-        std::lock_guard<std::recursive_mutex> lock(_mutex);
-        return _maxSourceOverzoomLevel;
-    }
-    
-    void TileLayer::setMaxSourceOverzoomLevel(int overzoomLevel) {
-        {
-            std::lock_guard<std::recursive_mutex> lock(_mutex);
-            _maxSourceOverzoomLevel = overzoomLevel;
-        }
-        refresh();
-    }
-    
     int TileLayer::getMaxUnderzoomLevel() const {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
         return _maxUnderzoomLevel;
