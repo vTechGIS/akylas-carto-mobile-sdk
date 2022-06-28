@@ -150,7 +150,7 @@ namespace carto {
         /**
          * Sets the maximum overzoom level for this layer.
          * If a tile for the given zoom level Z is not available, SDK will try to use tiles with zoom levels Z-1, ..., Z-MaxOverzoomLevel.
-         * The default is -1 (disabled).
+         * The default is 6.
          * @param overzoomLevel The new maximum overzoom value.
          */
         void setMaxOverzoomLevel(int overzoomLevel);
