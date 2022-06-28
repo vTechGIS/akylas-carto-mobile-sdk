@@ -248,6 +248,7 @@ namespace carto {
             const std::shared_ptr<BinaryData>& getTileData() const { return _tileData; }
             const std::shared_ptr<VectorTileDecoder::TileMap>& getTileMap() const { return _tileMap; }
 
+            int getMaxDrawCallCount() const;
             std::size_t getSize() const;
 
         private:
@@ -258,6 +259,7 @@ namespace carto {
 
         static const int BACKGROUND_BLOCK_SIZE;
         static const int BACKGROUND_BLOCK_COUNT;
+        static const int SKY_BITMAP_HEIGHT;
 
         static const int DEFAULT_CULL_DELAY;
 
