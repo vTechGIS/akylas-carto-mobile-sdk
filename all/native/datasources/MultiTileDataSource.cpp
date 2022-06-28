@@ -91,7 +91,7 @@ namespace carto {
             for (auto it = _cachedOpenDataSources.begin(); it != _cachedOpenDataSources.end(); it++)
             {
                 auto dataSource = it->second;
-                if (zoom < dataSource->getMinZoom() || zoom > dataSource->getMaxZoom()) {
+                if (zoom < dataSource->getMinZoom() || zoom > dataSource->getMaxZoomWithOverzoom() + 1) {
                     continue;
                 }
 
@@ -120,7 +120,7 @@ namespace carto {
                         if (it2 != _cachedOpenDataSources.end() && it2->second == it->second) {
                             continue;
                         }
-                        if (zoom < dataSource->getMinZoom() || zoom > dataSource->getMaxZoom()) {
+                        if (zoom < dataSource->getMinZoom() || zoom > dataSource->getMaxZoomWithOverzoom() + 1) {
                             continue;
                         }
                         std::shared_ptr<PackageTileMask> tileMask = it->first;
@@ -151,7 +151,9 @@ namespace carto {
                     if (!tileData){
                         tileData = std::make_shared<TileData>(std::shared_ptr<BinaryData>());
                     }
-                    tileData->setReplaceWithParent(true);
+                    if(!tileData->isOverZoom()) {
+                        tileData->setReplaceWithParent(true);
+                    }
                 }
                 else
                 {
