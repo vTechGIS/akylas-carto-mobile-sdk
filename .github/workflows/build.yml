@@ -102,18 +102,18 @@ jobs:
         if: matrix.variant == 'ios'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version.outputs.version-without-v }} --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --build-xcframework
 
       - name: Build CartoSDK
         if: matrix.variant == 'ios-metal'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version.outputs.version-without-v }} --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --build-xcframework
 
       - uses: actions/upload-artifact@v2
         if: matrix.variant == 'android'
         with:
-          name: CartoMobileSDK-android-${{steps.get_version.outputs.version-without-v}}.zip
+          name: CartoMobileSDK-android-${{ steps.get_version_or_prompt.outputs.result }}.zip
           path: |
             dist/android/*.aar
             dist/android/*.jar
@@ -122,5 +122,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: matrix.variant != 'android'
         with:
-          name: CartoMobileSDK-ios-${{steps.get_version.outputs.version-without-v}}.zip
+          name: CartoMobileSDK-ios-${{ steps.get_version_or_prompt.outputs.result }}.zip
           path: dist/ios/*.zip
