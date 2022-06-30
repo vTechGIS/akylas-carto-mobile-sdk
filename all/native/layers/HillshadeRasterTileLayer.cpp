@@ -225,10 +225,10 @@ namespace carto
         {
             scales = _elevationDecoder->getVectorTileScales();
             alpha = static_cast<std::uint8_t>(getContrast() * 255.0f);
-            float scale = 0.1f * static_cast<float>(bitmap->getHeight() * std::pow(2.0, subTile.getZoom()) / 40075016.6855785);
+            float scale = 0.1f * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom()) / 40075016.6855785);
             if (_exagerateHeightScaleEnabled) {
-                 float exaggeration = tile.getZoom() < 2 ? 0.2f : subTile.getZoom() < 5 ? 0.3f : 0.35f;
-                 scale = 16 * getHeightScale() * static_cast<float>(bitmap->getHeight() * std::pow(2.0, subTile.getZoom() * (1 - exaggeration)) / 40075016.6855785);
+                 float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
+                 scale = 16 * getHeightScale() * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom() * (1 - exaggeration)) / 40075016.6855785);
 
             }
             std::transform(scales.begin(), scales.end(), scales.begin(), [&scale](float &c) { return c * scale; });
