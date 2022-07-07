@@ -49,6 +49,8 @@ import com.carto.layers.VectorTileLayer;
 import com.carto.projections.EPSG4326;
 import com.carto.projections.Projection;
 import com.carto.rastertiles.MapBoxElevationDataDecoder;
+import com.carto.routing.RouteMatchingRequest;
+import com.carto.routing.RouteMatchingResult;
 import com.carto.routing.RoutingRequest;
 import com.carto.routing.RoutingResult;
 import com.carto.routing.ValhallaOfflineRoutingService;
@@ -133,14 +135,14 @@ public class SecondFragment extends Fragment {
         MBTilesTileDataSource hillshadeSourceWorld = null;
         MultiTileDataSource  dataSource = new MultiTileDataSource();
         try {
-            hillshadeSourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/test_rgb_webp_4.etiles");
+            hillshadeSourceFrance = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/france/france_terrain.etiles");
             hillshadeSourceWorld = new MBTilesTileDataSource( "/storage/1C05-0202/alpimaps_mbtiles/world_terrain.etiles");
 //            hillshadeSource = this.hillshadeSource = new HTTPTileDataSource(5, 11, "http://192.168.1.45:8080/data/BDALTIV2_75M_rvb/{z}/{x}/{y}.png");
             //        HTTPTileDataSource hillshadeSource =   new HTTPTileDataSource(1, 15, "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiYWt5bGFzIiwiYSI6IkVJVFl2OXMifQ.TGtrEmByO3-99hA0EI44Ew");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        hillshadeSourceWorld.setMaxOverzoomLevel(1);
+//        hillshadeSourceWorld.setMaxOverzoomLevel(1);
         dataSource.add(hillshadeSourceFrance, "wzAzMzDAwMBwwwXFfBcVXAzAxE8BcVfMxXFXMBFfxVVVwMzMBMVwMB8RVPHFV9QQ1xDUPwMDFfMRwFVzwFXMVxFVUz/MQD1BAPXENQTMQAP1dA1xV9AxExFc1NQDXNQDUxAAAPD/ww3BV8FxVfDAcVwVcwMMFwXwxV8BwVV/FVVV/DMBXwXFV8DBcMFVX/AcEXBV8MED0Q0QH9ENED0Q0AN1fVNQDV1dU/VNQA9EAP1dU11AAB9/RDRAw0QN1dEfBDRcEDfDRcEEdw0QfRR0QP1111FXdXV0DXV1T1TUNAPXRNQA/MQD1FMQDdXRM1EN0DUAP9Q0AAAP3V1DUPUAPXUNA3QAAAAAAAAA%");
         dataSource.add(hillshadeSourceWorld);
         final MapBoxElevationDataDecoder elevationDecoder = new MapBoxElevationDataDecoder();
@@ -343,8 +345,8 @@ public class SecondFragment extends Fragment {
         final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-//                testValhalla(hillshadeLayer, options);
-                testVectoTileSearch(backlayer, options);
+                testValhalla(hillshadeLayer, options);
+//                testVectoTileSearch(backlayer, options);
                 // Code here executes on main thread after user presses button
 //                if (options.getRenderProjectionMode() == RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL) {
 //                    options.setRenderProjectionMode(RenderProjectionMode.RENDER_PROJECTION_MODE_PLANAR);
@@ -410,6 +412,8 @@ public class SecondFragment extends Fragment {
             public void run() {
                 try {
                     RoutingResult result = routingService.calculateRoute(request);
+                    Log.d(TAG,"rawresult "+ result.getRawResult());
+
                     MapPosVector pointsWithAltitude = new MapPosVector();
                     if (result != null) {
                         MapPosVector points = result.getPoints();
@@ -420,6 +424,11 @@ public class SecondFragment extends Fragment {
                         Line line = new Line(points, builder.buildStyle());
                         localSource.add(line);
                     }
+                    RouteMatchingRequest matchrequest = new RouteMatchingRequest(request.getProjection(), result.getPoints(), 1);
+                    matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
+                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.weighted_grade\"], \"action\": \"include\" }"));
+                    RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
+                    Log.d(TAG,"matchresult "+ matchresult.getRawResult());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
