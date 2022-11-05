@@ -426,7 +426,7 @@ public class SecondFragment extends Fragment {
                     }
                     RouteMatchingRequest matchrequest = new RouteMatchingRequest(request.getProjection(), result.getPoints(), 1);
                     matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
-                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.weighted_grade\"], \"action\": \"include\" }"));
+                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.sac_scale\", \"edge.use\", \"edge.length\"], \"action\": \"include\" }"));
                     RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
                     Log.d(TAG,"matchresult "+ matchresult.getRawResult());
                 } catch (IOException e) {
