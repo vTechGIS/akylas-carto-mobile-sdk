@@ -428,7 +428,7 @@ public class SecondFragment extends Fragment {
                     matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
                     matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.sac_scale\", \"edge.use\", \"edge.length\"], \"action\": \"include\" }"));
                     RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
-                    Log.d(TAG,"matchresult "+ matchresult.getRawResult());
+                    largeLog(TAG,"matchresult "+ matchresult.getRawResult());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -446,19 +446,28 @@ public class SecondFragment extends Fragment {
             VectorLayer vectorLayer = new VectorLayer(localSource);
             mapView.getLayers().add(vectorLayer);
             MapPosVector vector = new MapPosVector();
-            vector.add(new MapPos(5.720614, 45.174683));
-            vector.add(new MapPos(5.726890, 45.201224));
+            vector.add(new MapPos(5.733486469835043, 45.21843006812678));
+            vector.add(new MapPos(5.722714718431234, 45.191625014876294));
             RoutingRequest request = new RoutingRequest(projection, vector);
-            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":0,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"alley_factor\":\"2\",\"driveway_factor\":\"200\",\"sidewalk_factor\":\"1\",\"walkway_factor\":\"0\",\"use_hills\":\"0.5\",\"use_tracks\":\"1\",\"use_living_streets\":\"0\",\"step_penalty\":\"10\",\"max_hiking_difficulty\":\"6\",\"walking_speed\":\"5.1\"}}"));
+            request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en-US\"}"));
             runValhallaInThread(routingService, request, "pedestrian", localSource);
-            request = new RoutingRequest(projection, vector);
-            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":1,\"use_ferry\":0,\"use_hills\":0,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
-            runValhallaInThread(routingService, request, "pedestrian", localSource);
-            request = new RoutingRequest(projection, vector);
-            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":true,\"step_penalty\":5,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
-            runValhallaInThread(routingService, request, "pedestrian", localSource);
+//            request = new RoutingRequest(projection, vector);
+//            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":1,\"use_ferry\":0,\"use_hills\":0,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+//            runValhallaInThread(routingService, request, "pedestrian", localSource);
+//            request = new RoutingRequest(projection, vector);
+//            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":true,\"step_penalty\":5,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+//            runValhallaInThread(routingService, request, "pedestrian", localSource);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    public static void largeLog(String tag, String content) {
+        if (content.length() > 4000) {
+            Log.d(tag, content.substring(0, 4000));
+            largeLog(tag, content.substring(4000));
+        } else {
+            Log.d(tag, content);
         }
     }
 
