@@ -446,11 +446,11 @@ public class SecondFragment extends Fragment {
             VectorLayer vectorLayer = new VectorLayer(localSource);
             mapView.getLayers().add(vectorLayer);
             MapPosVector vector = new MapPosVector();
-            vector.add(new MapPos(5.733486469835043, 45.21843006812678));
-            vector.add(new MapPos(5.722714718431234, 45.191625014876294));
+            vector.add(new MapPos(5.720390081405645, 45.18661183942357));
+            vector.add(new MapPos(5.733468532562251, 45.21845651921567));
             RoutingRequest request = new RoutingRequest(projection, vector);
-            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"alley_factor\":\"2\",\"driveway_factor\":\"200\",\"sidewalk_factor\":\"1\",\"walkway_factor\":\"0\",\"use_hills\":\"0.5\",\"use_tracks\":\"1\",\"use_living_streets\":\"0\",\"step_penalty\":\"10\",\"max_hiking_difficulty\":\"6\",\"walking_speed\":\"5.1\"}}"));
-            request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en-US\"}"));
+            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_ferry\":0,\"shortest\":false,\"use_hills\":1,\"max_hiking_difficulty\":6,\"step_penalty\":10,\"driveway_factor\":200,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4,\"sidewalk_factor\":10}}"));
+            request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
             runValhallaInThread(routingService, request, "pedestrian", localSource);
 //            request = new RoutingRequest(projection, vector);
 //            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":1,\"use_ferry\":0,\"use_hills\":0,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
