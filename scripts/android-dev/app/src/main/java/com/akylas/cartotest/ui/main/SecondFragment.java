@@ -1,5 +1,7 @@
 package com.akylas.cartotest.ui.main;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import android.Manifest;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
@@ -78,6 +80,24 @@ import androidx.fragment.app.Fragment;
 
 public class SecondFragment extends Fragment {
     private final String TAG = "SecondFragment";
+
+
+    class MathRouteTask extends TimerTask
+    {
+        MathRouteTask(ValhallaOfflineRoutingService routingService, Projection projection, String profile) {
+            super();
+            this.profile = profile;
+            this.projection = projection;
+            this.routingService = routingService;
+        }
+        ValhallaOfflineRoutingService routingService;
+        Projection projection;
+        String profile;
+        public void run()
+        {
+            matchRouteTest(this.routingService, this.projection, this.profile);
+        }
+    }
 
     public static SecondFragment newInstance() {
         return new SecondFragment();
@@ -346,6 +366,7 @@ public class SecondFragment extends Fragment {
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 testValhalla(hillshadeLayer, options);
+//                testMatchRoute(options);
 //                testVectoTileSearch(backlayer, options);
                 // Code here executes on main thread after user presses button
 //                if (options.getRenderProjectionMode() == RenderProjectionMode.RENDER_PROJECTION_MODE_SPHERICAL) {
@@ -355,10 +376,6 @@ public class SecondFragment extends Fragment {
 //                }
             }
         });
-
-//        testValhalla(hillshadeLayer, options);
-
-
     }
 
     public void testVectoTileSearch(final VectorTileLayer layer, final Options options) {
@@ -436,6 +453,42 @@ public class SecondFragment extends Fragment {
         });
         thread.start();
     }
+
+    public void matchRouteTest(final ValhallaOfflineRoutingService routingService, Projection projection, String profile) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    routingService.setProfile(profile);
+                    MapPosVector vector = new MapPosVector();
+                    vector.add(new MapPos(5.721619, 45.193549999999995));
+                    vector.add(new MapPos(5.721585, 45.193549));
+                    RouteMatchingRequest matchrequest = new RouteMatchingRequest(projection, vector, 1);
+                    matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
+                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.sac_scale\", \"edge.use\"], \"action\": \"include\" }"));
+                    RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
+                    largeLog(TAG,"matchresult "+ matchresult.getRawResult());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+    }
+
+        public void testMatchRoute(Options options) {
+            Projection projection = options.getBaseProjection();
+            ValhallaOfflineRoutingService routingService;
+            try {
+                routingService = new ValhallaOfflineRoutingService("/storage/1C05-0202/alpimaps_mbtiles/france.vtiles");
+                LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
+                Timer timer = new Timer();
+                TimerTask task = new MathRouteTask(routingService, options.getBaseProjection(), "pedestrian");
+                timer.schedule(task, 0, 500);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
     public void testValhalla(HillshadeRasterTileLayer layer, Options options) {
         Projection projection = options.getBaseProjection();
