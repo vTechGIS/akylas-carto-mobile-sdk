@@ -41,17 +41,20 @@ public class MapView extends GLSurfaceView implements GLSurfaceView.Renderer, Ma
     
     private static final int INVALID_POINTER_ID = -1;
 
+    private static Throwable libraryLoadingErrorCause;
+
+    private static AssetManager assetManager;
+    
     static {
         try {
             System.loadLibrary("carto_mobile_sdk");
             AndroidUtils.attachJVM(MapView.class);
-        } catch (Throwable t) {
-            android.util.Log.e("carto_mobile_sdk", "Failed to initialize Carto Mobile Maps SDK, native .so library failed to load?", t);
+        } catch (Throwable cause) {
+            android.util.Log.e("carto_mobile_sdk", "Failed to initialize Carto Mobile Maps SDK, native .so library failed to load?", cause);
+            libraryLoadingErrorCause = cause;
         }
     }
-    
-    private static AssetManager assetManager;
-    
+
     private BaseMapView baseMapView;
     
     private int pointer1Id = INVALID_POINTER_ID;
@@ -60,11 +63,17 @@ public class MapView extends GLSurfaceView implements GLSurfaceView.Renderer, Ma
     /**
      * Registers the SDK license. This class method and must be called before
      * creating any actual MapView instances.
+     * This method may throw RuntimeException if SDK initialization fails.
      * @param licenseKey The license string provided for this application.
      * @param context Application context for the license.
      * @return True if license is valid, false if not.
      */
     public static boolean registerLicense(final String licenseKey, Context context) {
+        // Check that native .so loading was successful
+        if (libraryLoadingErrorCause != null) {
+            throw new RuntimeException("Failed to load native library", libraryLoadingErrorCause);
+        }
+
         // Connect context info and assets manager to native part
         AndroidUtils.setContext(context);
         if (assetManager == null) {
@@ -128,7 +137,7 @@ public class MapView extends GLSurfaceView implements GLSurfaceView.Renderer, Ma
         setLongClickable(longClickable);
 
         if (!isInEditMode()) {
-            // Connect context info and assets manager to native part
+            // Connect context info and asset manager to native part
             AndroidUtils.setContext(context);
             if (assetManager == null) {
                 com.carto.utils.Log.warn("MapView: MapView created before MapView.registerLicense is called");
@@ -136,15 +145,13 @@ public class MapView extends GLSurfaceView implements GLSurfaceView.Renderer, Ma
                 assetManager = context.getApplicationContext().getAssets();
                 AssetUtils.setAssetManagerPointer(assetManager);
             }
-        
-            // Set asset manager pointer to allow native access to assets
-            assetManager = context.getApplicationContext().getAssets();
-            AssetUtils.setAssetManagerPointer(assetManager);
-        
+
+            // Initialize native BaseMapView instance
             baseMapView = new BaseMapView();
             baseMapView.getOptions().setDPI(getResources().getDisplayMetrics().densityDpi);
             baseMapView.setRedrawRequestListener(new MapRedrawRequestListener(this));
-        
+
+            // Set up relevant EGL state
             try {
                 Method m = GLSurfaceView.class.getMethod("setPreserveEGLContextOnPause", Boolean.TYPE);
                 m.invoke(this, true);
