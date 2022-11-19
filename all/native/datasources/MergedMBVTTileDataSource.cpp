@@ -4,6 +4,10 @@
 #include "components/Exceptions.h"
 #include "utils/Log.h"
 
+#ifdef _CARTO_OFFLINE_SUPPORT
+#include "datasources/MBTilesTileDataSource.h"
+#endif
+
 #include <algorithm>
 
 #include <stdext/zlib.h>
@@ -46,7 +50,21 @@ namespace carto {
         bounds.expandToContain(_dataSource2->getDataExtent());
         return bounds;
     }
-    
+
+
+    std::string MergedMBVTTileDataSource::getTileMask() const {
+#ifdef _CARTO_OFFLINE_SUPPORT
+        if (auto mbtilesDatasource = std::dynamic_pointer_cast<MBTilesTileDataSource>(_dataSource1.get())) {
+            return mbtilesDatasource->getTileMask();
+        }
+        if (auto mbtilesDatasource = std::dynamic_pointer_cast<MBTilesTileDataSource>(_dataSource2.get())) {
+            return mbtilesDatasource->getTileMask();
+        }
+#endif
+        return NULL;
+    }
+
+
     std::shared_ptr<TileData> MergedMBVTTileDataSource::loadTile(const MapTile& mapTile) {
         int zoom = mapTile.getZoom();
         std::shared_ptr<TileData> result1;
