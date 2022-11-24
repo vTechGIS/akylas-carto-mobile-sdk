@@ -24,11 +24,13 @@ import com.akylas.cartotest.R;
 import com.carto.components.Options;
 import com.carto.components.PanningMode;
 import com.carto.components.RenderProjectionMode;
+import com.carto.core.MapBounds;
 import com.carto.core.MapPos;
 import com.carto.core.MapPosVector;
 import com.carto.core.MapPosVectorVector;
 import com.carto.core.MapRange;
 import com.carto.core.MapVec;
+import com.carto.core.ScreenBounds;
 import com.carto.core.StringVector;
 import com.carto.core.Variant;
 import com.carto.datasources.HTTPTileDataSource;
@@ -57,7 +59,7 @@ import com.carto.routing.RouteMatchingRequest;
 import com.carto.routing.RouteMatchingResult;
 import com.carto.routing.RoutingRequest;
 import com.carto.routing.RoutingResult;
-import com.carto.routing.ValhallaOfflineRoutingService;
+import com.carto.routing.MultiValhallaOfflineRoutingService;
 import com.carto.search.SearchRequest;
 import com.carto.search.VectorTileSearchService;
 import com.carto.styles.CompiledStyleSet;
@@ -86,13 +88,13 @@ public class SecondFragment extends Fragment {
 
     class MathRouteTask extends TimerTask
     {
-        MathRouteTask(ValhallaOfflineRoutingService routingService, Projection projection, String profile) {
+        MathRouteTask(MultiValhallaOfflineRoutingService routingService, Projection projection, String profile) {
             super();
             this.profile = profile;
             this.projection = projection;
             this.routingService = routingService;
         }
-        ValhallaOfflineRoutingService routingService;
+        MultiValhallaOfflineRoutingService routingService;
         Projection projection;
         String profile;
         public void run()
@@ -143,6 +145,7 @@ public class SecondFragment extends Fragment {
                 " " : "");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSIONS_CODE_WRITE_STORAGE) {
@@ -377,9 +380,9 @@ public class SecondFragment extends Fragment {
         String dataPath = Paths.get(externalPath.getAbsolutePath(), "../../../../alpimaps_mbtiles").normalize().toString();
 
 
-//        addMap(dataPath);
+        addMap(dataPath);
 //        addRoutes(dataPath);
-        addHillshadeLayer(view, dataPath);
+//        addHillshadeLayer(view, dataPath);
 
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
@@ -409,7 +412,7 @@ public class SecondFragment extends Fragment {
         final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                testValhalla(dataPath, hillshadeLayer, options);
+                testValhalla(dataPath, options);
 //                testMatchRoute(options);
 //                testVectoTileSearch(backlayer, options);
                 // Code here executes on main thread after user presses button
@@ -467,7 +470,7 @@ public class SecondFragment extends Fragment {
     }
 
 
-    public void runValhallaInThread(final ValhallaOfflineRoutingService routingService, final RoutingRequest request, String profile, final LocalVectorDataSource localSource) {
+    public void runValhallaInThread(final MultiValhallaOfflineRoutingService routingService, final RoutingRequest request, String profile, final LocalVectorDataSource localSource) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -475,7 +478,7 @@ public class SecondFragment extends Fragment {
                     RoutingResult result = routingService.calculateRoute(request);
                     Log.d(TAG,"rawresult "+ result.getRawResult());
 
-                    MapPosVector pointsWithAltitude = new MapPosVector();
+//                    MapPosVector pointsWithAltitude = new MapPosVector();
                     if (result != null) {
                         MapPosVector points = result.getPoints();
                         Log.d(TAG, "showing route " + points.size());
@@ -483,14 +486,17 @@ public class SecondFragment extends Fragment {
                         builder.setWidth(4);
                         builder.setColor(new Color((short) 255, (short) 0, (short) 0, (short) 255));
                         Line line = new Line(points, builder.buildStyle());
+
                         localSource.add(line);
+                        MapBounds bounds = line.getGeometry().getBounds();
+                        mapView.moveToFitBounds(bounds, new ScreenBounds(), false, 0);
                     }
-                    RouteMatchingRequest matchrequest = new RouteMatchingRequest(request.getProjection(), result.getPoints(), 1);
-                    matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
-                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.sac_scale\", \"edge.use\", \"edge.length\"], \"action\": \"include\" }"));
-                    RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
-                    largeLog(TAG,"matchresult "+ matchresult.getRawResult());
-                } catch (IOException e) {
+//                    RouteMatchingRequest matchrequest = new RouteMatchingRequest(request.getProjection(), result.getPoints(), 1);
+//                    matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
+//                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.sac_scale\", \"edge.use\", \"edge.length\"], \"action\": \"include\" }"));
+//                    RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
+//                    largeLog(TAG,"matchresult "+ matchresult.getRawResult());
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -498,7 +504,7 @@ public class SecondFragment extends Fragment {
         thread.start();
     }
 
-    public void matchRouteTest(final ValhallaOfflineRoutingService routingService, Projection projection, String profile) {
+    public void matchRouteTest(final MultiValhallaOfflineRoutingService routingService, Projection projection, String profile) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -522,42 +528,35 @@ public class SecondFragment extends Fragment {
 
         public void testMatchRoute(String dataPath, Options options) {
             Projection projection = options.getBaseProjection();
-            ValhallaOfflineRoutingService routingService;
-            try {
-                routingService = new ValhallaOfflineRoutingService(dataPath+"/france.vtiles");
-                LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
-                Timer timer = new Timer();
-                TimerTask task = new MathRouteTask(routingService, options.getBaseProjection(), "pedestrian");
-                timer.schedule(task, 0, 500);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
+            routingService.add(dataPath+"/france.vtiles");
+            LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
+            Timer timer = new Timer();
+            TimerTask task = new MathRouteTask(routingService, options.getBaseProjection(), "pedestrian");
+            timer.schedule(task, 0, 500);
         }
 
-    public void testValhalla(String dataPath, HillshadeRasterTileLayer layer, Options options) {
+    public void testValhalla(String dataPath, Options options) {
         Projection projection = options.getBaseProjection();
-        ValhallaOfflineRoutingService routingService;
-        try {
-            routingService = new ValhallaOfflineRoutingService(dataPath+"/france.vtiles");
-            LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
-            VectorLayer vectorLayer = new VectorLayer(localSource);
-            mapView.getLayers().add(vectorLayer);
-            MapPosVector vector = new MapPosVector();
-            vector.add(new MapPos(5.720390081405645, 45.18661183942357));
-            vector.add(new MapPos(5.733468532562251, 45.21845651921567));
-            RoutingRequest request = new RoutingRequest(projection, vector);
-            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_ferry\":0,\"shortest\":false,\"use_hills\":1,\"max_hiking_difficulty\":6,\"step_penalty\":10,\"driveway_factor\":200,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4,\"sidewalk_factor\":10}}"));
-            request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
-            runValhallaInThread(routingService, request, "pedestrian", localSource);
+        MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
+//        routingService.add(dataPath+"/italy/italy.vtiles");
+        routingService.add(dataPath+"/france/france.vtiles");
+        LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
+        VectorLayer vectorLayer = new VectorLayer(localSource);
+        mapView.getLayers().add(vectorLayer);
+        MapPosVector vector = new MapPosVector();
+        vector.add(new MapPos(7.6601, 45.0755));
+        vector.add(new MapPos(7.6980, 44.9994));
+        RoutingRequest request = new RoutingRequest(projection, vector);
+        request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_ferry\":0,\"shortest\":false,\"use_hills\":1,\"max_hiking_difficulty\":6,\"step_penalty\":10,\"driveway_factor\":200,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4,\"sidewalk_factor\":10}}"));
+        request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
+        runValhallaInThread(routingService, request, "pedestrian", localSource);
 //            request = new RoutingRequest(projection, vector);
 //            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":1,\"use_ferry\":0,\"use_hills\":0,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
 //            runValhallaInThread(routingService, request, "pedestrian", localSource);
 //            request = new RoutingRequest(projection, vector);
 //            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":true,\"step_penalty\":5,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
 //            runValhallaInThread(routingService, request, "pedestrian", localSource);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
     public static void largeLog(String tag, String content) {
         if (content.length() > 4000) {
