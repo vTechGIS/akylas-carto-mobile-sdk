@@ -545,8 +545,8 @@ public class SecondFragment extends Fragment {
         VectorLayer vectorLayer = new VectorLayer(localSource);
         mapView.getLayers().add(vectorLayer);
         MapPosVector vector = new MapPosVector();
-        vector.add(new MapPos(7.6601, 45.0755));
-        vector.add(new MapPos(7.6980, 44.9994));
+        vector.add(new MapPos(5.7233, 45.1924));
+        vector.add(new MapPos(5.7247, 45.1992));
         RoutingRequest request = new RoutingRequest(projection, vector);
         request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_ferry\":0,\"shortest\":false,\"use_hills\":1,\"max_hiking_difficulty\":6,\"step_penalty\":10,\"driveway_factor\":200,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4,\"sidewalk_factor\":10}}"));
         request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
@@ -628,8 +628,8 @@ public class SecondFragment extends Fragment {
         options.setPanningMode(PanningMode.PANNING_MODE_STICKY);
         options.setBaseProjection(projection);
 //        mapView.getLayers().add(backlayer);
-        mapView.setFocusPos(new MapPos(12.7508, 42.8947), 0);
-        mapView.setZoom(8.5f, 0);
+        mapView.setFocusPos(new MapPos(5.7279, 45.1949), 0);
+        mapView.setZoom(13f, 0);
         com.carto.utils.Log.setShowInfo(true);
         com.carto.utils.Log.setShowDebug(true);
         com.carto.utils.Log.setShowWarn(true);
