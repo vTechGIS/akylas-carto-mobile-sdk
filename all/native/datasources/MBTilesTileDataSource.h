@@ -90,6 +90,8 @@ namespace carto {
 
         virtual MapBounds getDataExtent() const;
 
+        virtual std::string getTileMask() const;
+
         virtual std::shared_ptr<TileData> loadTile(const MapTile& mapTile);
 
     private:
@@ -103,6 +105,7 @@ namespace carto {
         mutable std::optional<int> _cachedMinZoom;
         mutable std::optional<int> _cachedMaxZoom;
         mutable std::optional<MapBounds> _cachedDataExtent;
+        mutable std::optional<std::string> _cachedTileMask;
         mutable std::recursive_mutex _mutex;
     };
     

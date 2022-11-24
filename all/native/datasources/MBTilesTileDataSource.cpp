@@ -127,6 +127,21 @@ namespace carto {
         return *_cachedDataExtent;
     }
 
+    std::string MBTilesTileDataSource::getTileMask() const {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+
+        // If value is not cached, load from database
+        if (!_cachedTileMask) {
+            if (!_database) {
+                Log::Error("MBTilesTileDataSource::getTileMask: Not connected to the database");
+                return NULL;
+            }
+
+            _cachedTileMask = getMetaData("tilemask");
+        }
+        return *_cachedTileMask;
+    }
+
     std::shared_ptr<TileData> MBTilesTileDataSource::loadTile(const MapTile& mapTile) {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
         Log::Infof("MBTilesTileDataSource::loadTile: Loading %s", mapTile.toString().c_str());

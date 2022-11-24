@@ -11,6 +11,7 @@
 #endif
 
 #include <boost/lexical_cast.hpp>
+#include "datasources/MergedMBVTTileDataSource.h"
 
 #include <memory>
 
@@ -196,9 +197,12 @@ namespace carto {
             std::shared_ptr<PackageTileMask> tileMask;
             std::string tileMaskStr = tileMaskArg;
             if (tileMaskStr.empty()) {
+                if (auto mbtilesDatasource = std::dynamic_pointer_cast<MergedMBVTTileDataSource>(dataSource)) {
+                    tileMaskStr = mbtilesDatasource->getTileMask();
+                }
 #ifdef _CARTO_OFFLINE_SUPPORT
                 if (auto mbtilesDatasource = std::dynamic_pointer_cast<MBTilesTileDataSource>(dataSource)) {
-                    tileMaskStr = mbtilesDatasource->getMetaData("tilemask");
+                    tileMaskStr = mbtilesDatasource->getTileMask();
                 }
  #endif
             }
