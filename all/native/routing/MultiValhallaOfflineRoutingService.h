@@ -54,7 +54,6 @@ namespace carto {
 
         virtual std::shared_ptr<RoutingResult> calculateRoute(const std::shared_ptr<RoutingRequest>& request) const;
 
-
         /**
          * Adds a new database.
          * @param database The database file patht to be added.
