@@ -1,0 +1,81 @@
+/*
+ * Copyright (c) 2016 CartoDB. All rights reserved.
+ * Copying and using this code is allowed only according
+ * to license terms, as given in https://cartodb.com/terms/
+ */
+
+#ifndef _CARTO_MULTIOSMOFFILINEGEOCODINGSERVICE_H_
+#define _CARTO_MULTIOSMOFFILINEGEOCODINGSERVICE_H_
+
+#if defined(_CARTO_GEOCODING_SUPPORT) && defined(_CARTO_OFFLINE_SUPPORT)
+
+#include "geocoding/GeocodingService.h"
+#include "packagemanager/handlers/GeocodingPackageHandler.h"
+
+namespace sqlite3pp {
+    class database;
+}
+
+namespace carto {
+    namespace geocoding {
+        class Geocoder;
+    }
+
+    /**
+     * A geocoding service that uses custom geocoding database files.
+     * Note: this class is experimental and may change or even be removed in future SDK versions.
+     */
+    class MultiOSMOfflineGeocodingService : public GeocodingService {
+    public:
+        /**
+         * Constructs a new instance of the MultiOSMOfflineGeocodingService.
+         */
+        explicit MultiOSMOfflineGeocodingService();
+        virtual ~MultiOSMOfflineGeocodingService();
+
+        virtual bool isAutocomplete() const;
+        virtual void setAutocomplete(bool autocomplete);
+
+        virtual std::string getLanguage() const;
+        virtual void setLanguage(const std::string& lang);
+
+        virtual int getMaxResults() const;
+        virtual void setMaxResults(int maxResults);
+
+        virtual std::vector<std::shared_ptr<GeocodingResult> > calculateAddresses(const std::shared_ptr<GeocodingRequest>& request) const;
+
+        /**
+         * Adds a new database.
+         * @param database The database file patht to be added.
+         */
+        void add(const std::string&  database);
+
+        /**
+         * Removes a database.
+         * @param database The database file patht to be removed.
+         * @return True if the  database was removed. False otherwise ( database was not found).
+         */
+        bool remove(const std::string&  database);
+        
+    protected:
+        bool _autocomplete;
+        std::string _language;
+        int _maxResults;
+
+        mutable std::map<std::string, std::shared_ptr<sqlite3pp::database> > _cachedPackageDatabaseMap;
+        mutable std::shared_ptr<geocoding::Geocoder> _cachedGeocoder;
+
+        mutable std::mutex _mutex;
+
+    private:
+        void accessLocalPackages(const std::function<void(const std::map<std::string, std::shared_ptr<GeocodingPackageHandler> >&)>& callback) const;
+        mutable std::map<std::string, std::shared_ptr<GeocodingPackageHandler> > _packageHandlerCache;
+        std::vector<std::string > _localDbs;
+        mutable std::mutex _packageFileMutex; // guards all package file accesses
+    };
+    
+}
+
+#endif
+
+#endif
