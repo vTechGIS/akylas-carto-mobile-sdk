@@ -332,14 +332,23 @@ namespace carto {
             }
             std::shared_ptr<Geometry> geometry = std::visit(MVTGeometryConverter(tileBounds), *mvtGeometry);
 
+            Variant propertiesVariant;
             std::map<std::string, Variant> featureData;
             if (std::shared_ptr<const mvt::FeatureData> mvtFeatureData = mvtFeature.getFeatureData()) {
-                for (const std::pair<std::string, mvt::Value>& var : mvtFeatureData->getVariables()) {
-                    featureData[var.first] = std::visit(MVTValueConverter(), var.second);
+                mvt::Value value;
+                if (mvtFeatureData->getVariable("$$properties$$", value)) {
+                    propertiesVariant = Variant::FromString(std::get<std::string>( value));
+//                    propertiesVariant = Variant(std::visit(MVTValueConverter(), value));
+                } else {
+                    for (const std::pair<std::string, mvt::Value>& var : mvtFeatureData->getVariables()) {
+                        featureData[var.first] = std::visit(MVTValueConverter(), var.second);
+                    }
+                    propertiesVariant = Variant(featureData);
                 }
+
             }
 
-            auto feature = std::make_shared<VectorTileFeature>(mvtFeature.getId(), MapTile(tile.x, tile.y, tile.zoom, 0), mvtLayerName, geometry, Variant(featureData));
+            auto feature = std::make_shared<VectorTileFeature>(mvtFeature.getId(), MapTile(tile.x, tile.y, tile.zoom, 0), mvtLayerName, geometry, propertiesVariant);
             return feature;
         }
         catch (const std::exception& ex) {
