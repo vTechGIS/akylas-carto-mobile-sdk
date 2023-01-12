@@ -77,6 +77,12 @@ namespace carto {
         mutable std::optional<int> _maxOpenedPackages;
 
         mutable std::vector<std::pair<std::shared_ptr<PackageTileMask>, std::shared_ptr<TileDataSource> > > _dataSources;
+
+        /**
+         * _cachedOpenDataSources is used to query the most recently used datasource first
+         * that way if you are in a region corresponding to a mbtiles you'll mostly will
+         * always only query that datasource thus it is faster
+         */
         mutable std::vector<std::pair<std::shared_ptr<PackageTileMask>, std::shared_ptr<TileDataSource> > > _cachedOpenDataSources;
 
         mutable std::mutex _mutex;
