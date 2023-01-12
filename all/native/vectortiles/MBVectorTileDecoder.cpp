@@ -338,7 +338,6 @@ namespace carto {
                 mvt::Value value;
                 if (mvtFeatureData->getVariable("$$properties$$", value)) {
                     propertiesVariant = Variant::FromString(std::get<std::string>( value));
-//                    propertiesVariant = Variant(std::visit(MVTValueConverter(), value));
                 } else {
                     for (const std::pair<std::string, mvt::Value>& var : mvtFeatureData->getVariables()) {
                         featureData[var.first] = std::visit(MVTValueConverter(), var.second);
