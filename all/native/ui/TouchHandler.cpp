@@ -530,7 +530,7 @@ namespace carto {
                     _mapRenderer->calculateCameraEvent(cameraZoomTargetEvent, 0, true);
                 }
     
-                if (rotate && cglib::norm(prevVec) > 0 && cglib::norm(currentVec) > 0) {
+                if (rotate && _options->isRotationGestures() && cglib::norm(prevVec) > 0 && cglib::norm(currentVec) > 0) {
                     cglib::vec3<double> axis = cglib::vector_product(cglib::unit(currentVec), cglib::unit(prevVec));
                     float angle = std::asin(std::max(-1.0f, std::min(1.0f, static_cast<float>(cglib::length(axis)))));
                     float dir = cglib::dot_product(axis, projectionSurface->calculateNormal(pivotPos)) > 0 ? 1 : -1;

@@ -368,6 +368,22 @@ namespace carto {
         }
         notifyOptionChanged("ZoomGestures");
     }
+
+    bool Options::isRotationGestures() const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _rotationGestures;
+    }
+    
+    void Options::setRotationGestures(bool enabled) {
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            if (_rotationGestures == enabled) {
+                return;
+            }
+            _rotationGestures = enabled;
+        }
+        notifyOptionChanged("RotationGestures");
+    }
         
     int Options::getEnvelopeThreadPoolSize() const {
         std::lock_guard<std::mutex> lock(_mutex);

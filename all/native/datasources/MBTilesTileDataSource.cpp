@@ -163,7 +163,6 @@ namespace carto {
             query.bind(":x", mapTile.getX());
             query.bind(":y", _scheme == MBTilesScheme::MBTILES_SCHEME_XYZ ? mapTile.getY() : (1 << (mapTile.getZoom())) - 1 - mapTile.getY());
 
-            Log::Debug("MBTilesTileDataSource::starting sql query");
             auto it = query.begin();
             if (it == query.end()) {
                 std::shared_ptr<TileData> tileData = std::make_shared<TileData>(std::shared_ptr<BinaryData>());
