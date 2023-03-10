@@ -38,6 +38,7 @@ namespace carto {
         _restrictedPanning(false),
         _tiltGestureReversed(false),
         _zoomGestures(false),
+        _rotationGestures(true),
         _clearColor(DEFAULT_CLEAR_COLOR),
         _skyColor(DEFAULT_SKY_COLOR),
         _skyBitmapColor(0, 0, 0, 0),
