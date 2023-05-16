@@ -108,6 +108,7 @@ static const char valhalla_default_config[] = R"({
       "apply_country_overrides": true,
       "infer_internal_intersections": true,
       "infer_turn_channels": true,
+      "scan_tar": false,
       "use_admin_db": true,
       "use_direction_on_ways": false,
       "use_rest_area": false,
@@ -118,6 +119,7 @@ static const char valhalla_default_config[] = R"({
     "id_table_size": 1300000000,
     "import_bike_share_stations": false,
     "include_bicycle": true,
+    "include_construction": false,
     "include_driveways": true,
     "include_driving": true,
     "include_pedestrian": true,
@@ -127,7 +129,7 @@ static const char valhalla_default_config[] = R"({
       "type": ""
     },
     "lru_mem_cache_hard_control": false,
-    "max_cache_size": 10000000,
+    "max_cache_size": 1000000000,
     "max_concurrent_reader_users": 1,
     "reclassify_links": true,
     "shortcuts": true,
@@ -136,6 +138,7 @@ static const char valhalla_default_config[] = R"({
     "timezone": "",
     "traffic_extract": "",
     "transit_dir": "",
+    "transit_feeds_dir": "",
     "use_lru_mem_cache": false,
     "use_simple_mem_cache": false
   },
@@ -144,6 +147,10 @@ static const char valhalla_default_config[] = R"({
       "color": true,
       "file_name": "",
       "type": ""
+    },
+    "markup_formatter": {
+      "markup_enabled": false,
+      "phoneme_format": "<TEXTUAL_STRING> (<span class=<QUOTES>phoneme<QUOTES>>/<VERBAL_STRING>/</span>) "
     },
     "service": {
       "proxy": "ipc:///tmp/odin"
@@ -154,41 +161,29 @@ static const char valhalla_default_config[] = R"({
       "max_distance": 5000000.0,
       "max_locations": 20,
       "max_matrix_distance": 400000.0,
-      "max_matrix_locations": 50
-    },
-    "auto_shorter": {
-      "max_distance": 5000000.0,
-      "max_locations": 20,
-      "max_matrix_distance": 400000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "bicycle": {
       "max_distance": 500000.0,
       "max_locations": 50,
       "max_matrix_distance": 200000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "bikeshare": {
       "max_distance": 500000.0,
       "max_locations": 50,
       "max_matrix_distance": 200000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "bus": {
       "max_distance": 5000000.0,
       "max_locations": 50,
       "max_matrix_distance": 400000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "centroid": {
       "max_distance": 200000.0,
       "max_locations": 5
-    },
-    "hov": {
-      "max_distance": 5000000.0,
-      "max_locations": 20,
-      "max_matrix_distance": 400000.0,
-      "max_matrix_locations": 50
     },
     "isochrone": {
       "max_contours": 4,
@@ -207,25 +202,25 @@ static const char valhalla_default_config[] = R"({
       "max_distance": 500000.0,
       "max_locations": 50,
       "max_matrix_distance": 200000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "motorcycle": {
       "max_distance": 500000.0,
       "max_locations": 50,
       "max_matrix_distance": 200000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "multimodal": {
       "max_distance": 500000.0,
       "max_locations": 50,
       "max_matrix_distance": 0.0,
-      "max_matrix_locations": 0
+      "max_matrix_location_pairs": 0
     },
     "pedestrian": {
       "max_distance": 250000.0,
       "max_locations": 50,
       "max_matrix_distance": 200000.0,
-      "max_matrix_locations": 50,
+      "max_matrix_location_pairs": 2500,
       "max_transit_walking_distance": 10000,
       "min_transit_walking_distance": 1
     },
@@ -240,11 +235,11 @@ static const char valhalla_default_config[] = R"({
       "max_distance": 5000000.0,
       "max_locations": 20,
       "max_matrix_distance": 400000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "trace": {
-      "max_best_paths": 4,
-      "max_best_paths_shape": 100,
+      "max_alternates": 3,
+      "max_alternates_shape": 100,
       "max_distance": 200000.0,
       "max_gps_accuracy": 100.0,
       "max_search_radius": 100.0,
@@ -254,16 +249,17 @@ static const char valhalla_default_config[] = R"({
       "max_distance": 500000.0,
       "max_locations": 50,
       "max_matrix_distance": 200000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     },
     "truck": {
       "max_distance": 5000000.0,
       "max_locations": 20,
       "max_matrix_distance": 400000.0,
-      "max_matrix_locations": 50
+      "max_matrix_location_pairs": 2500
     }
   },
   "thor": {
+    "clear_reserved_memory": false,
     "extended_search": false,
     "logging": {
       "color": true,
