@@ -205,6 +205,7 @@ namespace carto {
             lokiworker.trace(api);
             valhalla::thor::thor_worker_t thorworker(configTree, reader);
             resultString = thorworker.trace_attributes(api);
+            lokiworker.cleanup();
         }
         catch (const std::exception& ex) {
             throw GenericException("Exception while matching route", ex.what());
@@ -231,6 +232,9 @@ namespace carto {
             valhalla::odin::odin_worker_t odinworker(configTree);
             odinworker.narrate(api);
             resultString = valhalla::tyr::serializeDirections(api);
+            lokiworker.cleanup();
+            thorworker.cleanup();
+            odinworker.cleanup();
         }
         catch (const std::exception& ex) {
             throw GenericException("Exception while calculating route", ex.what());
@@ -349,18 +353,21 @@ namespace carto {
             locations.emplace_back(location);
         }
 
-        picojson::value customParams = request->getCustomParameters().toPicoJSON();
 
         picojson::object json;
-        if (customParams.is<picojson::object>()) {
-            json = customParams.get<picojson::object>();
-        }
         json["shape"] = picojson::value(locations);
         json["shape_match"] = picojson::value("map_snap");
         json["costing"] = picojson::value(profile);
         json["units"] = picojson::value("kilometers");
         if (request->getAccuracy() > 0) {
             json["gps_accuracy"] = picojson::value(request->getAccuracy());
+        }
+        picojson::value customParams = request->getCustomParameters().toPicoJSON();
+        if (customParams.is<picojson::object>()) {
+            const picojson::object& customParamsObj = customParams.get<picojson::value::object>();
+            for (auto it = customParamsObj.begin(); it != customParamsObj.end(); it++) {
+                    json[it->first] = it->second;
+            }
         }
         return picojson::value(json).serialize();
     }
@@ -400,47 +407,44 @@ namespace carto {
         if (!err.empty()) {
             throw GenericException("Failed to parse result", err);
         }
-        if (!result.get("matched_points").is<picojson::array>()) {
-            throw GenericException("No matched_points info in the result");
-        }
-        if (!result.get("edges").is<picojson::array>()) {
-            throw GenericException("No edges info in the result");
-        }
 
         std::vector<RouteMatchingPoint> matchingPoints;
         std::vector<RouteMatchingEdge> matchingEdges;
         try {
-            for (const picojson::value& matchedPointInfo : result.get("matched_points").get<picojson::array>()) {
-                RouteMatchingPointType::RouteMatchingPointType type = RouteMatchingPointType::ROUTE_MATCHING_POINT_UNMATCHED;
-                if (matchedPointInfo.get("type").get<std::string>() == "matched") {
-                    type = RouteMatchingPointType::ROUTE_MATCHING_POINT_MATCHED;
-                } else if (matchedPointInfo.get("type").get<std::string>() == "interpolated") {
-                    type = RouteMatchingPointType::ROUTE_MATCHING_POINT_INTERPOLATED;
-                }
-
-                double lat = matchedPointInfo.get("lat").get<double>();
-                double lon = matchedPointInfo.get("lon").get<double>();
-                int edgeIndex = static_cast<int>(matchedPointInfo.get("edge_index").get<std::int64_t>());
-
-                matchingPoints.emplace_back(proj->fromLatLong(lat, lon), type, edgeIndex);
-            }
-
-            for (const picojson::value& edgeInfo : result.get("edges").get<picojson::array>()) {
-                std::map<std::string, Variant> attributes;
-                if (edgeInfo.is<picojson::object>()) {
-                    const picojson::object& edgeInfoObject = edgeInfo.get<picojson::object>();
-                    for (auto it = edgeInfoObject.begin(); it != edgeInfoObject.end(); it++) {
-                        attributes[it->first] = Variant::FromPicoJSON(it->second);
+            if (result.get("matched_points").is<picojson::array>()) {
+                for (const picojson::value& matchedPointInfo : result.get("matched_points").get<picojson::array>()) {
+                    RouteMatchingPointType::RouteMatchingPointType type = RouteMatchingPointType::ROUTE_MATCHING_POINT_UNMATCHED;
+                    if (matchedPointInfo.get("type").get<std::string>() == "matched") {
+                        type = RouteMatchingPointType::ROUTE_MATCHING_POINT_MATCHED;
+                    } else if (matchedPointInfo.get("type").get<std::string>() == "interpolated") {
+                        type = RouteMatchingPointType::ROUTE_MATCHING_POINT_INTERPOLATED;
                     }
-                }
 
-                matchingEdges.emplace_back(attributes);
+                    double lat = matchedPointInfo.get("lat").get<double>();
+                    double lon = matchedPointInfo.get("lon").get<double>();
+                    int edgeIndex = static_cast<int>(matchedPointInfo.get("edge_index").get<std::int64_t>());
+
+                    matchingPoints.emplace_back(proj->fromLatLong(lat, lon), type, edgeIndex);
+                }
+            }
+            if (result.get("edges").is<picojson::array>()) {
+                for (const picojson::value &edgeInfo: result.get("edges").get<picojson::array>()) {
+                    std::map<std::string, Variant> attributes;
+                    if (edgeInfo.is<picojson::object>()) {
+                        const picojson::object &edgeInfoObject = edgeInfo.get<picojson::object>();
+                        for (auto it = edgeInfoObject.begin(); it != edgeInfoObject.end(); it++) {
+                            attributes[it->first] = Variant::FromPicoJSON(it->second);
+                        }
+                    }
+
+                    matchingEdges.emplace_back(attributes);
+                }
             }
         }
         catch (const std::exception& ex) {
             throw GenericException("Exception while translating route", ex.what());
         }
-        return std::make_shared<RouteMatchingResult>(proj, std::move(matchingPoints), std::move(matchingEdges));
+        return std::make_shared<RouteMatchingResult>(proj, std::move(matchingPoints), std::move(matchingEdges), resultString);
     }
 
     std::shared_ptr<RoutingResult> ValhallaRoutingProxy::ParseRoutingResult(const std::shared_ptr<Projection>& proj, const std::string& resultString) {
@@ -453,10 +457,18 @@ namespace carto {
             throw GenericException("No trip info in the result");
         }
 
-        RoutingResultBuilder resultBuilder(proj);
+        RoutingResultBuilder resultBuilder(proj, resultString);
         try {
+            std::size_t shapeIndex= 0;
             for (const picojson::value& legInfo : result.get("trip").get("legs").get<picojson::array>()) {
                 std::vector<valhalla::midgard::PointLL> shape = valhalla::midgard::decode<std::vector<valhalla::midgard::PointLL> >(legInfo.get("shape").get<std::string>());
+                std::vector<MapPos> points;
+                points.reserve(shape.size());
+                for (std::size_t i = 0; i < shape.size(); i++) {
+                    const valhalla::midgard::PointLL& point = shape.at(i);
+                    points.push_back(proj->fromLatLong(point.second, point.first));
+                }
+                resultBuilder.addPoints(points);
 
                 const picojson::array& maneuvers = legInfo.get("maneuvers").get<picojson::array>();
                 for (std::size_t i = 0; i < maneuvers.size(); i++) {
@@ -464,13 +476,6 @@ namespace carto {
 
                     std::size_t maneuverIndex0 = static_cast<std::size_t>(maneuver.get("begin_shape_index").get<std::int64_t>());
                     std::size_t maneuverIndex1 = static_cast<std::size_t>(maneuver.get("end_shape_index").get<std::int64_t>());
-                    std::vector<MapPos> points;
-                    points.reserve(maneuverIndex1 >= maneuverIndex0 ? maneuverIndex1 - maneuverIndex0 + 1 : 0);
-                    for (std::size_t j = maneuverIndex0; j <= maneuverIndex1; j++) {
-                        const valhalla::midgard::PointLL& point = shape.at(j);
-                        points.push_back(proj->fromLatLong(point.second, point.first));
-                    }
-                    int pointIndex = resultBuilder.addPoints(points);
 
                     RoutingAction::RoutingAction action = RoutingAction::ROUTING_ACTION_NO_TURN;
                     TranslateManeuverType(static_cast<int>(maneuver.get("type").get<std::int64_t>()), action);
@@ -489,12 +494,16 @@ namespace carto {
                     double time = maneuver.get("time").get<double>();
                     double distance = maneuver.get("length").get<double>() * 1000.0;
 
+                    std::size_t shapeBeginIndex = maneuver.get("begin_shape_index").get<std::int64_t>();
+                    int pointIndex = shapeIndex + shapeBeginIndex;
+
                     RoutingInstructionBuilder& instrBuilder = resultBuilder.addInstruction(action, pointIndex);
                     instrBuilder.setStreetName(streetName);
                     instrBuilder.setTime(time);
                     instrBuilder.setDistance(distance);
                     instrBuilder.setInstruction(instruction);
                 }
+                shapeIndex += maneuvers[maneuvers.size()-1].get("begin_shape_index").get<std::int64_t>();
             }
         }
         catch (const std::exception& ex) {

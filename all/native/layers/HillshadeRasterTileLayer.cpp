@@ -106,7 +106,7 @@ namespace carto
 
     void HillshadeRasterTileLayer::setContrast(float contrast) {
         _contrast.store(std::min(1.0f, std::max(0.0f, contrast)));
-        tilesChanged(false);
+        updateTiles(false);
     }
 
     float HillshadeRasterTileLayer::getHeightScale() const {
@@ -115,7 +115,7 @@ namespace carto
 
     void HillshadeRasterTileLayer::setHeightScale(float heightScale) {
         _heightScale.store(heightScale);
-        tilesChanged(false);
+        updateTiles(false);
     }
 
     Color HillshadeRasterTileLayer::getShadowColor() const {
@@ -183,7 +183,7 @@ namespace carto
     void HillshadeRasterTileLayer::setExagerateHeightScaleEnabled(bool enabled)
     {
         _exagerateHeightScaleEnabled.store(enabled);
-        tilesChanged(false);
+        updateTiles(false);
     }
 
     bool HillshadeRasterTileLayer::onDrawFrame(float deltaSeconds, BillboardSorter &billboardSorter, const ViewState &viewState)
@@ -219,8 +219,7 @@ namespace carto
         return false;
     }
     
-    std::shared_ptr<vt::Tile> HillshadeRasterTileLayer::createVectorTile(const MapTile &tile, const std::shared_ptr<Bitmap> &bitmap) const
-    {
+    std::shared_ptr<vt::Tile> HillshadeRasterTileLayer::createVectorTile(const MapTile& subTile, const MapTile& tile, const std::shared_ptr<Bitmap>& bitmap, const std::shared_ptr<vt::TileTransformer>& tileTransformer) const {
         std::uint8_t alpha = 0;
         std::array<float, 4> scales;
         {
@@ -228,7 +227,7 @@ namespace carto
             alpha = static_cast<std::uint8_t>(getContrast() * 255.0f);
             float scale = 0.1f * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom()) / 40075016.6855785);
             if (_exagerateHeightScaleEnabled) {
-        float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
+                 float exaggeration = tile.getZoom() < 2 ? 0.2f : tile.getZoom() < 5 ? 0.3f : 0.35f;
                  scale = 16 * getHeightScale() * static_cast<float>(bitmap->getHeight() * std::pow(2.0, tile.getZoom() * (1 - exaggeration)) / 40075016.6855785);
 
             }
@@ -237,22 +236,22 @@ namespace carto
         
         // Build normal map from height map
         vt::TileId vtTileId(tile.getZoom(), tile.getX(), tile.getY());
+        vt::TileId vtSubTileId(subTile.getZoom(), subTile.getX(), subTile.getY());
         std::shared_ptr<Bitmap> rgbaBitmap = bitmap->getRGBABitmap();
         auto rgbaBitmapDataPtr = reinterpret_cast<const std::uint32_t*>(rgbaBitmap->getPixelData().data());
         std::vector<std::uint32_t> rgbaBitmapData(rgbaBitmapDataPtr, rgbaBitmapDataPtr + rgbaBitmap->getWidth() * rgbaBitmap->getHeight());
         auto vtBitmap = std::make_shared<vt::Bitmap>(rgbaBitmap->getWidth(), rgbaBitmap->getHeight(), std::move(rgbaBitmapData));
         vt::NormalMapBuilder normalMapBuilder(scales, alpha);
-        std::shared_ptr<const vt::Bitmap> normalMap = normalMapBuilder.buildNormalMapFromHeightMap(vtTileId, vtBitmap);
+        std::shared_ptr<const vt::Bitmap> normalMap = normalMapBuilder.buildNormalMapFromHeightMap(vtTileId, vtTileId, vtBitmap);
         auto normalMapDataPtr = reinterpret_cast<const std::uint8_t*>(normalMap->data.data());
         std::vector<std::uint8_t> normalMapData(normalMapDataPtr, normalMapDataPtr + normalMap->data.size() * sizeof(std::uint32_t));
         auto tileBitmap = std::make_shared<vt::TileBitmap>(vt::TileBitmap::Type::NORMALMAP, vt::TileBitmap::Format::RGBA, normalMap->width, normalMap->height, std::move(normalMapData));
         
         // Build vector tile from created normal map
         float tileSize = 256.0f; // 'normalized' tile size in pixels. Not really important
-        std::shared_ptr<const vt::TileTransformer::VertexTransformer> vtTransformer = getTileTransformer()->createTileVertexTransformer(vtTileId);
-        vt::TileLayerBuilder tileLayerBuilder(vtTileId, 0, vtTransformer, tileSize, 1.0f); // Note: the size/scale argument is ignored
+        vt::TileLayerBuilder tileLayerBuilder(std::string(), 0, vtTileId, tileTransformer, tileSize, 1.0f); // Note: the size/scale argument is ignored
         tileLayerBuilder.addBitmap(tileBitmap);
-        std::shared_ptr<vt::TileLayer> tileLayer = tileLayerBuilder.buildTileLayer(std::optional<vt::CompOp>(), vt::FloatFunction(1));
+        std::shared_ptr<vt::TileLayer> tileLayer = tileLayerBuilder.buildTileLayer();
         return std::make_shared<vt::Tile>(vtTileId, tileSize, std::vector<std::shared_ptr<vt::TileLayer> > { tileLayer });
     }
 

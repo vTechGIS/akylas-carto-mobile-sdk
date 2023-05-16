@@ -16,6 +16,8 @@
 #include <map>
 #include <tuple>
 #include <vector>
+#include <regex>
+#include <optional>
 
 #include <cglib/ray.h>
 
@@ -58,6 +60,8 @@ namespace carto {
         void setNormalMapLightingShader(const std::string& shader);
         void setNormalIlluminationMapRotationEnabled(bool enabled);
         void setNormalIlluminationDirection(MapVec direction);
+        void setRendererLayerFilter(const std::optional<std::regex>& filter);
+        void setClickHandlerLayerFilter(const std::optional<std::regex>& filter);
 
         void offsetLayerHorizontally(double offset);
     
@@ -72,6 +76,8 @@ namespace carto {
         void calculateRayIntersectedElements3D(const cglib::ray3<double>& ray, const ViewState& viewState, float radius, std::vector<vt::GLTileRenderer::GeometryIntersectionInfo>& results) const;
         void calculateRayIntersectedBitmaps(const cglib::ray3<double>& ray, const ViewState& viewState, std::vector<vt::GLTileRenderer::BitmapIntersectionInfo>& results) const;
     
+        static Color evaluateColorFunc(const vt::ColorFunction& colorFunc, const ViewState& viewState);
+
     private:
         bool initializeRenderer();
 
@@ -94,6 +100,9 @@ namespace carto {
         Color _normalMapAccentColor;
         Color _normalMapHighlightColor;
         std::string _normalMapLightingShader;
+        std::optional<std::regex> _rendererLayerFilter;
+        std::optional<std::regex> _clickHandlerLayerFilter;
+
         double _horizontalLayerOffset;
         cglib::vec3<float> _viewDir;
         cglib::vec3<float> _mainLightDir;

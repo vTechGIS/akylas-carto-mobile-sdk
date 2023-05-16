@@ -51,7 +51,8 @@ namespace carto {
         _layerMaps(),
         _layerSymbolizerContexts(),
         _assetPackageSymbolizerContexts(),
-        _mapSettings()
+        _mapSettings(std::make_shared<mvt::Map::Settings>()),
+        _symbolizerContextSettings(std::make_shared<mvt::SymbolizerContext::Settings>(0.0f, std::make_shared<std::map<std::string, mvt::Value>>(), std::shared_ptr<const vt::Font>()))
     {
         for (auto it = layerStyleSets.begin(); it != layerStyleSets.end(); it++) {
             updateLayerStyleSet(it->first, it->second);
@@ -114,11 +115,16 @@ namespace carto {
         notifyDecoderChanged();
     }
 
-    std::shared_ptr<mvt::Map::Settings> CartoVectorTileDecoder::getMapSettings() const {
+    std::shared_ptr<const mvt::Map::Settings> CartoVectorTileDecoder::getMapSettings() const {
         std::lock_guard<std::mutex> lock(_mutex);
         return _mapSettings;
     }
-    
+
+    std::shared_ptr<const mvt::SymbolizerContext::Settings> CartoVectorTileDecoder::getSymbolizerContextSettings() const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _symbolizerContextSettings;
+    }
+
     void CartoVectorTileDecoder::addFallbackFont(const std::shared_ptr<BinaryData>& fontData) {
         {
             std::lock_guard<std::mutex> lock(_mutex);
@@ -175,11 +181,8 @@ namespace carto {
 
             std::map<std::string, Variant> featureData;
             if (std::shared_ptr<const mvt::FeatureData> mvtFeatureData = mvtFeature.getFeatureData()) {
-                for (const std::string& varName : mvtFeatureData->getVariableNames()) {
-                    mvt::Value mvtValue;
-                    if (mvtFeatureData->getVariable(varName, mvtValue)) {
-                        featureData[varName] = std::visit(MVTValueConverter(), mvtValue);
-                    }
+                for (const std::pair<std::string, mvt::Value>& var : mvtFeatureData->getVariables()) {
+                    featureData[var.first] = std::visit(MVTValueConverter(), var.second);
                 }
             }
 
@@ -222,16 +225,13 @@ namespace carto {
                     std::shared_ptr<Geometry> geometry = std::visit(MVTGeometryConverter(tileBounds), *mvtGeometry);
 
                     std::map<std::string, Variant> featureData;
-                    if (std::shared_ptr<const mvt::FeatureData> mvtFeatureData = mvtIt->getFeatureData(nullptr)) {
-                        for (const std::string& varName : mvtFeatureData->getVariableNames()) {
-                            mvt::Value mvtValue;
-                            if (mvtFeatureData->getVariable(varName, mvtValue)) {
-                                featureData[varName] = std::visit(MVTValueConverter(), mvtValue);
-                            }
+                    if (std::shared_ptr<const mvt::FeatureData> mvtFeatureData = mvtIt->getFeatureData(false, nullptr)) {
+                        for (const std::pair<std::string, mvt::Value>& var : mvtFeatureData->getVariables()) {
+                            featureData[var.first] = std::visit(MVTValueConverter(), var.second);
                         }
                     }
 
-                    auto feature = std::make_shared<VectorTileFeature>(mvtIt->getGlobalId(), MapTile(tile.x, tile.y, tile.zoom, 0), mvtLayerName, geometry, Variant(featureData));
+                    auto feature = std::make_shared<VectorTileFeature>(mvtIt->getFeatureId(), MapTile(tile.x, tile.y, tile.zoom, 0), mvtLayerName, geometry, Variant(featureData));
                     tileFeatures.push_back(feature);
                 }
             }
@@ -250,8 +250,8 @@ namespace carto {
         }
 
         std::set<std::string> layerInvisibleSet;
-        std::map<std::string, std::shared_ptr<mvt::Map> > layerMaps;
-        std::map<std::string, std::shared_ptr<mvt::SymbolizerContext> > layerSymbolizerContexts;
+        std::map<std::string, std::shared_ptr<const mvt::Map> > layerMaps;
+        std::map<std::string, std::shared_ptr<const mvt::SymbolizerContext> > layerSymbolizerContexts;
         {
             std::lock_guard<std::mutex> lock(_mutex);
             layerInvisibleSet = _layerInvisibleSet;
@@ -262,7 +262,7 @@ namespace carto {
         try {
             mvt::MBVTFeatureDecoder decoder(*tileData->getDataPtr(), _logger);
             decoder.setTransform(calculateTileTransform(tile, targetTile));
-            decoder.setGlobalIdOverride(true, MapTile(tile.x, tile.y, tile.zoom, 0).getTileId());
+            decoder.setFeatureIdOverride(true, MapTile(tile.x, tile.y, tile.zoom, 0).getTileId());
 
             std::vector<std::shared_ptr<vt::Tile> > tiles(_layerIds.size());
             for (auto it = layerMaps.begin(); it != layerMaps.end(); it++) {
@@ -289,7 +289,7 @@ namespace carto {
                     }
                     for (const std::shared_ptr<vt::TileLayer>& tileLayer : tile->getLayers()) {
                         int layerIdx = static_cast<int>(i * 65536) + tileLayer->getLayerIndex();
-                        tileLayers.push_back(std::make_shared<vt::TileLayer>(layerIdx, tileLayer->getCompOp(), tileLayer->getOpacityFunc(), tileLayer->getBackgrounds(), tileLayer->getBitmaps(), tileLayer->getGeometries(), tileLayer->getLabels()));
+                        tileLayers.push_back(std::make_shared<vt::TileLayer>(tileLayer->getLayerName(), layerIdx, tileLayer->getCompOp(), tileLayer->getOpacityFunc(), tileLayer->getBackgrounds(), tileLayer->getBitmaps(), tileLayer->getGeometries(), tileLayer->getLabels()));
                     }
                 }
             }
@@ -314,7 +314,7 @@ namespace carto {
         if (_assetPackageSymbolizerContexts.find(assetPackage) == _assetPackageSymbolizerContexts.end() && _assetPackageSymbolizerContexts.size() >= MAX_ASSETPACKAGE_SYMBOLIZER_CONTEXTS) {
             _assetPackageSymbolizerContexts.clear();
         }
-        std::shared_ptr<mvt::SymbolizerContext>& symbolizerContext = _assetPackageSymbolizerContexts[assetPackage];
+        std::shared_ptr<const mvt::SymbolizerContext>& symbolizerContext = _assetPackageSymbolizerContexts[assetPackage];
         if (!symbolizerContext) {
             auto fontManager = std::make_shared<vt::FontManager>(GLYPHMAP_SIZE, GLYPHMAP_SIZE);
             auto bitmapLoader = std::make_shared<VTBitmapLoader>("", assetPackage);
@@ -328,7 +328,7 @@ namespace carto {
                 std::string fontName = fontManager->loadFontData(*fontData->getDataPtr());
                 fallbackFont = fontManager->getFont(fontName, fallbackFont);
             }
-            mvt::SymbolizerContext::Settings settings(DEFAULT_TILE_SIZE, std::map<std::string, mvt::Value>(), fallbackFont);
+            mvt::SymbolizerContext::Settings settings(DEFAULT_TILE_SIZE, std::make_shared<std::map<std::string, mvt::Value>>(), fallbackFont);
             symbolizerContext = std::make_shared<mvt::SymbolizerContext>(bitmapManager, fontManager, strokeMap, glyphMap, settings);
 
             if (assetPackage) {
@@ -357,6 +357,7 @@ namespace carto {
 
         if (!_layerIds.empty() && _layerIds.front() == layerId) {
             _mapSettings = std::make_shared<mvt::Map::Settings>(map->getSettings());
+            _symbolizerContextSettings = std::make_shared<mvt::SymbolizerContext::Settings>(symbolizerContext->getSettings());
         }
 
         _layerStyleSets[layerId] = styleSet;
@@ -368,4 +369,5 @@ namespace carto {
     const int CartoVectorTileDecoder::STROKEMAP_SIZE = 512;
     const int CartoVectorTileDecoder::GLYPHMAP_SIZE = 2048;
     const std::size_t CartoVectorTileDecoder::MAX_ASSETPACKAGE_SYMBOLIZER_CONTEXTS = 4;
+
 }

@@ -1,3 +1,178 @@
+CARTO Mobile SDK 4.4.7RC1
+-------------------
+
+### New features:
+
+* Added support for generic expressions in CartoCSS 'Map' element.
+* Added support for CartoCSS 'line-miterlimit' property, tweaked join handling in case of offsets/patterns. 
+* Generalized CartoCSS font support, added support expression based face names
+
+### Changes, fixes:
+
+* Fixed Angle UWP related threading issues, if multiple views were used.
+* Fixed minor synchronization issue with RasterTileLayer
+* Improved handling of null blob in TileData
+* Improved normal map building for overzoomed tiles, resulting is less artifacts.
+* Improved reporting of .so loading errors on Android (re-throw original exception, instead of just logging/failing afterwards)
+* Added handling of 'OnPointerExited' event in UWP MapView
+* Build script fixes, fixes related tolatest Python versions, Android NDK25 support
+
+
+CARTO Mobile SDK 4.4.6
+-------------------
+
+### Changes, fixes:
+
+* Fixed minor rendering issue with lines joined at steep angles when BEVEL/ROUND join modes were used
+
+
+CARTO Mobile SDK 4.4.6RC1
+-------------------
+
+### New features:
+
+* Added 'getTimeout', 'setTimeout' methods to 'CartoOnlineTileDataSource', 'MapTilerOnlineTileDataSource' and 'HTTPTileDataSource'
+
+### Changes, fixes:
+
+* Fixed iOS specific issue related to SDK not properly handling 'didBecomeActive' notifications, resulting in MapView not being rendered.
+* Fixed critical synchronization issue on UWP platform related to stopping rendering loop.
+* Fixed flickering issues when MapView was resized on UWP platform.
+* Fix global pattern alignment when using 'polygon-pattern' symbolizer.
+
+
+CARTO Mobile SDK 4.4.5
+-------------------
+
+### Changes, fixes:
+
+* Fixed 'PersistentCacheTileDataSource' tile preload canceling not working
+* Fixed several cases where tile datasources could be accessed with tile coordinates out of bounds
+
+
+CARTO Mobile SDK 4.4.5RC1
+-------------------
+
+### New features:
+
+* Added 'setFeatureIdOverride' and 'isFeatureIdOverride' methods to 'MBVectorTileDecoder'
+* Added 'isAnimationStarted' method to 'MapInteractionInfo'
+
+### Changes, fixes:
+
+* Fixed critical issue with non-ASCII string wrapping on UWP platform
+* Fixed missing 'onMapInterAction' callback on double tap zoom
+* Changed user initiated zoom behaviour when 'PIVOT_MODE_CENTERPOINT' mode is used, now screen center is used as a pivot point.
+* Updated harfbuzz, libwebp and pugixml dependencies to latest stable versions
+* Fixed stack overflow issue in external css2xml utility due to missing rules for EXP/LOG functions
+* Added 'build id' to Android shared libraries, to help analyze Android native stack traces
+
+
+CARTO Mobile SDK 4.4.4
+-------------------
+
+### New features:
+
+* Feature id is now accessible in CartoCSS using 'mapnik::feature_id' variable
+
+### Changes, fixes:
+
+* Fixed issues with 'feature id' handling in vector tile renderer when feature was used in multiple layers
+* Updated harfbuzz dependency to the latest stable version
+* Fixed wrong compilation profile used for UWP builds, resulting in missing a few features
+* Dropped 'PersistentCacheTileDataSource' from 'lite' compilation profile, making 'lite' SDK build smaller
+* Minor tweaks to built-in styles, related to admin boundaries
+* Minor fixes related to non-standard SDK profiles
+* Minor optimizations
+
+
+CARTO Mobile SDK 4.4.4RC1
+-------------------
+
+### New features:
+
+* Added 'getDefaultLayerBuffer', 'setDefaultLayerBuffer' methods to 'GeoJSONVectorTileDataSource'. This allows controlling buffer size (in tile pixels) for vector tile layers.
+
+### Changes, fixes:
+
+* Restored support for arbitrary expressions in transform arguments (available in 4.3.x but removed from 4.4.0-4.4.3)
+* Improved batching for transformed geometries, all non-translated geometries can be now added into a single batch.
+* Fixed shield symbolizer issues where background was affected by fill color.
+* Fixed several clipping related issues in 'GeoJSONVectorTileDataSource'
+* Improved EAGLContext handling for iOS, workaround for a crash when a view is moved out of a window and then back
+
+
+CARTO Mobile SDK 4.4.3
+-------------------
+
+### New features:
+
+* Added an experimental option to configure various 'VectorTileLayer' parameters via project.json nutiparameters
+* Added support for configuring vector tile map parameters via project.json
+* Updated boost dependency to the latest stable version
+
+### Changes, fixes:
+
+* Build script cleanup
+
+
+CARTO Mobile SDK 4.4.3RC3
+-------------------
+
+### New features:
+
+* Added 'getRendererLayerFilter', 'setRendererLayerFilter', 'getClickHandlerLayerFilter', 'setClickHandlerLayerFilter' methods to 'VectorTileLayer'. These methods allow ignoring certain layers for rendering or click detection.
+* Added 'reverse' function support to CartoCSS 'text-transform'
+
+### Changes, fixes:
+
+* Dropped 'doclava' based javadoc generation, documentation for Android is now based on standard JDK doclet
+* Improved Android documentation by hiding unneeded wrapping related details
+* Fixed regression in 4.4.3RC2 related to parallel requests to 'ValhallaOfflineRoutingService'
+* Added better support for 'none' keyword in CartoCSS
+* Minor improvements to error reporting for CartoCSS issues
+* Fixes and cleanups in Android build script
+* Updated internal FreeType library to latest stable version
+* Minor speed and size optimizations
+
+
+CARTO Mobile SDK 4.4.3RC2
+-------------------
+
+### Changes, fixes:
+
+* Fixed 'TileLayer' not properly recalculating tiles when visibility changes, causing layer to remain hidden.
+* Fixed deadlock in 'ClusteredVectorLayer' when its data source is non-empty with all elements being hidden
+* Fixed stale tiles remaining in caches when offline packages were removed
+* Fixed subtle synchronization issues in 'PackageManager'
+* Added support for parallel requests to 'ValhallaOfflineRoutingService'
+* Added javadoc to published Android artifacts to Maven central
+* Minor fixes to iOS build script
+* Updated internal libjpeg-turbo, harfbuzz libraries to latest stable versions
+
+
+CARTO Mobile SDK 4.4.3RC1
+-------------------
+
+### Changes, fixes:
+
+* Fixed critical coordinate scaling issue in iOS Metal build (occurs only with iPhone 6 Plus, iPhone 7 Plus and iPhone 8 Plus devices)
+* Fixed regression in 'GeoJSONVectorTileDataSource' which caused parsing failure with features with non-object properties
+* Optimized parsing of complex CartoCSS styles, improving performance by 20-40% for complex styles
+* Optimized loading of compiled 'Mapnik' styles by using symbolizer cache, improving performance by up to 50% for complex styles
+* Updated internal Valhalla, sqlite, harfbuzz, botan and protobuf libraries to latest stable versions
+
+
+CARTO Mobile SDK 4.4.2
+-------------------
+
+### Changes, fixes:
+
+* Fixed style fallback version in 'CartoPackageManager' (when using 'startStyleDownload' method)
+* Changed exception type when encoutering unsupported geometry in 'GeoJSONVectorTileDataSource'
+* Minor iOS build script fixes
+
+
 CARTO Mobile SDK 4.4.2RC1
 -------------------
 

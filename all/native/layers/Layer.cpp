@@ -153,7 +153,6 @@ namespace carto {
     Layer::Layer() :
         _envelopeThreadPool(),
         _tileThreadPool(),
-        _lastCullState(),
         _mutex(),
         _updatePriority(0),
         _cullDelay(DEFAULT_CULL_DELAY),
@@ -161,6 +160,7 @@ namespace carto {
         _visible(true),
         _visibleZoomRange(0, std::numeric_limits<float>::infinity()),
         _metaData(),
+        _lastCullState(),
         _options(),
         _mapRenderer(),
         _touchHandler()
@@ -227,11 +227,11 @@ namespace carto {
         return false;
     }
     
-    std::shared_ptr<Bitmap> Layer::getBackgroundBitmap() const {
+    std::shared_ptr<Bitmap> Layer::getBackgroundBitmap(const ViewState& viewState) const {
         return std::shared_ptr<Bitmap>();
     }
 
-    std::shared_ptr<Bitmap> Layer::getSkyBitmap() const {
+    std::shared_ptr<Bitmap> Layer::getSkyBitmap(const ViewState& viewState) const {
         return std::shared_ptr<Bitmap>();
     }
 

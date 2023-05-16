@@ -6,7 +6,7 @@ import argparse
 import shutil
 import json
 
-SDK_VERSION = '4.4.2'
+SDK_VERSION = '4.4.7'
 
 def makedirs(dir):
   try:
@@ -104,7 +104,7 @@ def getProfile(profileIds):
   defines = set()
   cmakeOptions = set()
   allProfileIds = profileIds.split('+')
-  if 'lite' not in profileIds:
+  if 'lite' not in allProfileIds:
     allProfileIds.append(getDefaultProfileId())
   for profileId in allProfileIds:
     profile = getProfiles()[profileId]

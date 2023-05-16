@@ -185,8 +185,8 @@ namespace carto {
         virtual bool onDrawFrame(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState) = 0;
         virtual bool onDrawFrame3D(float deltaSeconds, BillboardSorter& billboardSorter, const ViewState& viewState);
         
-        virtual std::shared_ptr<Bitmap> getBackgroundBitmap() const;
-        virtual std::shared_ptr<Bitmap> getSkyBitmap() const;
+        virtual std::shared_ptr<Bitmap> getBackgroundBitmap(const ViewState& viewState) const;
+        virtual std::shared_ptr<Bitmap> getSkyBitmap(const ViewState& viewState) const;
         
         virtual void calculateRayIntersectedElements(const cglib::ray3<double>& ray, const ViewState& viewState, std::vector<RayIntersectedElement>& results) const = 0;
         virtual bool processClick(const ClickInfo& clickInfo, const RayIntersectedElement& intersectedElement, const ViewState& viewState) const = 0;
@@ -197,8 +197,6 @@ namespace carto {
         std::shared_ptr<CancelableThreadPool> _envelopeThreadPool;
         std::shared_ptr<CancelableThreadPool> _tileThreadPool;
         
-        std::shared_ptr<CullState> _lastCullState;
-       
         mutable std::recursive_mutex _mutex;
 
     private:
@@ -216,6 +214,8 @@ namespace carto {
 
         std::map<std::string, Variant> _metaData;
 
+        std::shared_ptr<CullState> _lastCullState;
+       
         std::weak_ptr<Options> _options;
         std::weak_ptr<MapRenderer> _mapRenderer;
         std::weak_ptr<TouchHandler> _touchHandler;

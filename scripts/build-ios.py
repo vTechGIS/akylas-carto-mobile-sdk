@@ -68,6 +68,7 @@ def buildModuleMap(filename, publicHeaders):
     f.write('    export *\n')
     f.write('    module * { export * }\n')
     f.write('}\n')
+  return True
 
 def copyHeaders(args, baseDir, outputDir):
   proxyHeaderDir = '%s/generated/ios-objc/proxies' % baseDir
@@ -103,8 +104,7 @@ def copyHeaders(args, baseDir, outputDir):
   updateUmbrellaHeader('%s/CartoMobileSDK.h' % destDir, args.defines)
 
   makedirs('%s/Modules' % outputDir)
-  buildModuleMap('%s/Modules/module.modulemap' % outputDir, publicHeaders)
-  return True
+  return buildModuleMap('%s/Modules/module.modulemap' % outputDir, publicHeaders)
 
 def buildIOSLib(args, baseArch, outputDir=None):
   platform, arch = getPlatformArch(baseArch)
@@ -123,7 +123,7 @@ def buildIOSLib(args, baseArch, outputDir=None):
     '-DSHARED_LIBRARY:BOOL=%s' % ('ON' if args.sharedlib else 'OFF'),
     '-DCMAKE_OSX_ARCHITECTURES=%s' % arch,
     '-DCMAKE_OSX_SYSROOT=%s' % ('macosx' if platform == 'MACCATALYST' else 'iphone%s' % platform.lower()),
-    '-DCMAKE_OSX_DEPLOYMENT_TARGET=%s' % ('11.3' if platform == 'MACCATALYST' else ('10.0' if arch == 'i386' else '9.0')),
+    '-DCMAKE_OSX_DEPLOYMENT_TARGET=%s' % ('11.3' if platform == 'MACCATALYST' else ('11.0' if arch == 'i386' else '9.0')),
     '-DCMAKE_BUILD_TYPE=%s' % args.configuration,
     "-DSDK_CPP_DEFINES=%s" % " ".join(defines),
     "-DSDK_DEV_TEAM='%s'" % (args.devteam if args.devteam else ""),
@@ -138,8 +138,9 @@ def buildIOSLib(args, baseArch, outputDir=None):
   bitcodeOptions = ['ENABLE_BITCODE=NO']
   if not args.stripbitcode and baseArch in ('armv7', 'arm64'):
     bitcodeOptions = ['ENABLE_BITCODE=YES', 'BITCODE_GENERATION_MODE=bitcode']
+  buildMode = ('archive' if args.configuration == 'Release' else 'build')
   return execute('xcodebuild', buildDir,
-    '-project', 'carto_mobile_sdk.xcodeproj', '-arch', arch, '-configuration', args.configuration, 'archive',
+    '-project', 'carto_mobile_sdk.xcodeproj', '-arch', arch, '-configuration', args.configuration, buildMode,
     *list(bitcodeOptions)
   )
 
@@ -168,7 +169,7 @@ def buildIOSFramework(args, baseArchs, outputDir=None):
   ):
     return False
 
-  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/Info.plist' % outputDir):
+  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/CartoMobileSDK.framework/Info.plist' % distDir):
       return False
 
   if args.sharedlib:
@@ -176,8 +177,6 @@ def buildIOSFramework(args, baseArchs, outputDir=None):
       '-id', '@rpath/CartoMobileSDK.framework/CartoMobileSDK',
       'CartoMobileSDK'
     ):
-      return False
-    if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/Info.plist' % frameworkDir):
       return False
 
   makedirs('%s/Headers' % frameworkDir)
@@ -194,7 +193,7 @@ def buildIOSFramework(args, baseArchs, outputDir=None):
     return False
 
   if outputDir is None:
-    print("Output available in:\n%s" % distDir)
+    print("iOS framework output available in:\n%s" % distDir)
   return True
 
 def buildIOSXCFramework(args, baseArchs, outputDir=None):
@@ -222,7 +221,7 @@ def buildIOSXCFramework(args, baseArchs, outputDir=None):
     return False
 
   if outputDir is None:
-    print("Output available in:\n%s" % distDir)
+    print("iOS xcframework output available in:\n%s" % distDir)
   return True
 
 def buildIOSPackage(args, buildCocoapod, buildSwiftPackage):
@@ -272,11 +271,7 @@ def buildIOSPackage(args, buildCocoapod, buildSwiftPackage):
     with open('%s/Package.swift' % distDir, 'w') as f:
       f.write(packageFile)
 
-  print('Output available in:\n%s\n\nTo publish, use:\ncd %s\naws s3 cp %s s3://nutifront/sdk_snapshots/%s --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers\n' % (distDir, distDir, distName, distName))
-  if buildCocoapod:
-    print('pod trunk push\n')
-  if buildSwiftPackage:
-    print('rm -rf mobile-swift-package\ngit clone https://github.com/CartoDB/mobile-swift-package\ncp Package.swift mobile-swift-package\ncd mobile-swift-package\ngit commit -m "Version %s" && git tag %s\ngit push origin master\n' % (version, version))
+  print("iOS package output available in:\n%s" % distDir)
   return True
 
 parser = argparse.ArgumentParser()
