@@ -4,6 +4,10 @@
 #include "components/Exceptions.h"
 #include "utils/Log.h"
 
+#ifdef _CARTO_OFFLINE_SUPPORT
+#include "datasources/MBTilesTileDataSource.h"
+#endif
+
 #include <algorithm>
 
 #include <stdext/zlib.h>
@@ -46,7 +50,21 @@ namespace carto {
         bounds.expandToContain(_dataSource2->getDataExtent());
         return bounds;
     }
-    
+
+
+    std::string MergedMBVTTileDataSource::getTileMask() const {
+#ifdef _CARTO_OFFLINE_SUPPORT
+        if (auto mbtilesDatasource = std::dynamic_pointer_cast<MBTilesTileDataSource>(_dataSource1.get())) {
+            return mbtilesDatasource->getTileMask();
+        }
+        if (auto mbtilesDatasource = std::dynamic_pointer_cast<MBTilesTileDataSource>(_dataSource2.get())) {
+            return mbtilesDatasource->getTileMask();
+        }
+#endif
+        return NULL;
+    }
+
+
     std::shared_ptr<TileData> MergedMBVTTileDataSource::loadTile(const MapTile& mapTile) {
         int zoom = mapTile.getZoom();
         std::shared_ptr<TileData> result1;
@@ -62,10 +80,10 @@ namespace carto {
             // If either result contains 'replace with parent' then the only option is to pass this result on.
             // Otherwise we would need to do request the parent ourselves, do unpacking, scaling, clipping and packing.
             if (result1->isReplaceWithParent()) {
-                return result1;
+                return result2;
             }
             if (result2->isReplaceWithParent()) {
-                return result2;
+                return result1;
             }
             
             // We have data for both sources, we can merge them. Note that we may need to decompress the data first.

@@ -126,7 +126,22 @@ namespace carto {
         }
         return *_cachedDataExtent;
     }
-    
+
+    std::string MBTilesTileDataSource::getTileMask() const {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+
+        // If value is not cached, load from database
+        if (!_cachedTileMask) {
+            if (!_database) {
+                Log::Error("MBTilesTileDataSource::getTileMask: Not connected to the database");
+                return NULL;
+            }
+
+            _cachedTileMask = getMetaData("tilemask");
+        }
+        return *_cachedTileMask;
+    }
+
     std::shared_ptr<TileData> MBTilesTileDataSource::loadTile(const MapTile& mapTile) {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
         Log::Infof("MBTilesTileDataSource::loadTile: Loading %s", mapTile.toString().c_str());
@@ -134,14 +149,20 @@ namespace carto {
             Log::Errorf("MBTilesTileDataSource::loadTile: Failed to load %s: Couldn't connect to the database", mapTile.toString().c_str());
             return std::shared_ptr<TileData>();
         }
-        
+
+        if (getMaxOverzoomLevel() >= 0 && mapTile.getZoom() > getMaxZoomWithOverzoom()) {
+            // we explicitly return an empty tile to not draw overzoom
+            auto tileData = std::make_shared<TileData>(std::shared_ptr<BinaryData>());
+            tileData->setIsOverZoom(true);
+            return  tileData;
+        }
         try {
             // Make the query and check for database error
             sqlite3pp::query query(*_database, "SELECT tile_data FROM tiles WHERE zoom_level=:zoom AND tile_column=:x AND tile_row=:y");
             query.bind(":zoom", mapTile.getZoom());
             query.bind(":x", mapTile.getX());
             query.bind(":y", _scheme == MBTilesScheme::MBTILES_SCHEME_XYZ ? mapTile.getY() : (1 << (mapTile.getZoom())) - 1 - mapTile.getY());
-            
+
             auto it = query.begin();
             if (it == query.end()) {
                 std::shared_ptr<TileData> tileData = std::make_shared<TileData>(std::shared_ptr<BinaryData>());
@@ -203,6 +224,7 @@ namespace carto {
         // If either was not found, do table scan
         if (!foundMinZoom || !foundMaxZoom) {
             try {
+                Log::Warnf("MBTilesTileDataSource: minzoom and maxzoom not found int metadata, we need to compute it and it might be long");
                 sqlite3pp::query query(*_database, "SELECT MIN(zoom_level), MAX(zoom_level) FROM tiles");
                 for (auto it = query.begin(); it != query.end(); it++) {
                     if (!foundMinZoom) {
@@ -286,6 +308,22 @@ namespace carto {
         return true;
     }
 
+    std::string MBTilesTileDataSource::getMetaData(const std::string &key) const {
+        // As a first step, try to use metadata
+        std::string result;
+        try {
+            sqlite3pp::query query(*_database, "SELECT value FROM metadata WHERE name=:name");
+            query.bind(":name", key.c_str());
+           for (auto it = query.begin(); it != query.end(); it++) {
+               result = (*it).get<const char*>(0);
+           }
+            query.finish();
+        }
+        catch (const std::exception& ex) {
+            Log::Errorf("MBTilesTileDataSource::getMetaData: Exception while reading %s metadata: %s", key, ex.what());
+        }
+        return result;
+    }
 }
 
 #endif

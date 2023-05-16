@@ -600,13 +600,17 @@ namespace carto {
             if (isCanceled()) {
                 break;
             }
-
             std::shared_ptr<TileData> tileData = layer->_dataSource->loadTile(dataSourceTile);
             if (!tileData) {
                 break;
             }
             if (tileData->isReplaceWithParent()) {
                 continue;
+            }
+            if(tileData->isOverZoom()) {
+                // we need to invalidate cache tiles to make sure we dont draw over
+                layer->_preloadingCache.remove(_tileId);
+                layer->_visibleCache.remove(_tileId);
             }
 
             if (isCanceled()) {

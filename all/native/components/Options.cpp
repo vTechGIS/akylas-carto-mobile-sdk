@@ -38,6 +38,7 @@ namespace carto {
         _restrictedPanning(false),
         _tiltGestureReversed(false),
         _zoomGestures(false),
+        _rotationGestures(true),
         _clearColor(DEFAULT_CLEAR_COLOR),
         _skyColor(DEFAULT_SKY_COLOR),
         _skyBitmapColor(0, 0, 0, 0),
@@ -367,6 +368,22 @@ namespace carto {
             _zoomGestures = enabled;
         }
         notifyOptionChanged("ZoomGestures");
+    }
+
+    bool Options::isRotationGestures() const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _rotationGestures;
+    }
+    
+    void Options::setRotationGestures(bool enabled) {
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            if (_rotationGestures == enabled) {
+                return;
+            }
+            _rotationGestures = enabled;
+        }
+        notifyOptionChanged("RotationGestures");
     }
         
     int Options::getEnvelopeThreadPoolSize() const {

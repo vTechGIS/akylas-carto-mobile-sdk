@@ -57,7 +57,7 @@ def buildAndroidSO(args, abi):
     return False
   return cmake(args, buildDir, [
     '--build', '.',
-    '--parallel', '4',
+    '--parallel', str(os.cpu_count()),
     '--config', args.configuration
   ])
 

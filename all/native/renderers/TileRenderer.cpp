@@ -10,6 +10,7 @@
 #include "renderers/utils/VTRenderer.h"
 #include "utils/Const.h"
 #include "utils/Log.h"
+#include "utils/Const.h"
 
 #include <vt/Label.h>
 #include <vt/LabelCuller.h>
@@ -33,13 +34,19 @@ namespace carto {
         _labelOrder(0),
         _buildingOrder(1),
         _rasterFilterMode(vt::RasterFilterMode::BILINEAR),
+        _normalMapLightingShader(LIGHTING_SHADER_NORMALMAP),
         _normalMapShadowColor(0, 0, 0, 255),
+        _normalMapAccentColor(0, 0, 0, 255),
         _normalMapHighlightColor(255, 255, 255, 255),
         _rendererLayerFilter(),
         _clickHandlerLayerFilter(),
         _horizontalLayerOffset(0),
         _viewDir(0, 0, 0),
         _mainLightDir(0, 0, 0),
+        _normalLightDir(0, 0, 0),
+        _normalIlluminationMapRotationEnabled(false),
+        _normalIlluminationDirection(0,0,0),
+        _mapRotation(0),
         _tiles(),
         _mutex()
     {
@@ -107,6 +114,30 @@ namespace carto {
         std::lock_guard<std::mutex> lock(_mutex);
         _normalMapHighlightColor = color;
     }
+    void TileRenderer::setNormalMapAccentColor(const Color& color) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _normalMapAccentColor = color;
+    }
+    void TileRenderer::setNormalMapLightingShader(const std::string& shader) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        std::string newValue = shader;
+        if (newValue.length() == 0) {
+            newValue = LIGHTING_SHADER_NORMALMAP;
+        }
+        if (newValue != _normalMapLightingShader) {
+            _normalMapLightingShader = newValue;
+            _vtRenderer.reset();
+        }
+    }
+    void TileRenderer::setNormalIlluminationDirection(MapVec direction) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _normalIlluminationDirection = direction;
+    }
+
+    void TileRenderer::setNormalIlluminationMapRotationEnabled(bool enabled) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _normalIlluminationMapRotationEnabled = enabled;
+    }
 
     void TileRenderer::setRendererLayerFilter(const std::optional<std::regex>& filter) {
         std::lock_guard<std::mutex> lock(_mutex);
@@ -142,10 +173,26 @@ namespace carto {
         tileRenderer->setLabelBlendingSpeed(_labelBlendingSpeed);
         tileRenderer->setRendererLayerFilter(_rendererLayerFilter);
 
+
+        _mapRotation = viewState.getRotation();
         _viewDir = cglib::unit(viewState.getFocusPosNormal());
         if (auto options = _options.lock()) {
             MapPos internalFocusPos = viewState.getProjectionSurface()->calculateMapPos(viewState.getFocusPos());
             _mainLightDir = cglib::vec3<float>::convert(cglib::unit(viewState.getProjectionSurface()->calculateVector(internalFocusPos, options->getMainLightDirection())));
+            MapVec normalIlluminationDir = options->getMainLightDirection();
+            if (_normalIlluminationDirection != MapVec(0,0,0)) {
+                normalIlluminationDir = _normalIlluminationDirection;
+            }
+            if (_normalIlluminationMapRotationEnabled) {
+                double y = normalIlluminationDir.getY();
+                double x = normalIlluminationDir.getX();
+                double azimuthal = ((x > 0) ? acos(y) : -acos(y)) * Const::RAD_TO_DEG - _mapRotation;
+                double sin = std::sin(azimuthal * Const::DEG_TO_RAD);
+                double cos = std::cos(azimuthal * Const::DEG_TO_RAD);
+                normalIlluminationDir = MapVec(sin, cos, normalIlluminationDir.getZ());
+            }
+
+            _normalLightDir = cglib::vec3<float>::convert(cglib::unit(viewState.getProjectionSurface()->calculateVector(internalFocusPos, normalIlluminationDir)));
         }
 
         bool refresh = false;
@@ -374,12 +421,14 @@ namespace carto {
             });
             tileRenderer->setLightingShader3D(lightingShader3D);
 
-            vt::GLTileRenderer::LightingShader lightingShaderNormalMap(false, LIGHTING_SHADER_NORMALMAP, [this](GLuint shaderProgram, const vt::ViewState& viewState) {
-                float shadowAlpha = _normalMapShadowColor.getA() / 255.0f;
-                glUniform4f(glGetUniformLocation(shaderProgram, "u_shadowColor"), _normalMapShadowColor.getR() * shadowAlpha / 255.0f, _normalMapShadowColor.getG() * shadowAlpha / 255.0f, _normalMapShadowColor.getB() * shadowAlpha / 255.0f, shadowAlpha);
-                float highlightAlpha = _normalMapHighlightColor.getA() / 255.0f;
-                glUniform4f(glGetUniformLocation(shaderProgram, "u_highlightColor"), _normalMapHighlightColor.getR() * highlightAlpha / 255.0f, _normalMapHighlightColor.getG() * highlightAlpha / 255.0f, _normalMapHighlightColor.getB() * highlightAlpha / 255.0f, highlightAlpha);
-                glUniform3fv(glGetUniformLocation(shaderProgram, "u_lightDir"), 1, _mainLightDir.data());
+            vt::GLTileRenderer::LightingShader lightingShaderNormalMap(false, _normalMapLightingShader, [this](GLuint shaderProgram, const vt::ViewState& viewState) {
+                    float shadowAlpha = _normalMapShadowColor.getA() / 255.0f;
+                    glUniform4f(glGetUniformLocation(shaderProgram, "u_shadowColor"), _normalMapShadowColor.getR() * shadowAlpha / 255.0f, _normalMapShadowColor.getG() * shadowAlpha / 255.0f, _normalMapShadowColor.getB() * shadowAlpha / 255.0f,  shadowAlpha);
+                    float accentAlpha = _normalMapAccentColor.getA() / 255.0f;
+                    glUniform4f(glGetUniformLocation(shaderProgram, "u_accentColor"), _normalMapAccentColor.getR() * accentAlpha / 255.0f, _normalMapAccentColor.getG() * accentAlpha / 255.0f, _normalMapAccentColor.getB() * accentAlpha / 255.0f, accentAlpha);
+                    float highlightAlpha = _normalMapHighlightColor.getA() / 255.0f;
+                    glUniform4f(glGetUniformLocation(shaderProgram, "u_highlightColor"), _normalMapHighlightColor.getR() * highlightAlpha / 255.0f, _normalMapHighlightColor.getG() * highlightAlpha / 255.0f, _normalMapHighlightColor.getB() * highlightAlpha / 255.0f,  highlightAlpha);
+                    glUniform3fv(glGetUniformLocation(shaderProgram, "u_lightDir"), 1, _normalLightDir.data() );
             });
             tileRenderer->setLightingShaderNormalMap(lightingShaderNormalMap);
         }
@@ -415,11 +464,15 @@ namespace carto {
     const std::string TileRenderer::LIGHTING_SHADER_NORMALMAP = R"GLSL(
         uniform vec4 u_shadowColor;
         uniform vec4 u_highlightColor;
+        uniform vec4 u_accentColor;
         uniform vec3 u_lightDir;
-        vec4 applyLighting(lowp vec4 color, mediump vec3 normal, mediump float intensity) {
+        vec4 applyLighting(lowp vec4 color, mediump vec3 normal, mediump vec3 surfaceNormal, mediump float intensity) {
             mediump float lighting = max(0.0, dot(normal, u_lightDir));
-            lowp vec4 shadeColor = mix(u_shadowColor, u_highlightColor, lighting);
-            return shadeColor * color * intensity;
+            mediump float accent = normal.z;
+            lowp vec4 accent_color = (1.0 - accent) * u_accentColor * intensity;
+            mediump float alpha = clamp(u_shadowColor.a*(1.0-lighting)+u_highlightColor.a*lighting, 0.0, 1.0);
+            lowp vec4 shade_color = vec4(mix(u_shadowColor.rgb, u_highlightColor.rgb, lighting), alpha);
+            return (accent_color * (1.0 - shade_color.a) + shade_color) * color * intensity;
         }
     )GLSL";
 

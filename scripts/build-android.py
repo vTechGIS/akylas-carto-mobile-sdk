@@ -6,6 +6,7 @@ import string
 from build.sdk_build_utils import *
 
 ANDROID_ABIS = ['armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64']
+SDK_VERSION = "4.4.2"
 
 def javac(args, dir, *cmdArgs):
   return execute(args.javac, dir, *cmdArgs)
@@ -75,8 +76,8 @@ def buildAndroidSO(args, abi):
     return False
   if not cmake(args, buildDir, [
     '--build', '.',
-    '--parallel', '4',
-    '--config', args.configuration
+    '--parallel', str(os.cpu_count()),
+    '--config', args.configuration,
   ]):
     return False
   return makedirs('%s/%s' % (distDir, abi)) and copyfile('%s/libcarto_mobile_sdk.so' % buildDir, '%s/%s/libcarto_mobile_sdk.so' % (distDir, abi))

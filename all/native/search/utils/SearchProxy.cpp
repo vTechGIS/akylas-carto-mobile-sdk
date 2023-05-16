@@ -291,13 +291,17 @@ namespace carto {
 
             MapPos wgs84CenterPos = request->getProjection()->toWgs84(request->getGeometry()->getCenterPos());
             _geometry = convertToEPSG3857(request->getGeometry(), request->getProjection());
-            MapBounds geometryBounds = _geometry->getBounds();
-            _searchRadius = request->getSearchRadius() / std::cos(std::min(89.9, std::abs(wgs84CenterPos.getY())) * Const::DEG_TO_RAD);
-            MapPos boundsPos0 = geometryBounds.getMin() - MapVec(_searchRadius, _searchRadius);
-            MapPos boundsPos1 = geometryBounds.getMax() + MapVec(_searchRadius, _searchRadius);
-            boundsPos0[0] = std::max(boundsPos0[0], EPSG3857().getBounds().getMin()[0] * 0.9999);
-            boundsPos1[0] = std::min(boundsPos1[0], EPSG3857().getBounds().getMax()[0] * 0.9999);
-            _searchBounds = MapBounds(boundsPos0, boundsPos1);
+            _searchBounds = _geometry->getBounds();
+            _searchRadius = request->getSearchRadius();
+            if (_searchRadius >= 0) {
+                _searchRadius = _searchRadius / std::cos(std::min(89.9, std::abs(wgs84CenterPos.getY())) * Const::DEG_TO_RAD);
+                MapPos boundsPos0 = _searchBounds.getMin() - MapVec(_searchRadius, _searchRadius);
+                MapPos boundsPos1 = _searchBounds.getMax() + MapVec(_searchRadius, _searchRadius);
+                boundsPos0[0] = std::max(boundsPos0[0], EPSG3857().getBounds().getMin()[0] * 0.9999);
+                boundsPos1[0] = std::min(boundsPos1[0], EPSG3857().getBounds().getMax()[0] * 0.9999);
+                _searchBounds = MapBounds(boundsPos0, boundsPos1);
+            }
+            
         } else {
             _searchBounds = convertToEPSG3857(mapBounds, proj);
         }
@@ -308,7 +312,7 @@ namespace carto {
     }
 
     bool SearchProxy::testBounds(const MapBounds& bounds) const {
-        if (_geometry) {
+        if (_searchRadius >= 0 && _geometry) {
             std::vector<MapPos> points(4);
             points[0] = bounds.getMin();
             points[1] = MapPos(bounds.getMin().getX(), bounds.getMax().getY());
@@ -338,7 +342,7 @@ namespace carto {
             }
         }
 
-        if (_geometry) {
+        if (_searchRadius >= 0 && _geometry) {
             if (calculateDistance(convertToEPSG3857(geometry, _projection), _geometry) > _searchRadius) {
                 return false;
             }

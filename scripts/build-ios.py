@@ -8,6 +8,7 @@ import string
 from build.sdk_build_utils import *
 
 IOS_ARCHS = ['i386', 'x86_64', 'armv7', 'arm64', 'arm64-simulator', 'x86_64-maccatalyst', 'arm64-maccatalyst']
+SDK_VERSION = "4.4.2"
 
 def getFinalBuildDir(target, arch=None):
   return getBuildDir(('%s_metal' % target) if args.metalangle else target, arch)
@@ -122,7 +123,7 @@ def buildIOSLib(args, baseArch, outputDir=None):
     '-DSHARED_LIBRARY:BOOL=%s' % ('ON' if args.sharedlib else 'OFF'),
     '-DCMAKE_OSX_ARCHITECTURES=%s' % arch,
     '-DCMAKE_OSX_SYSROOT=%s' % ('macosx' if platform == 'MACCATALYST' else 'iphone%s' % platform.lower()),
-    '-DCMAKE_OSX_DEPLOYMENT_TARGET=%s' % ('11.3' if platform == 'MACCATALYST' else ('10.0' if arch == 'i386' else '9.0')),
+    '-DCMAKE_OSX_DEPLOYMENT_TARGET=%s' % ('11.3' if platform == 'MACCATALYST' else ('11.0' if arch == 'i386' else '9.0')),
     '-DCMAKE_BUILD_TYPE=%s' % args.configuration,
     "-DSDK_CPP_DEFINES=%s" % " ".join(defines),
     "-DSDK_DEV_TEAM='%s'" % (args.devteam if args.devteam else ""),
@@ -168,13 +169,14 @@ def buildIOSFramework(args, baseArchs, outputDir=None):
   ):
     return False
 
+  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/CartoMobileSDK.framework/Info.plist' % distDir):
+      return False
+
   if args.sharedlib:
     if not execute('install_name_tool', frameworkDir,
       '-id', '@rpath/CartoMobileSDK.framework/CartoMobileSDK',
       'CartoMobileSDK'
     ):
-      return False
-    if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/Info.plist' % frameworkDir):
       return False
 
   makedirs('%s/Headers' % frameworkDir)
@@ -240,7 +242,7 @@ def buildIOSPackage(args, buildCocoapod, buildSwiftPackage):
     return False
 
   if buildCocoapod:
-    with open('%s/scripts/ios-cocoapod/CartoMobileSDK.podspec.template' % baseDir, 'r') as f:
+    with open('%s/scripts/ios-cocoapod/Akylas-CartoMobileSDK.podspec.template' % baseDir, 'r') as f:
       cocoapodFile = string.Template(f.read()).safe_substitute({
         'baseDir': baseDir,
         'distDir': distDir,

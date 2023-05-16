@@ -321,6 +321,18 @@ namespace carto {
          * @param enabled True if zoom gestured should be enabled, false otherwise.
          */
         void setZoomGestures(bool enabled);
+
+        /**
+         * Returns the state of rotation gestures. 
+         * @return True if rotation gestures are enabled. False otherwise.
+         */
+        bool isRotationGestures() const;
+        /**
+         * Sets the rotation gestures flag. Rotation gestures allow to use pinch to rotate the map.
+         * By default, rotation gestures are not enabled.
+         * @param enabled True if rotation gestured should be enabled, false otherwise.
+         */
+        void setRotationGestures(bool enabled);
     
         /**
          * Returns the number of threads used by the envelope task pool.
@@ -650,6 +662,7 @@ namespace carto {
         bool _tiltGestureReversed;
 
         bool _zoomGestures;
+        bool _rotationGestures;
 
         Color _clearColor;
         Color _skyColor;

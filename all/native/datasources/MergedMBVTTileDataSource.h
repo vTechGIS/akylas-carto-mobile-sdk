@@ -28,6 +28,7 @@ namespace carto {
 
         virtual int getMinZoom() const;
         virtual int getMaxZoom() const;
+        virtual std::string getTileMask() const;
 
         virtual MapBounds getDataExtent() const;
         
@@ -46,7 +47,7 @@ namespace carto {
         
         const DirectorPtr<TileDataSource> _dataSource1;
         const DirectorPtr<TileDataSource> _dataSource2;
-        
+
     private:
         std::shared_ptr<DataSourceListener> _dataSourceListener;
     };

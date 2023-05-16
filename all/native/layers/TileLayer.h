@@ -154,7 +154,7 @@ namespace carto {
          * @param overzoomLevel The new maximum overzoom value.
          */
         void setMaxOverzoomLevel(int overzoomLevel);
-        
+
         /**
          * Gets the current maximum underzoom level for this layer.
          * @return The current maximum underzoom level for this layer.

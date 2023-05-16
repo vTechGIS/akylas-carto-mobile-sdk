@@ -56,6 +56,10 @@ namespace carto {
         void setRasterFilterMode(vt::RasterFilterMode filterMode);
         void setNormalMapShadowColor(const Color& color);
         void setNormalMapHighlightColor(const Color& color);
+        void setNormalMapAccentColor(const Color& color);
+        void setNormalMapLightingShader(const std::string& shader);
+        void setNormalIlluminationMapRotationEnabled(bool enabled);
+        void setNormalIlluminationDirection(MapVec direction);
         void setRendererLayerFilter(const std::optional<std::regex>& filter);
         void setClickHandlerLayerFilter(const std::optional<std::regex>& filter);
 
@@ -93,13 +97,20 @@ namespace carto {
         int _buildingOrder;
         vt::RasterFilterMode _rasterFilterMode;
         Color _normalMapShadowColor;
+        Color _normalMapAccentColor;
         Color _normalMapHighlightColor;
+        std::string _normalMapLightingShader;
         std::optional<std::regex> _rendererLayerFilter;
         std::optional<std::regex> _clickHandlerLayerFilter;
 
         double _horizontalLayerOffset;
         cglib::vec3<float> _viewDir;
         cglib::vec3<float> _mainLightDir;
+        cglib::vec3<float> _normalLightDir;
+        MapVec _normalIlluminationDirection;
+        bool _normalIlluminationMapRotationEnabled;
+        double _mapRotation;
+
         std::map<vt::TileId, std::shared_ptr<const vt::Tile> > _tiles;
         
         mutable std::mutex _mutex;

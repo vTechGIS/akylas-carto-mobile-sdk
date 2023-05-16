@@ -99,7 +99,6 @@ namespace carto {
 
         return ValhallaRoutingProxy::CalculateRoute(std::vector<std::shared_ptr<sqlite3pp::database> > { _database }, profile, configuration, request);
     }
-
 }
 
 #endif
