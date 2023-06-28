@@ -28,6 +28,10 @@
 %attribute(carto::GeoJSONVectorTileDataSource, float, DefaultLayerBuffer, getDefaultLayerBuffer, setDefaultLayerBuffer)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::createLayer)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::setLayerGeoJSON)
+%std_io_exceptions(carto::GeoJSONVectorTileDataSource::setLayerGeoJSONString)
+%std_io_exceptions(carto::GeoJSONVectorTileDataSource::addGeoJSONFeature)
+%std_io_exceptions(carto::GeoJSONVectorTileDataSource::addGeoJSONStringFeature)
+%std_io_exceptions(carto::GeoJSONVectorTileDataSource::removeGeoJSONFeature)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::setLayerFeatureCollection)
 
 %feature("director") carto::GeoJSONVectorTileDataSource;

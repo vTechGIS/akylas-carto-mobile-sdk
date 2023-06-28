@@ -75,6 +75,38 @@ namespace carto {
         void setLayerGeoJSON(int layerIndex, const Variant& geoJSON);
 
         /**
+         * Sets the features of the specified layer.
+         * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
+         * @param geoJSON A geojson type variant that MUST contain single Feature element.
+         * @throws std::runtime_error If an error occured during updating the layer.
+         */
+        void addGeoJSONFeature(int layerIndex, const Variant& geoJSON);
+
+        /**
+         * Sets the features of the specified layer.
+         * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
+         * @param geoJSON A geojson string that MUST contain single FeatureColletion element.
+         * @throws std::runtime_error If an error occured during updating the layer.
+         */
+        void setLayerGeoJSONString(int layerIndex, const std::string& geoJSON);
+
+        /**
+         * Sets the features of the specified layer.
+         * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
+         * @param geoJSON A geojson string that MUST contain single Feature element.
+         * @throws std::runtime_error If an error occured during updating the layer.
+         */
+        void addGeoJSONStringFeature(int layerIndex, const std::string& geoJSON);
+
+        /**
+         * Sets the features of the specified layer.
+         * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
+         * @param id id of the feature to remove.
+         * @throws std::runtime_error If an error occured during updating the layer.
+         */
+        void removeGeoJSONFeature(int layerIndex, const const Variant& id);
+
+        /**
          * Sets the feature collection of the specified layer.
          * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
          * @param projection Projection for the features in featureCollection. Can be null if the coordinates are based on WGS84.
