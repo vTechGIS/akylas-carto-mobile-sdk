@@ -418,7 +418,7 @@ public class SecondFragment extends Fragment {
 
         addMap(dataPath);
 //        addRoutes(dataPath);
-        addHillshadeLayer(view, dataPath);
+//        addHillshadeLayer(view, dataPath);
 
 //        try {
 //            MBTilesTileDataSource dataSource = new MBTilesTileDataSource(dataPath+"/france/france_terrain.etiles");
@@ -437,7 +437,7 @@ public class SecondFragment extends Fragment {
 //        mapView.getLayers().add(layer);
 
 
-//        testLineDrawing();
+        testLineDrawing();
 //        testLineDrawing2();
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
@@ -465,7 +465,7 @@ public class SecondFragment extends Fragment {
         final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                testValhalla(dataPath, options);
+//                testValhallaBicycle(dataPath, options);
 //                testMatchRoute(options);
 //                testVectoTileSearch(backlayer, options);
                 // Code here executes on main thread after user presses button
@@ -587,6 +587,7 @@ public class SecondFragment extends Fragment {
             @Override
             public void run() {
                 try {
+                    routingService.setProfile(profile);
                     RoutingResult result = routingService.calculateRoute(request);
                     Log.d(TAG,"rawresult "+ result.getRawResult());
 
@@ -669,6 +670,24 @@ public class SecondFragment extends Fragment {
 //            request = new RoutingRequest(projection, vector);
 //            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":true,\"step_penalty\":5,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
 //            runValhallaInThread(routingService, request, "pedestrian", localSource);
+    }
+
+    public void testValhallaBicycle(String dataPath, Options options) {
+        Projection projection = options.getBaseProjection();
+        MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
+//        routingService.add(dataPath+"/italy/italy.vtiles");
+        routingService.add(dataPath+"/france/france.vtiles");
+        LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
+        VectorLayer vectorLayer = new VectorLayer(localSource);
+        mapView.getLayers().add(vectorLayer);
+        MapPosVector vector = new MapPosVector();
+        vector.add(new MapPos(5.726843476295472, 45.19021108701828));
+        vector.add(new MapPos(5.902746561696101, 45.28781046189793));
+        RoutingRequest request = new RoutingRequest(projection, vector);
+        request.setCustomParameter("costing_options", Variant.fromString("{\"bicycle\":{\"non_network_penalty\":20,\"use_ferry\":0,\"shortest\":false,\"use_roads\":1.0,\"use_tracks\":0.5,\"bicycle_type\":\"Hybrid\"}}"));
+        request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
+        runValhallaInThread(routingService, request, "bicycle", localSource);
+//            request = new RoutingRequest(projection, vector);
     }
     public static void largeLog(String tag, String content) {
         if (content.length() > 4000) {
