@@ -30,7 +30,9 @@
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::setLayerGeoJSON)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::setLayerGeoJSONString)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::addGeoJSONFeature)
+%std_io_exceptions(carto::GeoJSONVectorTileDataSource::updateGeoJSONFeature)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::addGeoJSONStringFeature)
+%std_io_exceptions(carto::GeoJSONVectorTileDataSource::updateGeoJSONStringFeature)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::removeGeoJSONFeature)
 %std_io_exceptions(carto::GeoJSONVectorTileDataSource::setLayerFeatureCollection)
 

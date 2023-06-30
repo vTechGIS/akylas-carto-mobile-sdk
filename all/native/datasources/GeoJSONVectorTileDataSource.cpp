@@ -130,11 +130,26 @@ namespace carto
         try
         {
             std::lock_guard<std::mutex> lock(_mutex);
-            _tileBuilder->importGeoJSONFeature(layerIndex, geoJSON.toPicoJSON());
+            _tileBuilder->importGeoJSONFeature(layerIndex, geoJSON.toPicoJSON(), false);
         }
         catch (const std::exception &ex)
         {
             Log::Errorf("GeoJSONVectorTileDataSource::addGeoJSONFeature: Failed to update layer: %s", ex.what());
+            throw GenericException("Failed to set layer contents", ex.what());
+        }
+        notifyTilesChanged(false);
+    }
+
+    void GeoJSONVectorTileDataSource::updateGeoJSONFeature(int layerIndex, const Variant &geoJSON)
+    {
+        try
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _tileBuilder->importGeoJSONFeature(layerIndex, geoJSON.toPicoJSON(), true);
+        }
+        catch (const std::exception &ex)
+        {
+            Log::Errorf("GeoJSONVectorTileDataSource::updateGeoJSONFeature: Failed to update layer: %s", ex.what());
             throw GenericException("Failed to set layer contents", ex.what());
         }
         notifyTilesChanged(false);
@@ -173,11 +188,32 @@ namespace carto
                 throw ParseException(std::string("GeoJSON parsing failed: ") + err, geoJSON);
             }
             std::lock_guard<std::mutex> lock(_mutex);
-            _tileBuilder->importGeoJSONFeature(layerIndex, val);
+            _tileBuilder->importGeoJSONFeature(layerIndex, val, false);
         }
         catch (const std::exception &ex)
         {
             Log::Errorf("GeoJSONVectorTileDataSource::addGeoJSONStringFeature: Failed to update layer: %s", ex.what());
+            throw GenericException("Failed to set layer contents", ex.what());
+        }
+        notifyTilesChanged(false);
+    }
+
+    void GeoJSONVectorTileDataSource::updateGeoJSONStringFeature(int layerIndex, const std::string &geoJSON)
+    {
+        try
+        {
+            picojson::value val;
+            std::string err = picojson::parse(val, geoJSON);
+            if (!err.empty())
+            {
+                throw ParseException(std::string("GeoJSON parsing failed: ") + err, geoJSON);
+            }
+            std::lock_guard<std::mutex> lock(_mutex);
+            _tileBuilder->importGeoJSONFeature(layerIndex, val, true);
+        }
+        catch (const std::exception &ex)
+        {
+            Log::Errorf("GeoJSONVectorTileDataSource::updateGeoJSONStringFeature: Failed to update layer: %s", ex.what());
             throw GenericException("Failed to set layer contents", ex.what());
         }
         notifyTilesChanged(false);
@@ -233,17 +269,17 @@ namespace carto
                 if (auto point = std::dynamic_pointer_cast<PointGeometry>(geometry))
                 {
                     mbvtbuilder::MBVTTileBuilder::MultiPoint points = {convertPoint(projection, point->getPos())};
-                    _tileBuilder->addMultiPoint(layerIndex, std::move(points), id, std::move(properties));
+                    _tileBuilder->addMultiPoint(layerIndex, std::move(points), id, std::move(properties), false);
                 }
                 else if (auto line = std::dynamic_pointer_cast<LineGeometry>(geometry))
                 {
                     mbvtbuilder::MBVTTileBuilder::MultiLineString lines = {convertPoints(projection, line->getPoses())};
-                    _tileBuilder->addMultiLineString(layerIndex, std::move(lines), id, std::move(properties));
+                    _tileBuilder->addMultiLineString(layerIndex, std::move(lines), id, std::move(properties), false);
                 }
                 else if (auto polygon = std::dynamic_pointer_cast<PolygonGeometry>(geometry))
                 {
                     mbvtbuilder::MBVTTileBuilder::MultiPolygon polygons = {convertPointsList(projection, polygon->getRings())};
-                    _tileBuilder->addMultiPolygon(layerIndex, std::move(polygons), id, std::move(properties));
+                    _tileBuilder->addMultiPolygon(layerIndex, std::move(polygons), id, std::move(properties), false);
                 }
                 else if (auto multiPoint = std::dynamic_pointer_cast<MultiPointGeometry>(geometry))
                 {
@@ -253,7 +289,7 @@ namespace carto
                     {
                         points.push_back(convertPoint(projection, multiPoint->getGeometry(i)->getPos()));
                     }
-                    _tileBuilder->addMultiPoint(layerIndex, std::move(points), id, std::move(properties));
+                    _tileBuilder->addMultiPoint(layerIndex, std::move(points), id, std::move(properties), false);
                 }
                 else if (auto multiLine = std::dynamic_pointer_cast<MultiLineGeometry>(geometry))
                 {
@@ -263,7 +299,7 @@ namespace carto
                     {
                         lines.push_back(convertPoints(projection, multiLine->getGeometry(i)->getPoses()));
                     }
-                    _tileBuilder->addMultiLineString(layerIndex, std::move(lines), id, std::move(properties));
+                    _tileBuilder->addMultiLineString(layerIndex, std::move(lines), id, std::move(properties), false);
                 }
                 else if (auto multiPolygon = std::dynamic_pointer_cast<MultiPolygonGeometry>(geometry))
                 {
@@ -273,7 +309,7 @@ namespace carto
                     {
                         polygons.push_back(convertPointsList(projection, multiPolygon->getGeometry(i)->getRings()));
                     }
-                    _tileBuilder->addMultiPolygon(layerIndex, std::move(polygons), id, std::move(properties));
+                    _tileBuilder->addMultiPolygon(layerIndex, std::move(polygons), id, std::move(properties), false);
                 }
                 else
                 {

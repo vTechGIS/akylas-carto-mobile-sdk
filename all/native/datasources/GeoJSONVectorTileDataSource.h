@@ -83,6 +83,14 @@ namespace carto {
         void addGeoJSONFeature(int layerIndex, const Variant& geoJSON);
 
         /**
+         * Sets the features of the specified layer if it already exists.
+         * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
+         * @param geoJSON A geojson type variant that MUST contain single Feature element.
+         * @throws std::runtime_error If an error occured during updating the layer.
+         */
+        void updateGeoJSONFeature(int layerIndex, const Variant& geoJSON);
+
+        /**
          * Sets the features of the specified layer.
          * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
          * @param geoJSON A geojson string that MUST contain single FeatureColletion element.
@@ -97,6 +105,14 @@ namespace carto {
          * @throws std::runtime_error If an error occured during updating the layer.
          */
         void addGeoJSONStringFeature(int layerIndex, const std::string& geoJSON);
+
+        /**
+         * Sets the features of the specified layer if it already exists.
+         * @param layerIndex The index of the layer. A layer with empty name will be created if it does not exist yet.
+         * @param geoJSON A geojson string that MUST contain single Feature element.
+         * @throws std::runtime_error If an error occured during updating the layer.
+         */
+        void updateGeoJSONStringFeature(int layerIndex, const std::string& geoJSON);
 
         /**
          * Sets the features of the specified layer.
