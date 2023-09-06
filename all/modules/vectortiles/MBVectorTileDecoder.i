@@ -3,7 +3,7 @@
 
 %module MBVectorTileDecoder
 
-!proxy_imports(carto::MBVectorTileDecoder, core.BinaryData, core.StringVector, graphics.Color, styles.CompiledStyleSet, styles.CartoCSSStyleSet, vectortiles.VectorTileDecoder)
+!proxy_imports(carto::MBVectorTileDecoder, core.BinaryData, core.StringVector, core.StringMap, graphics.Color, styles.CompiledStyleSet, styles.CartoCSSStyleSet, vectortiles.VectorTileDecoder)
 
 %{
 #include "vectortiles/MBVectorTileDecoder.h"
@@ -13,8 +13,10 @@
 
 %include <std_shared_ptr.i>
 %include <std_vector.i>
+%include <std_map.i>
 %include <cartoswig.i>
 
+%import "core/StringMap.i"
 %import "core/BinaryData.i"
 %import "styles/CompiledStyleSet.i"
 %import "styles/CartoCSSStyleSet.i"
@@ -31,6 +33,8 @@
 %std_exceptions(carto::MBVectorTileDecoder::setCartoCSSStyleSet)
 %std_exceptions(carto::MBVectorTileDecoder::getStyleParameter)
 %std_exceptions(carto::MBVectorTileDecoder::setStyleParameter)
+%std_exceptions(carto::MBVectorTileDecoder::setStyleParameters)
+%std_exceptions(carto::MBVectorTileDecoder::setJSONStyleParameters)
 %ignore carto::MBVectorTileDecoder::isCartoCSSLayerNamesIgnored;
 %ignore carto::MBVectorTileDecoder::setCartoCSSLayerNamesIgnored;
 %ignore carto::MBVectorTileDecoder::getLayerNameOverride;

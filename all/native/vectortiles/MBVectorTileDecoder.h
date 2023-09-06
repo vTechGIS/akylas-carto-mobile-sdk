@@ -98,6 +98,20 @@ namespace carto {
         bool setStyleParameter(const std::string& param, const std::string& value);
 
         /**
+         * Sets the values of the specified parameters.
+         * The style parameters must be declared in the current style.
+         * @param params The getStyleParameters to set.
+         */
+        void setStyleParameters(const std::map<std::string, std::string>& params);
+        /**
+         * Sets the values of the specified parameters.
+         * The style parameters must be declared in the current style.
+         * @param params The getStyleParameters to set.
+         */
+        void setJSONStyleParameters(const std::string& params);
+
+
+        /**
          * Returns the value of feature id override flag. This is intended for cases when feature ids in tile are not globally unique.
          * @return The value of feature id override flag.
          */
@@ -144,12 +158,14 @@ namespace carto {
 
         virtual std::shared_ptr<VectorTileFeature> decodeFeature(long long id, const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds) const;
 
-        virtual std::shared_ptr<VectorTileFeatureCollection> decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds) const;
+        virtual std::shared_ptr<VectorTileFeatureCollection> decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds, const std::vector<std::string>& onlyLayers) const;
 
         virtual std::shared_ptr<TileMap> decodeTile(const vt::TileId& tile, const vt::TileId& targetTile, const std::shared_ptr<vt::TileTransformer>& tileTransformer, const std::shared_ptr<BinaryData>& tileData) const;
     
     protected:
         void updateCurrentStyleSet(const std::variant<std::shared_ptr<CompiledStyleSet>, std::shared_ptr<CartoCSSStyleSet> >& styleSet);
+        bool setStyleParameterInternal(const std::string& param, const std::string& value);
+        void updateSymbolizer();
 
         static const int DEFAULT_TILE_SIZE;
         static const int STROKEMAP_SIZE;

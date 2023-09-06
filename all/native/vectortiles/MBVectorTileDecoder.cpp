@@ -42,7 +42,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 namespace carto {
-    
+
     MBVectorTileDecoder::MBVectorTileDecoder(const std::shared_ptr<CompiledStyleSet>& compiledStyleSet) :
         _logger(std::make_shared<MVTLogger>("MBVectorTileDecoder")),
         _featureIdOverride(false),
@@ -174,59 +174,103 @@ namespace carto {
         return std::string();
     }
 
+    void MBVectorTileDecoder::updateSymbolizer() {
+        auto parameterValueMap = std::make_shared<std::map<std::string, mvt::Value>>(*_symbolizerContextSettings->getNutiParameterValueMap());
+        for (auto it2 = _parameterValueMap.begin(); it2 != _parameterValueMap.end(); it2++) {
+            (*parameterValueMap)[it2->first] = it2->second;
+        }
+        _symbolizerContextSettings = std::make_shared<mvt::SymbolizerContext::Settings>(_symbolizerContextSettings->getTileSize(), parameterValueMap, _symbolizerContextSettings->getFallbackFont());
+        _symbolizerContext = std::make_shared<mvt::SymbolizerContext>(_symbolizerContext->getBitmapManager(), _symbolizerContext->getFontManager(), _symbolizerContext->getStrokeMap(), _symbolizerContext->getGlyphMap(), *_symbolizerContextSettings);
+    }
+
+    bool MBVectorTileDecoder::setStyleParameterInternal(const std::string& param, const std::string& value) {
+        auto it = _map->getNutiParameterMap().find(param);
+        if (it == _map->getNutiParameterMap().end()) {
+            Log::Errorf("MBVectorTileDecoder::setStyleParameter: Could not find parameter: %s", param.c_str());
+            return false;
+        }
+        const mvt::NutiParameter& nutiParam = it->second;
+
+        if (!nutiParam.getEnumMap().empty()) {
+            auto it2 = nutiParam.getEnumMap().find(value);
+            if (it2 == nutiParam.getEnumMap().end()) {
+                Log::Errorf("MBVectorTileDecoder::setStyleParameter: Illegal enum value for parameter: %s/%s", param.c_str(), value.c_str());
+                return false;
+            }
+            _parameterValueMap[param] = it2->second;
+        } else {
+            try {
+                mvt::Value val = nutiParam.getDefaultValue();
+                if (std::get_if<bool>(&val)) {
+                    if (value == "true") {
+                        val = mvt::Value(true);
+                    } else if (value == "false") {
+                        val = mvt::Value(false);
+                    } else {
+                        val = mvt::Value(boost::lexical_cast<bool>(value));
+                    }
+                } else if (std::get_if<long long>(&val)) {
+                    val = mvt::Value(boost::lexical_cast<long long>(value));
+                } else if (std::get_if<double>(&val)) {
+                    val = mvt::Value(boost::lexical_cast<double>(value));
+                } else if (std::get_if<std::string>(&val)) {
+                    val = value;
+                }
+                _parameterValueMap[param] = val;
+            }
+            catch (const std::exception& ex) {
+                Log::Errorf("MBVectorTileDecoder::setStyleParameter: Exception while converting parameter %s/%s: %s", param.c_str(), value.c_str(), ex.what());
+                return false;
+            }
+        }
+        return true;
+    }
+
     bool MBVectorTileDecoder::setStyleParameter(const std::string& param, const std::string& value) {
         {
             std::lock_guard<std::mutex> lock(_mutex);
-    
-            auto it = _map->getNutiParameterMap().find(param);
-            if (it == _map->getNutiParameterMap().end()) {
-                Log::Errorf("MBVectorTileDecoder::setStyleParameter: Could not find parameter: %s", param.c_str());
-                return false;
-            }
-            const mvt::NutiParameter& nutiParam = it->second;
 
-            if (!nutiParam.getEnumMap().empty()) {
-                auto it2 = nutiParam.getEnumMap().find(value);
-                if (it2 == nutiParam.getEnumMap().end()) {
-                    Log::Errorf("MBVectorTileDecoder::setStyleParameter: Illegal enum value for parameter: %s/%s", param.c_str(), value.c_str());
-                    return false;
-                }
-                _parameterValueMap[param] = it2->second;
-            } else {
-                try {
-                    mvt::Value val = nutiParam.getDefaultValue();
-                    if (std::get_if<bool>(&val)) {
-                        if (value == "true") {
-                            val = mvt::Value(true);
-                        } else if (value == "false") {
-                            val = mvt::Value(false);
-                        } else {
-                            val = mvt::Value(boost::lexical_cast<bool>(value));
-                        }
-                    } else if (std::get_if<long long>(&val)) {
-                        val = mvt::Value(boost::lexical_cast<long long>(value));
-                    } else if (std::get_if<double>(&val)) {
-                        val = mvt::Value(boost::lexical_cast<double>(value));
-                    } else if (std::get_if<std::string>(&val)) {
-                        val = value;
-                    }
-                    _parameterValueMap[param] = val;
-                }
-                catch (const std::exception& ex) {
-                    Log::Errorf("MBVectorTileDecoder::setStyleParameter: Exception while converting parameter %s/%s: %s", param.c_str(), value.c_str(), ex.what());
-                    return false;
-                }
-            }
+            setStyleParameterInternal(param, value);
 
-            auto parameterValueMap = std::make_shared<std::map<std::string, mvt::Value>>(*_symbolizerContextSettings->getNutiParameterValueMap());
-            for (auto it2 = _parameterValueMap.begin(); it2 != _parameterValueMap.end(); it2++) {
-                (*parameterValueMap)[it2->first] = it2->second;
-            }
-            _symbolizerContextSettings = std::make_shared<mvt::SymbolizerContext::Settings>(_symbolizerContextSettings->getTileSize(), parameterValueMap, _symbolizerContextSettings->getFallbackFont());
-            _symbolizerContext = std::make_shared<mvt::SymbolizerContext>(_symbolizerContext->getBitmapManager(), _symbolizerContext->getFontManager(), _symbolizerContext->getStrokeMap(), _symbolizerContext->getGlyphMap(), *_symbolizerContextSettings);
+            updateSymbolizer();
         }
         notifyDecoderChanged();
         return true;
+    }
+    void MBVectorTileDecoder::setJSONStyleParameters(const std::string& params) {
+        try
+        {
+            picojson::value val;
+            std::string err = picojson::parse(val, params);
+            if (!err.empty())
+            {
+                throw ParseException(std::string("JSON parsing failed: ") + err, params);
+            }
+            const picojson::object &jsonValues = val.get<picojson::object>();
+            {
+                std::lock_guard<std::mutex> lock(_mutex);
+                for (auto it = jsonValues.begin(); it != jsonValues.end(); it++) {
+                    setStyleParameterInternal(it->first, it->second.get<std::string>());
+                }
+                updateSymbolizer();
+            }
+            notifyDecoderChanged();
+        }
+        catch (const std::exception &ex)
+        {
+            Log::Errorf("MBVectorTileDecoder::setJSONStyleParameters: Failed to set parameters: %s", ex.what());
+            throw GenericException("Failed to set style parameters", ex.what());
+        }
+    }
+    void MBVectorTileDecoder::setStyleParameters(const std::map<std::string, std::string>& params) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        {
+            for (auto p = params.begin(); p != params.end(); ++p)  {
+                setStyleParameterInternal(p->first, p->second);
+            }
+            updateSymbolizer();
+        }
+        notifyDecoderChanged();
     }
 
     bool MBVectorTileDecoder::isFeatureIdOverride() const {
@@ -356,7 +400,7 @@ namespace carto {
         return std::shared_ptr<VectorTileFeature>();
     }
 
-    std::shared_ptr<VectorTileFeatureCollection> MBVectorTileDecoder::decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds) const {
+    std::shared_ptr<VectorTileFeatureCollection> MBVectorTileDecoder::decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds, const std::vector<std::string>& onlyLayers) const {
         if (!tileData) {
             Log::Warn("MBVectorTileDecoder::decodeFeatures: Null tile data");
             return std::shared_ptr<VectorTileFeatureCollection>();
@@ -376,8 +420,15 @@ namespace carto {
                     decoder = _cachedFeatureDecoder.second;
                 }
             }
-
-            for (const std::string& mvtLayerName : decoder->getLayerNames()) {
+            std::vector<std::string> layers = decoder->getLayerNames();
+            if (onlyLayers.size() > 0) {
+                std::vector<std::string> result;
+                std::copy_if(onlyLayers.begin(), onlyLayers.end(), std::back_inserter(result), [&layers](std::string str) {
+                    return std::find(layers.begin(), layers.end(), str) != layers.end();
+                });
+                layers = result;
+            }
+            for (const std::string& mvtLayerName : layers) {
                 for (std::shared_ptr<mvt::FeatureDecoder::FeatureIterator> mvtIt = decoder->createLayerFeatureIterator(mvtLayerName, nullptr); mvtIt->valid(); mvtIt->advance()) {
                     std::shared_ptr<const mvt::Geometry> mvtGeometry = mvtIt->getGeometry();
                     if (!mvtGeometry) {
