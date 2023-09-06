@@ -46,9 +46,11 @@ import com.carto.datasources.TileDataSource;
 import com.carto.geometry.Feature;
 import com.carto.geometry.FeatureCollection;
 import com.carto.geometry.GeoJSONGeometryReader;
+import com.carto.geometry.GeoJSONGeometryWriter;
 import com.carto.geometry.Geometry;
 import com.carto.geometry.LineGeometry;
 import com.carto.geometry.MultiLineGeometry;
+import com.carto.geometry.PointGeometry;
 import com.carto.geometry.PolygonGeometry;
 import com.carto.geometry.VectorTileFeatureCollection;
 import com.carto.graphics.Color;
@@ -98,22 +100,22 @@ public class SecondFragment extends Fragment {
     private final String TAG = "SecondFragment";
 
 
-    class MathRouteTask extends TimerTask
-    {
-        MathRouteTask(MultiValhallaOfflineRoutingService routingService, Projection projection, String profile) {
-            super();
-            this.profile = profile;
-            this.projection = projection;
-            this.routingService = routingService;
-        }
-        MultiValhallaOfflineRoutingService routingService;
-        Projection projection;
-        String profile;
-        public void run()
-        {
-            matchRouteTest(this.routingService, this.projection, this.profile);
-        }
-    }
+//    class MathRouteTask extends TimerTask
+//    {
+//        MathRouteTask(MultiValhallaOfflineRoutingService routingService, Projection projection, String profile) {
+//            super();
+//            this.profile = profile;
+//            this.projection = projection;
+//            this.routingService = routingService;
+//        }
+//        MultiValhallaOfflineRoutingService routingService;
+//        Projection projection;
+//        String profile;
+//        public void run()
+//        {
+//            matchRouteTest(this.routingService, this.projection, this.profile);
+//        }
+//    }
 
     public static SecondFragment newInstance() {
         return new SecondFragment();
@@ -349,7 +351,7 @@ public class SecondFragment extends Fragment {
         });
 
     }
-
+    VectorTileLayer mainMapLayer;
     void addMap(String dataPath) {
         MultiTileDataSource  dataSource = new MultiTileDataSource();
         MBTilesTileDataSource sourceFrance = null;
@@ -358,10 +360,10 @@ public class SecondFragment extends Fragment {
         MBTilesTileDataSource sourceWorld = null;
         MBVectorTileDecoder decoder = null;
         try {
-            sourceFrance = new MBTilesTileDataSource( dataPath+"/france/france_full.mbtiles");
-//            sourceItaly = new MBTilesTileDataSource( dataPath+"/italy/italy.mbtiles");
-            sourceFranceContours = new MBTilesTileDataSource( dataPath+"/france/france_contours.mbtiles");
-            sourceWorld = new MBTilesTileDataSource( dataPath+"/world.mbtiles");
+            sourceFrance = new MBTilesTileDataSource( dataPath+"/france/france.mbtiles");
+            sourceItaly = new MBTilesTileDataSource( dataPath+"/netherlands/netherlands.mbtiles");
+//            sourceFranceContours = new MBTilesTileDataSource( dataPath+"/france/france_contours.mbtiles");
+//            sourceWorld = new MBTilesTileDataSource( dataPath+"/world.mbtiles");
             final File file = new File(dataPath+"/osm.zip");
             final FileInputStream stream = new java.io.FileInputStream(file);
             final DataInputStream dataInputStream = new java.io.DataInputStream(stream);
@@ -372,12 +374,13 @@ public class SecondFragment extends Fragment {
             e.printStackTrace();
         }
 
-        MergedMBVTTileDataSource mergedSource = new MergedMBVTTileDataSource(sourceFranceContours, sourceFrance);
-        dataSource.add(mergedSource);
-//        dataSource.add(sourceItaly);
-        dataSource.add(sourceWorld);
-        VectorTileLayer backlayer  = new VectorTileLayer(dataSource, decoder);
-        mapView.getLayers().add(backlayer);
+//        MergedMBVTTileDataSource mergedSource = new MergedMBVTTileDataSource(sourceFranceContours, sourceFrance);
+        dataSource.add(sourceFrance);
+//        dataSource.add(mergedSource);
+        dataSource.add(sourceItaly);
+//        dataSource.add(sourceWorld);
+        mainMapLayer  = new VectorTileLayer(dataSource, decoder);
+        mapView.getLayers().add(mainMapLayer);
     }
     void addRoutes(String dataPath) {
         MultiTileDataSource  dataSource = new MultiTileDataSource();
@@ -437,7 +440,7 @@ public class SecondFragment extends Fragment {
 //        mapView.getLayers().add(layer);
 
 
-        testLineDrawing();
+//        testLineDrawing();
 //        testLineDrawing2();
         final TextView textZoom = (TextView) view.findViewById(R.id.zoomText); // initiate the Seek bar
         mapView.setMapEventListener(new MapEventListener() {
@@ -465,7 +468,8 @@ public class SecondFragment extends Fragment {
         final Button modeButton = (Button) view.findViewById(R.id.modeButton); // initiate the Seek bar
         modeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-//                testValhallaBicycle(dataPath, options);
+                    // testVectorTileSearch("pub");
+               testValhallaBicycle(dataPath, options);
 //                testMatchRoute(options);
 //                testVectoTileSearch(backlayer, options);
                 // Code here executes on main thread after user presses button
@@ -602,7 +606,7 @@ public class SecondFragment extends Fragment {
 
                         localSource.add(line);
                         MapBounds bounds = line.getGeometry().getBounds();
-                        mapView.moveToFitBounds(bounds, new ScreenBounds(), false, 0);
+                        mapView.moveToFitBounds(bounds, new ScreenBounds(), false, 10);
                     }
 //                    RouteMatchingRequest matchrequest = new RouteMatchingRequest(request.getProjection(), result.getPoints(), 1);
 //                    matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
@@ -616,79 +620,110 @@ public class SecondFragment extends Fragment {
         });
         thread.start();
     }
+//
+//    public void matchRouteTest(final MultiValhallaOfflineRoutingService routingService, Projection projection, String profile) {
+//        Thread thread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    routingService.setProfile(profile);
+//                    MapPosVector vector = new MapPosVector();
+//                    vector.add(new MapPos(5.721619, 45.193549999999995));
+//                    vector.add(new MapPos(5.721585, 45.193549));
+//                    RouteMatchingRequest matchrequest = new RouteMatchingRequest(projection, vector, 1);
+//                    matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
+//                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.sac_scale\", \"edge.use\"], \"action\": \"include\" }"));
+//                    RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
+//                    largeLog(TAG,"matchresult "+ matchresult.getRawResult());
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+//        thread.start();
+//    }
+//
+//        public void testMatchRoute(String dataPath, Options options) {
+//            Projection projection = options.getBaseProjection();
+//            MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
+//            routingService.add(dataPath+"/france.vtiles");
+//            LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
+//            Timer timer = new Timer();
+//            TimerTask task = new MathRouteTask(routingService, options.getBaseProjection(), "pedestrian");
+//            timer.schedule(task, 0, 500);
+//        }
+//
+//    public void testValhalla(String dataPath, Options options) {
+//        Projection projection = options.getBaseProjection();
+//        MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
+////        routingService.add(dataPath+"/italy/italy.vtiles");
+//        routingService.add(dataPath+"/france/france.vtiles");
+//        LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
+//        VectorLayer vectorLayer = new VectorLayer(localSource);
+//        mapView.getLayers().add(vectorLayer);
+//        MapPosVector vector = new MapPosVector();
+//        vector.add(new MapPos(5.7233, 45.1924));
+//        vector.add(new MapPos(5.7247, 45.1992));
+//        RoutingRequest request = new RoutingRequest(projection, vector);
+//        request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_ferry\":0,\"shortest\":false,\"use_hills\":1,\"max_hiking_difficulty\":6,\"step_penalty\":10,\"driveway_factor\":200,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4,\"sidewalk_factor\":10}}"));
+//        request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
+//        runValhallaInThread(routingService, request, "pedestrian", localSource);
+////            request = new RoutingRequest(projection, vector);
+////            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":1,\"use_ferry\":0,\"use_hills\":0,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+////            runValhallaInThread(routingService, request, "pedestrian", localSource);
+////            request = new RoutingRequest(projection, vector);
+////            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":true,\"step_penalty\":5,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
+////            runValhallaInThread(routingService, request, "pedestrian", localSource);
+//    }
 
-    public void matchRouteTest(final MultiValhallaOfflineRoutingService routingService, Projection projection, String profile) {
+    public void testVectorTileSearch(String query) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    routingService.setProfile(profile);
-                    MapPosVector vector = new MapPosVector();
-                    vector.add(new MapPos(5.721619, 45.193549999999995));
-                    vector.add(new MapPos(5.721585, 45.193549));
-                    RouteMatchingRequest matchrequest = new RouteMatchingRequest(projection, vector, 1);
-                    matchrequest.setCustomParameter("shape_match", new Variant("edge_walk"));
-                    matchrequest.setCustomParameter("filters", Variant.fromString("{ \"attributes\": [\"edge.surface\", \"edge.road_class\", \"edge.sac_scale\", \"edge.use\"], \"action\": \"include\" }"));
-                    RouteMatchingResult matchresult = routingService.matchRoute(matchrequest);
-                    largeLog(TAG,"matchresult "+ matchresult.getRawResult());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                long startTime = System.nanoTime();
+                SearchRequest request = new SearchRequest();
+                request.setFilterExpression("regexp_ilike(name,'.*" + query + ".*') OR regexp_ilike(class,'.*" + query + ".*')");
+                request.setSearchRadius(2000);
+                request.setGeometry(new PointGeometry(mapView.getFocusPos()));
+                request.setProjection(mapView.getOptions().getBaseProjection());
+                VectorTileSearchService service = new VectorTileSearchService(mainMapLayer.getDataSource(), mainMapLayer.getTileDecoder());
+                service.setMaxZoom(14);
+                service.setMinZoom(14);
+                StringVector layers = new StringVector();
+                layers.add("poi");
+                layers.add("transportation_name");
+                layers.add("place");
+                service.setLayers(layers);
+                service.setSortByDistance(true);
+                service.setPreventDuplicates(true);
+                VectorTileFeatureCollection result = service.findFeatures(request);
+                Log.d("TAG", "testVectorTileSearch done " + result.getFeatureCount() + " " + ((System.nanoTime() - startTime)/1000000));
+                GeoJSONGeometryWriter writer = new GeoJSONGeometryWriter();
+                ;
+                largeLog("TAG", writer.writeFeatureCollection(result));
             }
         });
         thread.start();
     }
 
-        public void testMatchRoute(String dataPath, Options options) {
-            Projection projection = options.getBaseProjection();
-            MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
-            routingService.add(dataPath+"/france.vtiles");
-            LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
-            Timer timer = new Timer();
-            TimerTask task = new MathRouteTask(routingService, options.getBaseProjection(), "pedestrian");
-            timer.schedule(task, 0, 500);
-        }
 
-    public void testValhalla(String dataPath, Options options) {
-        Projection projection = options.getBaseProjection();
-        MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
-//        routingService.add(dataPath+"/italy/italy.vtiles");
-        routingService.add(dataPath+"/france/france.vtiles");
-        LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
-        VectorLayer vectorLayer = new VectorLayer(localSource);
-        mapView.getLayers().add(vectorLayer);
-        MapPosVector vector = new MapPosVector();
-        vector.add(new MapPos(5.7233, 45.1924));
-        vector.add(new MapPos(5.7247, 45.1992));
-        RoutingRequest request = new RoutingRequest(projection, vector);
-        request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"use_ferry\":0,\"shortest\":false,\"use_hills\":1,\"max_hiking_difficulty\":6,\"step_penalty\":10,\"driveway_factor\":200,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4,\"sidewalk_factor\":10}}"));
-        request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
-        runValhallaInThread(routingService, request, "pedestrian", localSource);
+   public void testValhallaBicycle(String dataPath, Options options) {
+       Projection projection = options.getBaseProjection();
+       MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
+       routingService.add(dataPath+"/france/france.vtiles");
+       routingService.add(dataPath+"/netherlands/netherlands.vtiles");
+       LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
+       VectorLayer vectorLayer = new VectorLayer(localSource);
+       mapView.getLayers().add(vectorLayer);
+       MapPosVector vector = new MapPosVector();
+       vector.add(new MapPos(4.8714, 52.3839));
+       vector.add(new MapPos(4.9311, 52.3482));
+       RoutingRequest request = new RoutingRequest(projection, vector);
+       request.setCustomParameter("costing_options", Variant.fromString("{\"bicycle\":{\"non_network_penalty\":20,\"use_ferry\":0,\"shortest\":false,\"use_roads\":1.0,\"use_tracks\":0.5,\"bicycle_type\":\"Hybrid\"}}"));
+       request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
+       runValhallaInThread(routingService, request, "pedestrian", localSource);
 //            request = new RoutingRequest(projection, vector);
-//            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":false,\"step_penalty\":1,\"use_ferry\":0,\"use_hills\":0,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
-//            runValhallaInThread(routingService, request, "pedestrian", localSource);
-//            request = new RoutingRequest(projection, vector);
-//            request.setCustomParameter("costing_options", Variant.fromString("{\"pedestrian\":{\"driveway_factor\":10,\"max_hiking_difficulty\":6,\"shortest\":true,\"step_penalty\":5,\"use_ferry\":0,\"use_hills\":1,\"use_roads\":0,\"use_tracks\":1,\"walking_speed\":4}},\"directions_options\":{\"language\":\"en\"}}"));
-//            runValhallaInThread(routingService, request, "pedestrian", localSource);
-    }
-
-    public void testValhallaBicycle(String dataPath, Options options) {
-        Projection projection = options.getBaseProjection();
-        MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
-//        routingService.add(dataPath+"/italy/italy.vtiles");
-        routingService.add(dataPath+"/france/france.vtiles");
-        LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
-        VectorLayer vectorLayer = new VectorLayer(localSource);
-        mapView.getLayers().add(vectorLayer);
-        MapPosVector vector = new MapPosVector();
-        vector.add(new MapPos(5.726843476295472, 45.19021108701828));
-        vector.add(new MapPos(5.902746561696101, 45.28781046189793));
-        RoutingRequest request = new RoutingRequest(projection, vector);
-        request.setCustomParameter("costing_options", Variant.fromString("{\"bicycle\":{\"non_network_penalty\":20,\"use_ferry\":0,\"shortest\":false,\"use_roads\":1.0,\"use_tracks\":0.5,\"bicycle_type\":\"Hybrid\"}}"));
-        request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
-        runValhallaInThread(routingService, request, "bicycle", localSource);
-//            request = new RoutingRequest(projection, vector);
-    }
+   }
     public static void largeLog(String tag, String content) {
         if (content.length() > 4000) {
             Log.d(tag, content.substring(0, 4000));
