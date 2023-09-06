@@ -24,6 +24,7 @@
 %attribute(carto::VectorTileFeature, long long, Id, getId)
 %attributeval(carto::VectorTileFeature, carto::MapTile, MapTile, getMapTile)
 %attributestring(carto::VectorTileFeature, std::string, LayerName, getLayerName)
+%attribute(carto::VectorTileFeature, double, Distance, getDistance)
 !standard_equals(carto::VectorTileFeature);
 
 %include "geometry/VectorTileFeature.h"

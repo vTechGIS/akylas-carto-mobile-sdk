@@ -92,15 +92,16 @@ namespace carto {
          * @return The feature, if found. Null if not found.
          */
         virtual std::shared_ptr<VectorTileFeature> decodeFeature(long long id, const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds) const = 0;
-        
+
         /**
          * Decodes all features from the tile.
          * @param tile The tile coordinates.
          * @param tileData The tile data to use.
          * @param tileBounds The bounds for the tile (used for coordinate transformation).
+         * @param onlyLayers layers to filter (can be much faster)
          * @return The list of tile features.
          */
-        virtual std::shared_ptr<VectorTileFeatureCollection> decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds) const = 0;
+        virtual std::shared_ptr<VectorTileFeatureCollection> decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds, const std::vector<std::string>& onlyLayers) const = 0;
 
         /**
          * Loads the specified vector tile.

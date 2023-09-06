@@ -64,7 +64,9 @@ namespace carto {
 
                 const std::shared_ptr<VectorElement>& element = vectorData->getElements()[i];
 
-                if (proxy.testElement(element->getGeometry(), nullptr, Variant(element->getMetaData()))) {
+                double distance = proxy.testElement(element->getGeometry(), nullptr, Variant(element->getMetaData()));
+                if (distance >= 0) {
+                    // TODO: should we set the computed distance with setMetaDataElement?
                     elements.push_back(element);
                 }
             }

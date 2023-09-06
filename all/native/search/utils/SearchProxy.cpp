@@ -115,26 +115,6 @@ namespace {
         }
     }
 
-    double calculateDistance(const std::shared_ptr<carto::Geometry>& geometry1, const std::shared_ptr<carto::Geometry>& geometry2) {
-        if (auto multiGeometry1 = std::dynamic_pointer_cast<carto::MultiGeometry>(geometry1)) {
-            double dist = std::numeric_limits<double>::infinity();
-            for (int i = 0; i < multiGeometry1->getGeometryCount(); i++) {
-                dist = std::min(dist, calculateDistance(multiGeometry1->getGeometry(i), geometry2));
-            }
-            return dist;
-        }
-
-        if (auto multiGeometry2 = std::dynamic_pointer_cast<carto::MultiGeometry>(geometry2)) {
-            double dist = std::numeric_limits<double>::infinity();
-            for (int i = 0; i < multiGeometry2->getGeometryCount(); i++) {
-                dist = std::min(dist, calculateDistance(geometry1, multiGeometry2->getGeometry(i)));
-            }
-            return dist;
-        }
-
-        return boost::geometry::distance(convertToBoostGeometry(geometry1), convertToBoostGeometry(geometry2));
-    }
-
     bool matchRegexFilter(const carto::Variant& variant, const std::regex& re) {
         std::string str;
         switch (variant.getType()) {
@@ -307,6 +287,27 @@ namespace carto {
         }
     }
 
+    double SearchProxy::calculateDistance(const std::shared_ptr<carto::Geometry>& geometry1, const std::shared_ptr<carto::Geometry>& geometry2) {
+        if (auto multiGeometry1 = std::dynamic_pointer_cast<carto::MultiGeometry>(geometry1)) {
+            double dist = std::numeric_limits<double>::infinity();
+            for (int i = 0; i < multiGeometry1->getGeometryCount(); i++) {
+                dist = std::min(dist, calculateDistance(multiGeometry1->getGeometry(i), geometry2));
+            }
+            return dist;
+        }
+
+        if (auto multiGeometry2 = std::dynamic_pointer_cast<carto::MultiGeometry>(geometry2)) {
+            double dist = std::numeric_limits<double>::infinity();
+            for (int i = 0; i < multiGeometry2->getGeometryCount(); i++) {
+                dist = std::min(dist, calculateDistance(geometry1, multiGeometry2->getGeometry(i)));
+            }
+            return dist;
+        }
+
+        return boost::geometry::distance(convertToBoostGeometry(geometry1), convertToBoostGeometry(geometry2));
+    }
+
+
     const MapBounds& SearchProxy::getSearchBounds() const {
         return _searchBounds;
     }
@@ -328,27 +329,26 @@ namespace carto {
         return true;
     }
 
-    bool SearchProxy::testElement(const std::shared_ptr<Geometry>& geometry, const std::string* layerName, const Variant& var) const {
-        if (_re) {
-            if (!matchRegexFilter(var, *_re)) {
-                return false;
+    double SearchProxy::testElement(const std::shared_ptr<Geometry>& geometry, const std::string* layerName, const Variant& var) const {
+        double distance = 0;
+        if (_geometry) {
+            distance = calculateDistance(convertToEPSG3857(geometry, _projection), _geometry);
+            if (_searchRadius > 0 && distance > _searchRadius) {
+                return -1;
             }
         }
-
         if (_expr) {
             SearchQueryContext context(geometry, layerName, var);
             if (!_expr->evaluate(context)) {
-                return false;
+                return -1;
             }
         }
-
-        if (_searchRadius >= 0 && _geometry) {
-            if (calculateDistance(convertToEPSG3857(geometry, _projection), _geometry) > _searchRadius) {
-                return false;
+        if (_re) {
+            if (!matchRegexFilter(var, *_re)) {
+                return -1;
             }
         }
-
-        return true;
+        return distance;
     }
 
 }

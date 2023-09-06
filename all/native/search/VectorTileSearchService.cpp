@@ -22,6 +22,8 @@ namespace carto {
         _minZoom(0),
         _maxZoom(0),
         _maxResults(1000),
+        _sortByDistance(false),
+        _layers({}),
         _mutex()
     {
         if (!dataSource) {
@@ -76,6 +78,36 @@ namespace carto {
         _maxResults = maxResults;
     }
 
+    bool VectorTileSearchService::getSortByDistance() const {
+        return _sortByDistance;
+    }
+
+    void VectorTileSearchService::setSortByDistance(bool sortByDistance) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _sortByDistance = sortByDistance;
+    }
+
+    bool VectorTileSearchService::getPreventDuplicates() const {
+        return _preventDuplicates;
+    }
+
+    void VectorTileSearchService::setPreventDuplicates(bool preventDuplicates) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _preventDuplicates = preventDuplicates;
+    }
+
+    std::vector<std::string> VectorTileSearchService::getLayers() const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _layers;
+    }
+
+    void VectorTileSearchService::setLayers(const std::vector<std::string>& layers) {
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _layers = layers;
+        }
+    }
+
     std::shared_ptr<VectorTileFeatureCollection> VectorTileSearchService::findFeatures(const std::shared_ptr<SearchRequest>& request) const {
         if (!request) {
             throw NullArgumentException("Null request");
@@ -97,7 +129,7 @@ namespace carto {
 
         auto testTile = [&](const MapTile& mapTile, const MapBounds& tileBounds) {
             if (std::shared_ptr<TileData> tileData = _dataSource->loadTile(mapTile.getFlipped())) {
-                if (std::shared_ptr<VectorTileFeatureCollection> featureCollection = _tileDecoder->decodeFeatures(vt::TileId(mapTile.getZoom(), mapTile.getX(), mapTile.getY()), tileData->getData(), tileBounds)) {
+                if (std::shared_ptr<VectorTileFeatureCollection> featureCollection = _tileDecoder->decodeFeatures(vt::TileId(mapTile.getZoom(), mapTile.getX(), mapTile.getY()), tileData->getData(), tileBounds, _layers)) {
                     for (int i = 0; i < featureCollection->getFeatureCount(); i++) {
                         if (static_cast<int>(features.size()) >= maxResults) {
                             break;
@@ -105,12 +137,25 @@ namespace carto {
 
                         const std::shared_ptr<VectorTileFeature>& feature = featureCollection->getFeature(i);
 
-                        if (proxy.testElement(feature->getGeometry(), &feature->getLayerName(), feature->getProperties())) {
+                        double distance = proxy.testElement(feature->getGeometry(), &feature->getLayerName(), feature->getProperties());
+                        if (distance >= 0) {
+                            if (_preventDuplicates) {
+                                auto it = std::find_if(features.begin(), features.end(), [&](const std::shared_ptr<VectorTileFeature> sFeature)
+                                {
+                                    return sFeature->getLayerName() == feature->getLayerName() && sFeature->getProperties().getObjectElement("name") == feature->getProperties().getObjectElement("name") && SearchProxy::calculateDistance(sFeature->getGeometry(), feature->getGeometry()) <= 0.001;
+                                });
+                                if (it != features.end()) {
+                                    continue;
+                                }
+                            }
+                            if (distance > 0) {
+                                feature->setDistance(distance);
+                            }
                             features.push_back(feature);
                         }
                     }
                 }
-            }        
+            }
         };
 
         for (int zoom = minZoom; zoom <= maxZoom; zoom++) {
@@ -129,6 +174,11 @@ namespace carto {
                     }
                 }
             }
+        }
+        if (_sortByDistance) {
+            std::sort(features.begin(), features.end(), [](const std::shared_ptr<VectorTileFeature> feature1, const std::shared_ptr<VectorTileFeature> feature2) {
+                return feature1->getDistance() < feature2->getDistance();
+            });
         }
         return std::make_shared<VectorTileFeatureCollection>(features);
     }

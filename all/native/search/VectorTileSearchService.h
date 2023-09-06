@@ -84,6 +84,39 @@ namespace carto {
         void setMaxResults(int maxResults);
 
         /**
+         * Returns wether result features are sorted by distance
+         * @return wether result features are sorted by distance
+         */
+        bool getSortByDistance() const;
+        /**
+         * Sets wether to sort result features by distance
+         * @param sortByDistance wether to sort result features by distance
+         */
+        void setSortByDistance(bool sortByDistance);
+        /**
+         * Returns wether to prevent duplicate elements
+         * @return wether to prevent duplicate elements
+         */
+        bool getPreventDuplicates() const;
+        /**
+         * Sets wether to prevent duplicate elements (present in different tiles)
+         * @param preventDuplicates wether to prevent duplicate elements
+         */
+        void setPreventDuplicates(bool preventDuplicates);
+
+
+        /**
+         * Returns the layers to filter while decoding tiles.
+         * @return The list of layers.
+         */
+        std::vector<std::string> getLayers() const;
+        /**
+         * Sets the layers to filter.
+         * @param subdomains The list of layers to filter.
+         */
+        void setLayers(const std::vector<std::string>& layers);
+
+        /**
          * Searches for the features specified by search request from the vector tiles bound to the service.
          * The zoom level range used for searching is specified using minZoom/maxZoom attributes of the search service.
          * Depending on the data source, this method may perform slow IO operations and may need to be run in background thread.
@@ -99,6 +132,9 @@ namespace carto {
         int _minZoom;
         int _maxZoom;
         int _maxResults;
+        bool _sortByDistance;
+        bool _preventDuplicates;
+        std::vector<std::string> _layers;
 
         mutable std::mutex _mutex;
     };

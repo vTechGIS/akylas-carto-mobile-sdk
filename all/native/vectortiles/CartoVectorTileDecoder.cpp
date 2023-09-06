@@ -195,7 +195,7 @@ namespace carto {
         return std::shared_ptr<VectorTileFeature>();
     }
 
-    std::shared_ptr<VectorTileFeatureCollection> CartoVectorTileDecoder::decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds) const {
+    std::shared_ptr<VectorTileFeatureCollection> CartoVectorTileDecoder::decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds, const std::vector<std::string>& onlyLayers) const {
         if (!tileData) {
             Log::Warn("CartoVectorTileDecoder::decodeFeatures: Null tile data");
             return std::shared_ptr<VectorTileFeatureCollection>();

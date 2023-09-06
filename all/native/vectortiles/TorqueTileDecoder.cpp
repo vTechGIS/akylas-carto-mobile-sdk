@@ -105,7 +105,7 @@ namespace carto {
         return std::shared_ptr<VectorTileFeature>();
     }
 
-    std::shared_ptr<VectorTileFeatureCollection> TorqueTileDecoder::decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds) const {
+    std::shared_ptr<VectorTileFeatureCollection> TorqueTileDecoder::decodeFeatures(const vt::TileId& tile, const std::shared_ptr<BinaryData>& tileData, const MapBounds& tileBounds, const std::vector<std::string>& onlyLayers) const {
         Log::Warn("TorqueTileDecoder::decodeFeatures: Not implemented");
         return std::shared_ptr<VectorTileFeatureCollection>();
     }

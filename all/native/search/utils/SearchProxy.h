@@ -31,7 +31,9 @@ namespace carto {
 
         bool testBounds(const MapBounds& bounds) const;
 
-        bool testElement(const std::shared_ptr<Geometry>& geometry, const std::string* layerName, const Variant& var) const;
+        double testElement(const std::shared_ptr<Geometry>& geometry, const std::string* layerName, const Variant& var) const;
+
+        static double calculateDistance(const std::shared_ptr<carto::Geometry>& geometry1, const std::shared_ptr<carto::Geometry>& geometry2);
 
     protected:
         std::shared_ptr<SearchRequest> _request;

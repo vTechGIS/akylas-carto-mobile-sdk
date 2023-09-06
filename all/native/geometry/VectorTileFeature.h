@@ -48,11 +48,20 @@ namespace carto {
          * @return The layer name of the feature.
          */
         const std::string& getLayerName() const;
+
+        double getDistance() const;
+        void setDistance(double value); 
         
     protected:
         const long long _id;
         const MapTile _mapTile;
         const std::string _layerName;
+
+        /**
+         * Distance is used for search results to get distance for search geometry
+         * Initialized with -1
+         */
+        double _distance;
     };
     
 }

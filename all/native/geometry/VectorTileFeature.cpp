@@ -6,7 +6,8 @@ namespace carto {
         Feature(geometry, std::move(properties)),
         _id(id),
         _mapTile(mapTile),
-        _layerName(layerName)
+        _layerName(layerName),
+        _distance(-1)
     {
     }
     
@@ -25,4 +26,10 @@ namespace carto {
         return _layerName;
     }
     
+    double VectorTileFeature::getDistance() const {
+        return _distance;
+    }
+    void VectorTileFeature::setDistance(double value) {
+        _distance = value;
+    }
 }

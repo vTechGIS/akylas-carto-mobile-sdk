@@ -67,7 +67,8 @@ namespace carto {
 
             const std::shared_ptr<Feature>& feature = _featureCollection->getFeature(i);
 
-            if (proxy.testElement(feature->getGeometry(), nullptr, feature->getProperties())) {
+            double distance = proxy.testElement(feature->getGeometry(), nullptr, feature->getProperties());
+            if (distance >= 0) {
                 features.push_back(feature);
             }
         }
