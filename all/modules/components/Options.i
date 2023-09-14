@@ -44,6 +44,7 @@
 %attribute(carto::Options, bool, RestrictedPanning, isRestrictedPanning, setRestrictedPanning)
 %attribute(carto::Options, bool, TiltGestureReversed, isTiltGestureReversed, setTiltGestureReversed)
 %attribute(carto::Options, bool, ZoomGestures, isZoomGestures, setZoomGestures)
+%attribute(carto::Options, bool, LayersLabelsProcessedInReverseOrder, isLayersLabelsProcessedInReverseOrder, setLayersLabelsProcessedInReverseOrder)
 %attributeval(carto::Options, carto::MapRange, ZoomRange, getZoomRange, setZoomRange)
 %attributeval(carto::Options, carto::MapRange, TiltRange, getTiltRange, setTiltRange)
 %attributeval(carto::Options, carto::MapBounds, PanBounds, getPanBounds, setPanBounds)

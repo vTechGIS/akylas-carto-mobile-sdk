@@ -108,6 +108,8 @@ namespace carto {
         void captureRendering(const std::shared_ptr<RendererCaptureListener>& listener, bool waitWhileUpdating);
 
         std::shared_ptr<Layers> getLayers() const;
+
+        std::shared_ptr<Options> getOptions() const;
         
         std::shared_ptr<GLResourceManager> getGLResourceManager() const;
 

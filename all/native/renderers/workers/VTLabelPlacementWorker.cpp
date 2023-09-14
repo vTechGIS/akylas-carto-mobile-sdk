@@ -103,17 +103,32 @@ namespace carto {
 
         vt::LabelCuller culler(Const::WORLD_SIZE);
 
+        bool reversedOrder = mapRenderer->getOptions()->isLayersLabelsProcessedInReverseOrder();
         bool changed = false;
-        for (auto it = layers.rbegin(); it != layers.rend(); it++) {
-            auto vectorTileLayer = std::dynamic_pointer_cast<VectorTileLayer>(*it);
-            if (!vectorTileLayer) {
-                continue;
-            }
+        if (reversedOrder) {
+            for (auto it = layers.rbegin(); it != layers.rend(); it++) {
+                auto vectorTileLayer = std::dynamic_pointer_cast<VectorTileLayer>(*it);
+                if (!vectorTileLayer) {
+                    continue;
+                }
 
-            if (vectorTileLayer->_tileRenderer->cullLabels(culler, viewState)) {
-                changed = true;
+                if (vectorTileLayer->_tileRenderer->cullLabels(culler, viewState)) {
+                    changed = true;
+                }
+            }
+        } else {
+            for (auto it = layers.begin(); it != layers.end(); it++) {
+                auto vectorTileLayer = std::dynamic_pointer_cast<VectorTileLayer>(*it);
+                if (!vectorTileLayer) {
+                    continue;
+                }
+
+                if (vectorTileLayer->_tileRenderer->cullLabels(culler, viewState)) {
+                    changed = true;
+                }
             }
         }
+        
 
         if (changed) {
             mapRenderer->requestRedraw();

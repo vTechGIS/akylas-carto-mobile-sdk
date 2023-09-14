@@ -161,6 +161,11 @@ namespace carto {
         return _layers;
     }
 
+    std::shared_ptr<Options> MapRenderer::getOptions() const {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _options;
+    }
+
     std::shared_ptr<GLResourceManager> MapRenderer::getGLResourceManager() const {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
         return _glResourceManager;

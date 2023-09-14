@@ -602,7 +602,20 @@ namespace carto {
          * @return The projection surface.
          */
         std::shared_ptr<ProjectionSurface> getProjectionSurface() const;
-        
+
+        /**
+         * Sets wether layers are processed in reversed order to process labels.
+         * The default is true.
+         * @param enabled wether to process layers in reversed order.
+         */
+        void setLayersLabelsProcessedInReverseOrder(bool enabled);
+    
+        /**
+         * Returns wether layers are processed in reversed order to process labels.
+         * @return True if layers are processed in reversed order.
+         */
+        bool isLayersLabelsProcessedInReverseOrder() const;
+
         /**
          * Registers listener for options change events.
          * @param listener The listener for change events.
@@ -689,6 +702,9 @@ namespace carto {
         MapRange _zoomRange;
         MapBounds _panBounds;
         ScreenPos _focusPointOffset;
+
+        bool _layersLabelsProcessedInReverseOrder;
+
     
         std::shared_ptr<Projection> _baseProjection;
 

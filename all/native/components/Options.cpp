@@ -62,6 +62,7 @@ namespace carto {
         _projectionSurface(std::make_shared<PlanarProjectionSurface>()),
         _envelopeThreadPool(envelopeThreadPool),
         _tileThreadPool(tileThreadPool),
+        _layersLabelsProcessedInReverseOrder(true),
         _mutex()
     {
         setEnvelopeThreadPoolSize(1);
@@ -786,6 +787,22 @@ namespace carto {
     std::shared_ptr<ProjectionSurface> Options::getProjectionSurface() const {
         std::lock_guard<std::mutex> lock(_mutex);
         return _projectionSurface;
+    }
+    
+    void Options::setLayersLabelsProcessedInReverseOrder(bool enabled) {
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            if (_layersLabelsProcessedInReverseOrder == enabled) {
+                return;
+            }
+            _layersLabelsProcessedInReverseOrder = enabled;
+        }
+        notifyOptionChanged("LayersLabelsProcessedInReverseOrder");
+    }
+    
+    bool Options::isLayersLabelsProcessedInReverseOrder() const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _layersLabelsProcessedInReverseOrder;
     }
     
     void Options::registerOnChangeListener(const std::shared_ptr<OnChangeListener>& listener) {

@@ -57,6 +57,7 @@
 %ignore carto::MapRenderer::registerOnChangeListener;
 %ignore carto::MapRenderer::unregisterOnChangeListener;
 %ignore carto::MapRenderer::addRenderThreadCallback;
+%ignore carto::MapRenderer::getOptions;
 
 !standard_equals(carto::MapRenderer);
 
