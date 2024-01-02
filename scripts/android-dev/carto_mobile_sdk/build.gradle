@@ -35,6 +35,7 @@ def cmakeOptions = {
 }
 
 android {
+    namespace 'com.carto'
     compileSdkVersion 33
 
     defaultConfig {
