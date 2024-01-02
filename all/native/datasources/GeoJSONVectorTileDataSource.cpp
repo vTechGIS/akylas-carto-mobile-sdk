@@ -219,7 +219,7 @@ namespace carto
         notifyTilesChanged(false);
     }
 
-    void GeoJSONVectorTileDataSource::removeGeoJSONFeature(int layerIndex, const const Variant &id)
+    void GeoJSONVectorTileDataSource::removeGeoJSONFeature(int layerIndex, const Variant &id)
     {
         try
         {

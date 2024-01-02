@@ -120,7 +120,7 @@ namespace carto {
          * @param id id of the feature to remove.
          * @throws std::runtime_error If an error occured during updating the layer.
          */
-        void removeGeoJSONFeature(int layerIndex, const const Variant& id);
+        void removeGeoJSONFeature(int layerIndex, const Variant& id);
 
         /**
          * Sets the feature collection of the specified layer.
