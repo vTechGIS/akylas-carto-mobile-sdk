@@ -176,8 +176,8 @@ namespace carto {
         std::lock_guard<std::recursive_mutex> lock(_mutex);
         if (mapRenderer.lock() == _mapRenderer.lock()) {
             return;
-        } else if (mapRenderer.lock() && _mapRenderer.lock()) {
-            throw InvalidArgumentException("Layer already attached to a different renderer");
+//        } else if (mapRenderer.lock() && _mapRenderer.lock()) {
+//            throw InvalidArgumentException("Layer already attached to a different renderer");
         }
 
         // This method is called only when the layer is added/removed from Layers object,
