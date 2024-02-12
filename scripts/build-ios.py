@@ -141,7 +141,7 @@ def buildIOSLib(args, baseArch, outputDir=None):
   buildMode = ('archive' if args.configuration == 'Release' else 'build')
   return execute('xcodebuild', buildDir,
     '-project', 'carto_mobile_sdk.xcodeproj', '-arch', arch, '-configuration', args.configuration, buildMode,
-    *list(bitcodeOptions)
+    *list(bitcodeOptions+['GCC_PREPROCESSOR_DEFINITIONS=_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION'])
   )
 
 def buildIOSFramework(args, baseArchs, outputDir=None):

@@ -38,6 +38,7 @@
 #import "NTMapTilerOnlineTileDataSource.h"
 #import "NTLocalVectorDataSource.h"
 #import "NTTileDownloadListener.h"
+#import "NTMultiTileDataSource.h"
 
 #import "NTFeature.h"
 #import "NTFeatureCollection.h"
@@ -197,6 +198,8 @@
 #import "NTMapBoxOnlineReverseGeocodingService.h"
 #import "NTTomTomOnlineGeocodingService.h"
 #import "NTTomTomOnlineReverseGeocodingService.h"
+#import "NTMultiOSMOfflineGeocodingService.h"
+#import "NTMultiOSMOfflineReverseGeocodingService.h"
 #endif
 
 #ifdef _CARTO_SEARCH_SUPPORT
@@ -218,6 +221,7 @@
 #import "NTCartoOnlineRoutingService.h"
 #import "NTValhallaOnlineRoutingService.h"
 #ifdef _CARTO_VALHALLA_ROUTING_SUPPORT
+#import "NTMultiValhallaOfflineRoutingService.h"
 #import "NTValhallaOfflineRoutingService.h"
 #endif
 #endif
