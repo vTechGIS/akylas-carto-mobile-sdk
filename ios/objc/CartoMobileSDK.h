@@ -62,6 +62,8 @@
 #import "NTRasterTileEventListener.h"
 #import "NTRasterTileLayer.h"
 #import "NTHillshadeRasterTileLayer.h"
+#import "NTMapBoxElevationDataDecoder.h"
+#import "NTTerrariumElevationDataDecoder.h"
 #import "NTTileLoadListener.h"
 #import "NTUTFGridEventListener.h"
 #import "NTVectorElementEventListener.h"
