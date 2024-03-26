@@ -49,7 +49,6 @@ namespace carto {
         _screenFrameBuffers(),
         _screenBlendShader(),
         _backgroundRenderer(*options, *layers),
-        _watermarkRenderer(*options),
         _billboardDrawDatas(),
         _billboardDrawDataBuffer(),
         _billboardPlacementWorker(std::make_shared<BillboardPlacementWorker>()),
@@ -502,7 +501,6 @@ namespace carto {
 
         // Notify renderers about the event
         _backgroundRenderer.onSurfaceCreated(_glResourceManager);
-        _watermarkRenderer.onSurfaceCreated(_glResourceManager);
 
         GLContext::CheckGLError("MapRenderer::onSurfaceCreated");
     }
@@ -555,7 +553,6 @@ namespace carto {
                 height = _viewState.getHeight();
             }
             glViewport(0, 0, width, height);
-            _watermarkRenderer.onSurfaceChanged(width, height);
 
             _kineticEventHandler.stopPan();
             _kineticEventHandler.stopRotation();
@@ -597,7 +594,6 @@ namespace carto {
         initializeRenderState();
         _backgroundRenderer.onDrawFrame(viewState);
         drawLayers(deltaSeconds, viewState);
-        _watermarkRenderer.onDrawFrame(viewState);
     
         // Callback for synchronized rendering
         if (mapRendererListener) {
@@ -639,7 +635,6 @@ namespace carto {
         _screenBlendShader.reset();
 
         // Notify renderers about the event
-        _watermarkRenderer.onSurfaceDestroyed();
         _backgroundRenderer.onSurfaceDestroyed();
     }
     
@@ -953,11 +948,7 @@ namespace carto {
             if (optionName == "AmbientLightColor" || optionName == "MainLightColor" || optionName == "MainLightDirection" || optionName == "ClearColor" || optionName == "SkyColor") {
                 updateView = true;
             }
-
-            if (optionName.substr(0, 9) == "Watermark") {
-                updateView = true;
-            }
-
+            
             if (optionName == "RenderProjectionMode" || optionName == "BaseProjection" || optionName == "ZoomRange" || optionName == "PanBounds" || optionName == "RestrictedPanning") {
                 std::lock_guard<std::recursive_mutex> lock(mapRenderer->_mutex);
                 mapRenderer->_viewState.calculateViewState(*mapRenderer->_options);

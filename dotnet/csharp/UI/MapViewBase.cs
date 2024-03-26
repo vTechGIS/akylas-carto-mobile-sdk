@@ -22,30 +22,6 @@ namespace Carto.Ui {
         private delegate string ReadKeyDelegate(string key);
         private delegate void WriteKeyDelegate(string key, string value);
 
-        private static bool RegisterLicenseInternal(string licenseKey, ReadKeyDelegate readKey, WriteKeyDelegate writeKey) {
-            string oldKey = "license_key_old";
-            string newKey = "license_key_new";
-            LicenseManagerListener listener = new MapLicenseManagerListener((string updatedLicenseKey) => {
-                try {
-                    writeKey(newKey, updatedLicenseKey);
-                }
-                catch (System.Exception e) {
-                    Carto.Utils.Log.Error("MapView.RegisterLicense: Failed to save license key: " + e);
-                }
-            });
-            string newLicenseKey = null;
-            try {
-                string oldLicenseKey = readKey(oldKey);
-                if (oldLicenseKey != null && oldLicenseKey != licenseKey) {
-                    newLicenseKey = readKey(newKey);
-                }
-            }
-            catch (System.Exception e) {
-                Carto.Utils.Log.Error("MapView.RegisterLicense: Failed to read license key: " + e);
-            }
-            return BaseMapView.RegisterLicense(newLicenseKey != null ? newLicenseKey : licenseKey, listener);
-        }
-
         /// <summary>
         /// Internal native map view object. Not part of the public API.
         /// </summary>

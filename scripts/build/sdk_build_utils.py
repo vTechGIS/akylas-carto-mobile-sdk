@@ -101,6 +101,8 @@ def getDefaultProfileId():
   return 'standard'
 
 def getProfile(profileIds):
+  includes = set()
+  excludes = set()
   defines = set()
   cmakeOptions = set()
   allProfileIds = profileIds.split('+')
@@ -108,8 +110,19 @@ def getProfile(profileIds):
     allProfileIds.append(getDefaultProfileId())
   for profileId in allProfileIds:
     profile = getProfiles()[profileId]
+    includes.update(profile.get('cmake-includes', '').split(';'))
+    excludes.update(profile.get('cmake-excludes', '').split(';'))
     defines.update(profile.get('defines', '').split(';'))
     cmakeOptions.update(profile.get('cmake-options', '').split(';'))
+  
+  for include in includes:
+    if (include != ""):
+      cmakeOptions.add('INCLUDE_%s:BOOL=ON' % include)
+
+  for exclude in excludes:
+    if (exclude != "" and not exclude in includes):
+      cmakeOptions.add('INCLUDE_%s:BOOL=OFF' % exclude)
+
   return { 'defines': ';'.join(list(defines)), 'cmake-options': ';'.join(list(cmakeOptions)) }
 
 def getProfiles():

@@ -1,6 +1,5 @@
 #include "BaseMapView.h"
 #include "components/CancelableThreadPool.h"
-#include "components/LicenseManager.h"
 #include "components/Layers.h"
 #include "core/MapPos.h"
 #include "core/MapBounds.h"
@@ -26,10 +25,6 @@
 #include <sstream>
 
 namespace carto {
-
-    bool BaseMapView::RegisterLicense(const std::string& licenseKey, const std::shared_ptr<LicenseManagerListener>& listener) {
-        return LicenseManager::GetInstance().registerLicense(licenseKey, listener);
-    }
 
     std::string BaseMapView::GetSDKVersion() {
         std::stringstream ss;

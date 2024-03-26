@@ -41,13 +41,6 @@ __attribute__ ((visibility("default"))) @interface NTMapView : NTGLKView
 -(id)init;
 -(id)initWithCoder:(NSCoder *)aDecoder;
 -(id)initWithFrame:(CGRect)frame;
-
-/**
- * Registers the SDK license. This is class method and must be called before <br>
- * creating any actual MapView instances.<br>
- * @param licenseKey The license string provided for this application.
- */
-+(BOOL)registerLicense:(NSString*)licenseKey;
 /**
  * Returns the Layers object, that can be used for adding and removing map layers.
  * @return The Layer object.

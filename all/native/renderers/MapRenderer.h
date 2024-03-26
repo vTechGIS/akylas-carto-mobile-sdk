@@ -16,7 +16,6 @@
 #include "renderers/BackgroundRenderer.h"
 #include "renderers/components/AnimationHandler.h"
 #include "renderers/components/KineticEventHandler.h"
-#include "renderers/WatermarkRenderer.h"
 
 #include <atomic>
 #include <optional>
@@ -188,7 +187,6 @@ namespace carto {
         std::shared_ptr<Shader> _screenBlendShader;
         
         BackgroundRenderer _backgroundRenderer;
-        WatermarkRenderer _watermarkRenderer;
         
         std::vector<std::shared_ptr<BillboardDrawData> > _billboardDrawDatas;
         std::vector<std::shared_ptr<BillboardDrawData> > _billboardDrawDataBuffer;

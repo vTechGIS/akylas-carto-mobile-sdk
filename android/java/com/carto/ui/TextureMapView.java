@@ -15,7 +15,6 @@ import android.view.MotionEvent;
 
 import com.carto.components.Options;
 import com.carto.components.Layers;
-import com.carto.components.LicenseManagerListener;
 import com.carto.core.MapBounds;
 import com.carto.core.MapPos;
 import com.carto.core.ScreenPos;
@@ -57,46 +56,6 @@ public class TextureMapView extends GLTextureView implements GLSurfaceView.Rende
     private int pointer2Id = INVALID_POINTER_ID;
 
     /**
-     * Registers the SDK license. This class method and must be called before
-     * creating any actual MapView instances.
-     * @param licenseKey The license string provided for this application.
-     * @param context Application context for the license.
-     * @return True if license is valid, false if not.
-     */
-    public static boolean registerLicense(final String licenseKey, Context context) {
-        // Connect context info and assets manager to native part
-        AndroidUtils.setContext(context);
-        if (assetManager == null) {
-            assetManager = context.getApplicationContext().getAssets();
-            AssetUtils.setAssetManagerPointer(assetManager);
-        }
-
-        final String oldKey = "license_key_old";
-        final String newKey = "license_key_new";
-        final SharedPreferences prefs = context.getSharedPreferences(context.getPackageName() + "_carto_mobile_sdk1_preferences", Context.MODE_PRIVATE);
-        LicenseManagerListener listener = new LicenseManagerListener() {
-            @Override
-            public void onLicenseUpdated(String newLicenseKey) {
-                try {
-                    prefs.edit().putString(oldKey, licenseKey).putString(newKey, newLicenseKey).commit();
-                } catch (Exception e) {
-                    com.carto.utils.Log.info("MapView.registerLicense: Failed to save license key");
-                }
-            }
-        };
-        String newLicenseKey = null;
-        try {
-            String oldLicenseKey = prefs.getString(oldKey, null);
-            if (oldLicenseKey != null && oldLicenseKey.equals(licenseKey)) {
-                newLicenseKey = prefs.getString(newKey, null);
-            }
-        } catch (Exception e) {
-            com.carto.utils.Log.info("MapView.registerLicense: Failed to read license key");
-        }
-        return BaseMapView.registerLicense(newLicenseKey != null ? newLicenseKey : licenseKey, listener);
-    }
-
-    /**
      * Creates a new MapView object from a context object.
      * @param context The context object.
      */
@@ -130,8 +89,6 @@ public class TextureMapView extends GLTextureView implements GLSurfaceView.Rende
             // Connect context info and assets manager to native part
             AndroidUtils.setContext(context);
             if (assetManager == null) {
-                com.carto.utils.Log.warn("MapView: MapView created before MapView.registerLicense is called");
-
                 assetManager = context.getApplicationContext().getAssets();
                 AssetUtils.setAssetManagerPointer(assetManager);
             }

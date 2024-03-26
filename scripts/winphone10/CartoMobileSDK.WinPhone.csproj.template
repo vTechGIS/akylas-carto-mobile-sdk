@@ -132,9 +132,6 @@
     <Compile Include="$baseDir\winphone\csharp\System\SystemException.cs">
       <Link>System\SystemException.cs</Link>
     </Compile>
-    <Compile Include="$baseDir\dotnet\csharp\ui\MapLicenseManagerListener.cs">
-      <Link>UI\MapLicenseManagerListener.cs</Link>
-    </Compile>
     <Compile Include="$baseDir\dotnet\csharp\ui\IMapView.cs">
       <Link>UI\IMapView.cs</Link>
     </Compile>

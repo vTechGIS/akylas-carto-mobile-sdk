@@ -3,7 +3,6 @@
 #import "NTPolymorphicClasses.h"
 #import "ui/MapRedrawRequestListener.h"
 #import "ui/BaseMapView.h"
-#import "ui/MapLicenseManagerListener.h"
 #include "utils/Const.h"
 #include "utils/IOSUtils.h"
 #include "utils/Log.h"
@@ -352,25 +351,6 @@ static const int NATIVE_NO_COORDINATE = -1;
 
 -(NTLayers*)getLayers {
     return [_baseMapView getLayers];
-}
-
-+(BOOL)registerLicense:(NSString*)licenseKey {
-    @synchronized (self) {
-        NSString* newLicenseKey = nil;
-        NSString* oldKey = @"CARTO_MOBILE_SDKLICENSE_KEY_OLD";
-        NSString* newKey = @"CARTO_MOBILE_SDKLICENSE_KEY_NEW";
-        @try {
-            NSString* oldLicenseKey = [[NSUserDefaults standardUserDefaults] objectForKey:oldKey];
-            if (oldLicenseKey && [oldLicenseKey isEqualToString:licenseKey]) {
-                newLicenseKey = [[NSUserDefaults standardUserDefaults] objectForKey:newKey];
-            }
-        }
-        @catch (NSException* e) {
-            carto::Log::Warn("NTMapView.registerLicense: Failed to read updated license key");
-        }
-        NTLicenseManagerListener* listener = [[NTMapLicenseManagerListener alloc] initWithLicenseKey:licenseKey defaultsKeyOld:oldKey defaultsKeyNew:newKey];
-        return [NTBaseMapView registerLicense:(newLicenseKey ? newLicenseKey : licenseKey) listener:listener];
-    }
 }
 
 -(NTOptions*)getOptions {

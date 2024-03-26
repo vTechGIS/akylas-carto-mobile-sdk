@@ -21,7 +21,6 @@ namespace carto {
     class ScreenBounds;
     class ScreenPos;
     class Options;
-    class LicenseManagerListener;
     class MapEventListener;
     class RedrawRequestListener;
     class TouchHandler;
@@ -32,15 +31,6 @@ namespace carto {
      */
     class BaseMapView {
     public:
-        /**
-         * Registers the SDK license. This class method and must be called before
-         * creating any actual MapView instances.
-         * @param licenseKey The license string provided for this application.
-         * @param listener The listener that receives notifications when the license has been updated.
-         * @return True if license is valid, false if not.
-         */
-        static bool RegisterLicense(const std::string& licenseKey, const std::shared_ptr<LicenseManagerListener>& listener);
-
         /**
          * Returns the SDK version and build info. The result should be used only for reporting purposes.
          * @return The SDK version and build info.

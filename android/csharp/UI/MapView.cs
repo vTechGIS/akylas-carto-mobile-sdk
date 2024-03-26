@@ -21,27 +21,6 @@ namespace Carto.Ui {
         static MapView() {
             AndroidUtils.AttachJVM (Android.Runtime.JNIEnv.Handle);
         }
-
-        /// <summary>
-        /// Registers the SDK license. This class method and must be called before
-        /// creating any actual MapView instances.
-        /// </summary>
-        /// <param name="licenseKey">The license string provided for this application.</param>
-        /// <param name="context">Application context for the license.</param>
-        /// <returns>True if license is valid, false if not.</returns>
-        public static bool RegisterLicense(string licenseKey, Context context) {
-            // Connect context info and assets manager to native part
-            AndroidUtils.SetContext (context);
-            if (_assetManager == null) {
-                _assetManager = context.ApplicationContext.Assets;
-                AssetUtils.SetAssetManagerPointer(_assetManager);
-            }
-
-            ISharedPreferences prefs = context.GetSharedPreferences(context.PackageName + "_carto_mobile_sdk1_preferences", FileCreationMode.Private);
-            ReadKeyDelegate readKey = (string key) => { return prefs.GetString(key, null); };
-            WriteKeyDelegate writeKey = (string key, string value) => { prefs.Edit().PutString(key, value); };
-            return RegisterLicenseInternal(licenseKey, readKey, writeKey);
-        }
         
         /// <summary>
         /// Constructs a new MapView object from a context object.
@@ -59,8 +38,6 @@ namespace Carto.Ui {
             // Connect context info and assets manager to native part
             AndroidUtils.SetContext (context);
             if (_assetManager == null) {
-                Carto.Utils.Log.Warn("MapView: MapView created before MapView.RegisterLicense is called");
-
                 _assetManager = context.ApplicationContext.Assets;
                 AssetUtils.SetAssetManagerPointer(_assetManager);
             }

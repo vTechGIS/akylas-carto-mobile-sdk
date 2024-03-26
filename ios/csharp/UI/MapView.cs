@@ -35,18 +35,6 @@
         }
 
         /// <summary>
-        /// Registers the SDK license. This class method and must be called before
-        /// creating any actual MapView instances.
-        /// </summary>
-        /// <param name="licenseKey">The license string provided for this application.</param>
-        /// <returns>True if license is valid, false if not.</returns>
-        public static bool RegisterLicense(string licenseKey) {
-            ReadKeyDelegate readKey = (string key) => { return NSUserDefaults.StandardUserDefaults.StringForKey(key); };
-            WriteKeyDelegate writeKey = (string key, string value) => { NSUserDefaults.StandardUserDefaults.SetString(value, key); NSUserDefaults.StandardUserDefaults.Synchronize(); };
-            return RegisterLicenseInternal(licenseKey, readKey, writeKey);
-        }
-
-        /// <summary>
         /// Constructs a new MapView object.
         /// </summary>
         /// <param name="rect">The view rectangle.</param>

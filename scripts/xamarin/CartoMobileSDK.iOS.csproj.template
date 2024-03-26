@@ -53,9 +53,6 @@
     <Compile Include="$baseDir\ios\csharp\UI\MapView.cs">
       <Link>UI\MapView.cs</Link>
     </Compile>
-    <Compile Include="$baseDir\dotnet\csharp\ui\MapLicenseManagerListener.cs">
-      <Link>UI\MapLicenseManagerListener.cs</Link>
-    </Compile>
     <Compile Include="$baseDir\dotnet\csharp\ui\MapViewBase.cs">
       <Link>UI\MapViewBase.cs</Link>
     </Compile>

@@ -401,65 +401,7 @@ namespace carto {
          * @param backgroundBitmap The new background bitmap.
          */
         void setBackgroundBitmap(const std::shared_ptr<Bitmap>& backgroundBitmap);
-    
-        /**
-         * Returns the horizontal alignment of the watermark.
-         * @return The horizontal alignment of the watermark.
-         */
-        float getWatermarkAlignmentX() const;
-        /**
-         * Sets the position of the watermark relative to the screen. Values will be clamped to [-1, 1] range.
-         * @param alignmentX The new horizontal alignment for the watermark. -1 means the left side,
-         * 0 the center and 1 the right side. The default is 1.
-         */
-        void setWatermarkAlignmentX(float alignmentX);
-        /**
-         * Returns the vertical alignment of the watermark.
-         * @return The vertical alignment of the watermark.
-         */
-        float getWatermarkAlignmentY() const;
-        /**
-         * Sets the position of the watermark relative to the screen. Values will be clamped to [-1, 1] range.
-         * @param alignmentY The new vertical alignment for the watermark. -1 means the bottom,
-         * 0 the center and 1 the top. The default is -1.
-         */
-        void setWatermarkAlignmentY(float alignmentY);
-    
-        /**
-         * Returns the watermark relative scale.
-         * @return The watermark relative scale. The default is 1.
-         */
-        float getWatermarkScale() const;
-        /**
-         * Set the watermark relative scale. By default, watermark size is independant of the actual watermark bitmap size.
-         * This method can be used to change this.
-         * @param scale The new relative scale value.
-         */
-        void setWatermarkScale(float scale);
-        
-        /**
-         * Returns the watermark bitmap. May be null.
-         * @return The watermark bitmap.
-         */
-        std::shared_ptr<Bitmap> getWatermarkBitmap() const;
-        /**
-         * Sets the watermark bitmap. This is only available with enterprise licenses. The watermark will be displayed
-         * on top of the map view in a user chosen corner. If null is passed no watermark will be displayed.
-         * @param watermarkBitmap The new watermark bitmap.
-         */
-        void setWatermarkBitmap(const std::shared_ptr<Bitmap>& watermarkBitmap);
-        
-        /**
-         * Returns the padding of the watermark.
-         * @return The padding of the watermark in dp.
-         */
-        ScreenPos getWatermarkPadding() const;
-        /**
-         * Sets the padding between the watermark and the edge of the screen.
-         * @param padding The new padding for the watermark in dp. The default is 4,4.
-         */
-        void setWatermarkPadding(const ScreenPos& padding);
-        
+
         /**
          * Returns the state of the user input flag.
          * @return True if user input is allowed.
@@ -630,10 +572,6 @@ namespace carto {
 
         static std::shared_ptr<Bitmap> GetDefaultBackgroundBitmap();
 
-        static std::shared_ptr<Bitmap> GetCartoWatermarkBitmap();
-        static std::shared_ptr<Bitmap> GetEvaluationWatermarkBitmap();
-        static std::shared_ptr<Bitmap> GetExpiredWatermarkBitmap();
-
     private:
         static const float DEFAULT_LONG_CLICK_DURATION;
         static const float DEFAULT_DOUBLE_CLICK_MAX_DURATION;
@@ -685,12 +623,6 @@ namespace carto {
 
         std::shared_ptr<Bitmap> _backgroundBitmap;
         
-        float _watermarkAlignmentX;
-        float _watermarkAlignmentY;
-        std::shared_ptr<Bitmap> _watermarkBitmap;
-        ScreenPos _watermarkPadding;
-        float _watermarkScale;
-        
         bool _userInput;
     
         bool _kineticPan;
@@ -721,9 +653,6 @@ namespace carto {
         mutable std::mutex _onChangeListenersMutex;
 
         static std::shared_ptr<Bitmap> _DefaultBackgroundBitmap;
-        static std::shared_ptr<Bitmap> _CartoWatermarkBitmap;
-        static std::shared_ptr<Bitmap> _EvaluationWatermarkBitmap;
-        static std::shared_ptr<Bitmap> _ExpiredWatermarkBitmap;
         
         static std::mutex _Mutex;
     };

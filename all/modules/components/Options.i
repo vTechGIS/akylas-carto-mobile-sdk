@@ -64,16 +64,10 @@
 %attribute(carto::Options, int, TileDrawSize, getTileDrawSize, setTileDrawSize)
 %attribute(carto::Options, float, DPI, getDPI, setDPI)
 %attribute(carto::Options, float, DrawDistance, getDrawDistance, setDrawDistance)
-%attributestring(carto::Options, std::shared_ptr<carto::Bitmap>, WatermarkBitmap, getWatermarkBitmap, setWatermarkBitmap)
-%attribute(carto::Options, float, WatermarkAlignmentX, getWatermarkAlignmentX, setWatermarkAlignmentX)
-%attribute(carto::Options, float, WatermarkAlignmentY, getWatermarkAlignmentY, setWatermarkAlignmentY)
-%attribute(carto::Options, float, WatermarkScale, getWatermarkScale, setWatermarkScale)
-%attributeval(carto::Options, carto::ScreenPos, WatermarkPadding, getWatermarkPadding, setWatermarkPadding)
 %std_exceptions(carto::Options::setBaseProjection)
 %std_exceptions(carto::Options::setTiltRange)
 %std_exceptions(carto::Options::setZoomRange)
 %std_exceptions(carto::Options::setPanBounds)
-!objc_rename(setWatermarkPadding) carto::Options::setWatermarkPadding;
 %ignore carto::Options::Options;
 %ignore carto::Options::getProjectionSurface;
 %ignore carto::Options::getSkyBitmap;
@@ -82,9 +76,6 @@
 %ignore carto::Options::registerOnChangeListener;
 %ignore carto::Options::unregisterOnChangeListener;
 %ignore carto::Options::GetDefaultBackgroundBitmap;
-%ignore carto::Options::GetCartoWatermarkBitmap;
-%ignore carto::Options::GetEvaluationWatermarkBitmap;
-%ignore carto::Options::GetExpiredWatermarkBitmap;
 !standard_equals(carto::Options);
 
 %include "components/Options.h"

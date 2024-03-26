@@ -3,7 +3,7 @@
 
 %module BaseMapView
 
-!proxy_imports(carto::BaseMapView, core.MapPos, core.MapVec, core.MapBounds, core.ScreenPos, core.ScreenBounds, components.Options, components.Layers, components.LicenseManagerListener, renderers.MapRenderer, renderers.RedrawRequestListener, ui.MapEventListener)
+!proxy_imports(carto::BaseMapView, core.MapPos, core.MapVec, core.MapBounds, core.ScreenPos, core.ScreenBounds, components.Options, components.Layers, renderers.MapRenderer, renderers.RedrawRequestListener, ui.MapEventListener)
 
 %{
 #include "ui/BaseMapView.h"
@@ -20,7 +20,6 @@
 %import "core/MapVec.i"
 %import "components/Options.i"
 %import "components/Layers.i"
-%import "components/LicenseManagerListener.i"
 %import "renderers/MapRenderer.i"
 %import "renderers/RedrawRequestListener.i"
 %import "ui/MapEventListener.i"

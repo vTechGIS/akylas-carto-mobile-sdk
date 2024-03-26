@@ -1,8 +1,5 @@
 #include "Options.h"
 #include "assets/DefaultBackgroundPNG.h"
-#include "assets/CartoWatermarkPNG.h"
-#include "assets/EvaluationWatermarkPNG.h"
-#include "assets/ExpiredWatermarkPNG.h"
 #include "components/Exceptions.h"
 #include "components/CancelableThreadPool.h"
 #include "graphics/Bitmap.h"
@@ -44,11 +41,6 @@ namespace carto {
         _skyBitmapColor(0, 0, 0, 0),
         _skyBitmap(),
         _backgroundBitmap(GetDefaultBackgroundBitmap()),
-        _watermarkAlignmentX(-1),
-        _watermarkAlignmentY(-1),
-        _watermarkBitmap(GetCartoWatermarkBitmap()),
-        _watermarkPadding(4, 4),
-        _watermarkScale(1.0f),
         _userInput(true),
         _kineticPan(true),
         _kineticRotation(true),
@@ -480,88 +472,6 @@ namespace carto {
         notifyOptionChanged("BackgroundBitmap");
     }
     
-    float Options::getWatermarkAlignmentX() const {
-        std::lock_guard<std::mutex> lock(_mutex);
-        return _watermarkAlignmentX;
-    }
-    
-    void Options::setWatermarkAlignmentX(float alignmentX) {
-        {
-            std::lock_guard<std::mutex> lock(_mutex);
-            float alignmentXClipped = GeneralUtils::Clamp(alignmentX, -1.0f, 1.0f);
-            if (_watermarkAlignmentX == alignmentXClipped) {
-                return;
-            }
-            _watermarkAlignmentX = alignmentXClipped;
-        }
-        notifyOptionChanged("WatermarkAlignment");
-    }
-        
-    float Options::getWatermarkAlignmentY() const {
-        std::lock_guard<std::mutex> lock(_mutex);
-        return _watermarkAlignmentY;
-    }
-        
-    void Options::setWatermarkAlignmentY(float alignmentY) {
-        {
-            std::lock_guard<std::mutex> lock(_mutex);
-            float alignmentYClipped = GeneralUtils::Clamp(alignmentY, -1.0f, 1.0f);
-            if (_watermarkAlignmentY == alignmentYClipped) {
-                return;
-            }
-            _watermarkAlignmentY = alignmentYClipped;
-        }
-        notifyOptionChanged("WatermarkAlignment");
-    }
-        
-    float Options::getWatermarkScale() const {
-        std::lock_guard<std::mutex> lock(_mutex);
-        return _watermarkScale;
-    }
-        
-    void Options::setWatermarkScale(float scale) {
-        {
-            std::lock_guard<std::mutex> lock(_mutex);
-            if (_watermarkScale == scale) {
-                return;
-            }
-            _watermarkScale = scale;
-        }
-        notifyOptionChanged("WatermarkScale");
-    }
-        
-    std::shared_ptr<Bitmap> Options::getWatermarkBitmap() const {
-        std::lock_guard<std::mutex> lock(_mutex);
-        return _watermarkBitmap;
-    }
-    
-    void Options::setWatermarkBitmap(const std::shared_ptr<Bitmap>& watermarkBitmap) {
-        {
-            std::lock_guard<std::mutex> lock(_mutex);
-            if (_watermarkBitmap == watermarkBitmap) {
-                return;
-            }
-            _watermarkBitmap = watermarkBitmap;
-        }
-        notifyOptionChanged("WatermarkBitmap");
-    }
-        
-    ScreenPos Options::getWatermarkPadding() const {
-        std::lock_guard<std::mutex> lock(_mutex);
-        return _watermarkPadding;
-    }
-    
-    void Options::setWatermarkPadding(const ScreenPos& padding) {
-        {
-            std::lock_guard<std::mutex> lock(_mutex);
-            if (_watermarkPadding == padding) {
-                return;
-            }
-            _watermarkPadding = padding;
-        }
-        notifyOptionChanged("WatermarkPadding");
-    }
-    
     bool Options::isUserInput() const {
         std::lock_guard<std::mutex> lock(_mutex);
         return _userInput;
@@ -822,30 +732,6 @@ namespace carto {
         }
         return _DefaultBackgroundBitmap;
     }
-
-    std::shared_ptr<Bitmap> Options::GetCartoWatermarkBitmap() {
-        std::lock_guard<std::mutex> lock(_Mutex);
-        if (!_CartoWatermarkBitmap) {
-            _CartoWatermarkBitmap = Bitmap::CreateFromCompressed(carto_watermark_png, carto_watermark_png_len);
-        }
-        return _CartoWatermarkBitmap;
-    }
-        
-    std::shared_ptr<Bitmap> Options::GetEvaluationWatermarkBitmap() {
-        std::lock_guard<std::mutex> lock(_Mutex);
-        if (!_EvaluationWatermarkBitmap) {
-            _EvaluationWatermarkBitmap = Bitmap::CreateFromCompressed(evaluation_watermark_png, evaluation_watermark_png_len);
-        }
-        return _EvaluationWatermarkBitmap;
-    }
-    
-    std::shared_ptr<Bitmap> Options::GetExpiredWatermarkBitmap() {
-        std::lock_guard<std::mutex> lock(_Mutex);
-        if (!_ExpiredWatermarkBitmap) {
-            _ExpiredWatermarkBitmap = Bitmap::CreateFromCompressed(expired_watermark_png, expired_watermark_png_len);
-        }
-        return _ExpiredWatermarkBitmap;
-    }
         
     void Options::notifyOptionChanged(const std::string& optionName) {
         std::vector<std::shared_ptr<OnChangeListener> > onChangeListeners;
@@ -868,9 +754,6 @@ namespace carto {
     const MapVec Options::DEFAULT_MAIN_LIGHT_DIR = MapVec(0.35, 0.35, -0.87);
 
     std::shared_ptr<Bitmap> Options::_DefaultBackgroundBitmap;
-    std::shared_ptr<Bitmap> Options::_CartoWatermarkBitmap;
-    std::shared_ptr<Bitmap> Options::_EvaluationWatermarkBitmap;
-    std::shared_ptr<Bitmap> Options::_ExpiredWatermarkBitmap;
     
     std::mutex Options::_Mutex;
     
