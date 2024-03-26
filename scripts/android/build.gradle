@@ -6,8 +6,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.2'
-        classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
+        classpath 'com.android.tools.build:gradle:8.2.2'
+        // classpath 'io.github.gradle-nexus:publish-plugin:1.1.0'
     }
 }
 
@@ -20,19 +20,20 @@ allprojects {
     buildDir = '../../build/android-aar'
 }
 
-apply plugin: 'signing'
-apply plugin: 'maven-publish'
+// apply plugin: 'signing'
+// apply plugin: 'maven-publish'
 apply plugin: 'com.android.library'
-apply plugin: 'io.github.gradle-nexus.publish-plugin'
+// apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
-apply from: "publish.gradle"
+// apply from: "publish.gradle"
 
 android {
-    compileSdkVersion 31
+    namespace "com.carto"
+    compileSdkVersion 34
 
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 31
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
     }
@@ -82,47 +83,47 @@ artifacts {
 group = 'com.carto'
 version = System.getProperty('build-version')
 
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                groupId = 'com.carto'
-                artifactId 'carto-mobile-sdk'
-                version = System.getProperty('build-version')
-                from(components.release)
-                artifact sourcesJar
-                artifact javadocJar
-                pom {
-                    name = "CARTO Mobile SDK"
-                    description = "CARTO Mobile Maps SDK for Android"
-                    url = "https://github.com/CartoDB/mobile-sdk"
-                    licenses {
-                        license {
-                            name = "BSD 3-Clause"
-                            url = "https://opensource.org/licenses/BSD-3-Clause"
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = "CARTO"
-                            name = "CARTO Mobile Team"
-                        }
-                    }
-                    scm {
-                        connection = "scm:git:https://github.com/CartoDB/mobile-sdk.git"
-                        developerConnection = "scm:git:https://github.com/CartoDB/mobile-sdk.git"
-                        url = "https://github.com/CartoDB/mobile-sdk"
-                    }
-                }
-            }
-        }
-    }
-}
+// afterEvaluate {
+//     publishing {
+//         publications {
+//             release(MavenPublication) {
+//                 groupId = 'com.carto'
+//                 artifactId 'carto-mobile-sdk'
+//                 version = System.getProperty('build-version')
+//                 from(components.release)
+//                 artifact sourcesJar
+//                 artifact javadocJar
+//                 pom {
+//                     name = "CARTO Mobile SDK"
+//                     description = "CARTO Mobile Maps SDK for Android"
+//                     url = "https://github.com/CartoDB/mobile-sdk"
+//                     licenses {
+//                         license {
+//                             name = "BSD 3-Clause"
+//                             url = "https://opensource.org/licenses/BSD-3-Clause"
+//                         }
+//                     }
+//                     developers {
+//                         developer {
+//                             id = "CARTO"
+//                             name = "CARTO Mobile Team"
+//                         }
+//                     }
+//                     scm {
+//                         connection = "scm:git:https://github.com/CartoDB/mobile-sdk.git"
+//                         developerConnection = "scm:git:https://github.com/CartoDB/mobile-sdk.git"
+//                         url = "https://github.com/CartoDB/mobile-sdk"
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
-ext["signing.keyId"] = rootProject.ext["signing.keyId"]
-ext["signing.password"] = rootProject.ext["signing.password"]
-ext["signing.secretKeyRingFile"] = rootProject.ext["signing.secretKeyRingFile"]
+// ext["signing.keyId"] = rootProject.ext["signing.keyId"]
+// ext["signing.password"] = rootProject.ext["signing.password"]
+// ext["signing.secretKeyRingFile"] = rootProject.ext["signing.secretKeyRingFile"]
 
-signing {
-    sign publishing.publications
-}
+// signing {
+//     sign publishing.publications
+// }

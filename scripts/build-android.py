@@ -179,7 +179,7 @@ def buildAndroidAAR(args):
     return False
   aarFileName = '%s/outputs/aar/carto-mobile-sdk-%s.aar' % (buildDir, args.configuration.lower())
   if not os.path.exists(aarFileName):
-    aarFileName = '%s/outputs/aar/carto-mobile-sdk.aar' % buildDir
+    aarFileName = '%s/outputs/aar/android-release.aar' % buildDir
   if not makedirs(distDir) or \
      not copyfile(pomFileName, '%s/carto-mobile-sdk-%s.pom' % (distDir, version)) or \
      not copyfile(aarFileName, '%s/carto-mobile-sdk-%s.aar' % (distDir, version)) or \
