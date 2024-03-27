@@ -711,17 +711,16 @@ public class SecondFragment extends Fragment {
        Projection projection = options.getBaseProjection();
        MultiValhallaOfflineRoutingService routingService = new MultiValhallaOfflineRoutingService();
        routingService.add(dataPath+"/france/france.vtiles");
-       routingService.add(dataPath+"/netherlands/netherlands.vtiles");
        LocalVectorDataSource localSource = new LocalVectorDataSource(projection);
        VectorLayer vectorLayer = new VectorLayer(localSource);
        mapView.getLayers().add(vectorLayer);
        MapPosVector vector = new MapPosVector();
-       vector.add(new MapPos(4.8714, 52.3839));
-       vector.add(new MapPos(4.9311, 52.3482));
+       vector.add(new MapPos(5.7168, 45.1845));
+       vector.add(new MapPos(5.74027, 45.24433));
        RoutingRequest request = new RoutingRequest(projection, vector);
-       request.setCustomParameter("costing_options", Variant.fromString("{\"bicycle\":{\"non_network_penalty\":20,\"use_ferry\":0,\"shortest\":false,\"use_roads\":1.0,\"use_tracks\":0.5,\"bicycle_type\":\"Hybrid\"}}"));
+       request.setCustomParameter("costing_options", Variant.fromString("{\"bicycle\":{\"non_network_penalty\":0,\"use_ferry\":0,\"shortest\":true,\"use_roads\":0.0,\"use_tracks\":0.5,\"bicycle_type\":\"Hybrid\"}}"));
        request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
-       runValhallaInThread(routingService, request, "pedestrian", localSource);
+       runValhallaInThread(routingService, request, "bicycle", localSource);
 //            request = new RoutingRequest(projection, vector);
    }
     public static void largeLog(String tag, String content) {
