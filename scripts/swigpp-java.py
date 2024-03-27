@@ -225,6 +225,9 @@ def fixProxyCode(fileName, className):
   with open(fileName, 'w') as f:
     f.writelines(lines_out)
 
+
+ignoredSourceFiles = []
+argsDefines = []
 def transformSwigFile(sourcePath, outPath, headerDirs):
   lines_in = [line.rstrip('\n') for line in readUncommentedLines(sourcePath)]
   lines_out = []
@@ -235,6 +238,13 @@ def transformSwigFile(sourcePath, outPath, headerDirs):
   stl_wrapper = False
   directors_module = False
   for line in lines_in:
+
+    match = re.search('^\s*(#ifdef )(_CARTO_[^\s]*_SUPPORT)$', line)
+    if match:
+      if(match.group(2) and not match.group(2) in argsDefines ):
+        print("ignoredSourceFiles %s for define: %s" % (sourcePath, match.group(2)))
+        ignoredSourceFiles.append(sourcePath)
+        return
     # Rename module
     match = re.search('^\s*(%module(?:[(].*[)]|)\s+)([^\s]*)\s*$', line)
     if match:
@@ -445,6 +455,13 @@ def transformSwigPackages(args, sourceDir, outDir, basePackageName):
       return False
   return True
 
+def findRegexInFile(sourcePath, regexp):
+  size = os.stat(sourcePath).st_size
+  f = open(sourcePath)
+  data = mmap.mmap(f.fileno(), size, access=mmap.ACCESS_READ)
+
+  m = re.search(regexp, data)
+
 def buildSwigPackage(args, sourceDir, packageName):
   for fileName in os.listdir(sourceDir):
     if fileName == 'NutiSwig.i':
@@ -454,6 +471,8 @@ def buildSwigPackage(args, sourceDir, packageName):
     outPath = os.path.join(args.wrapperDir, fileNameWithoutExt) + "_wrap.cpp"
     proxyDir = os.path.join(args.proxyDir, ("com.carto.%s" % packageName).replace(".", "/"))
     if not os.path.isfile(sourcePath):
+      continue
+    if (sourcePath in ignoredSourceFiles):
       continue
     if not os.path.isdir(proxyDir):
       os.makedirs(proxyDir)
@@ -504,7 +523,7 @@ parser.add_argument('--sourcedir', dest='sourceDir', default='../all/modules;../
 
 args = parser.parse_args()
 args.defines += ';' + getProfile(args.profile).get('defines', '')
-
+argsDefines = args.defines.split(";")
 if not checkExecutable(args.swig, '-help'):
   print('Unable to find SWIG executable. Use --swig argument to specify its location. The supported version is available from https://github.com/cartodb/mobile-swig')
   sys.exit(-1)

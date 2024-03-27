@@ -221,6 +221,8 @@ def fixProxyCode(fileName):
 
 polymorphic_objcClasses = []
 
+ignoredSourceFiles = []
+argsDefines = []
 def transformSwigFile(sourcePath, outPath, moduleDirs, headerDirs):
   lines_in = [line.rstrip('\n') for line in readUncommentedLines(sourcePath)]
   lines_out = []
@@ -232,6 +234,14 @@ def transformSwigFile(sourcePath, outPath, moduleDirs, headerDirs):
   include_linenum = None
   stl_wrapper = False
   for line in lines_in:
+
+    match = re.search('^\s*(#ifdef )(_CARTO_[^\s]*_SUPPORT)$', line)
+    if match:
+      if(match.group(2) and not match.group(2) in argsDefines ):
+        print("ignoredSourceFiles %s for define: %s" % (sourcePath, match.group(2)))
+        ignoredSourceFiles.append(sourcePath)
+        return
+    
     # Language-specific rename declarations
     match = re.search('^\s*!(java|cs|objc)_rename(.*)$', line)
     if match:
@@ -483,6 +493,8 @@ def buildSwigPackage(args, sourceDir, packageName):
   for fileName in os.listdir(sourceDir):
     if fileName == 'NutiSwig.i':
       continue
+    if (sourcePath in ignoredSourceFiles):
+      continue
     fileNameWithoutExt = fileName.split(".")[0]
     sourcePath = os.path.join(sourceDir, fileName)
     outPath = os.path.join(args.wrapperDir, fileNameWithoutExt) + "_wrap.mm"
@@ -550,6 +562,7 @@ parser.add_argument('--sourcedir', dest='sourceDir', default='../all/modules;../
 
 args = parser.parse_args()
 args.defines += ';' + getProfile(args.profile).get('defines', '')
+argsDefines = args.defines.split(";")
 
 if not checkExecutable(args.swig, '-help'):
   print('Unable to find SWIG executable. Use --swig argument to specify its location. The supported version is available from https://github.com/cartodb/mobile-swig')
