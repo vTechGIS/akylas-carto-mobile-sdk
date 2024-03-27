@@ -15,6 +15,8 @@ def cmakeOptions = {
 
     def options = []
     def defines = ''
+    def includes = [] as Set
+    def excludes = [] as Set
     for (profile in profileList) {
         if (!parsedJson.containsKey(profile)) {
             throw new java.lang.Exception("The profile ${profile} is not valid!")
@@ -22,6 +24,26 @@ def cmakeOptions = {
         if (parsedJson[profile].containsKey('cmake-options')) {
             for (option in parsedJson[profile]['cmake-options'].split(';')) {
                 options += ['-D' + option]
+            }
+        }
+        if (parsedJson[profile].containsKey('cmake-includes')) {
+            for (include in parsedJson[profile]['cmake-includes'].split(';')) {
+                includes += [include]
+            }
+        }
+        if (parsedJson[profile].containsKey('cmake-excludes')) {
+            for (exclude in parsedJson[profile]['cmake-excludes'].split(';')) {
+                excludes += [exclude]
+            }
+        }
+        for (include in includes) {
+            if (include != "") {
+                options += ["-DINCLUDE_$include:BOOL=ON"]
+            }
+        }
+        for (exclude in excludes) {
+            if (exclude != "" && !includes.contains(exclude)) {
+                options += ["-DINCLUDE_$exclude:BOOL=OFF"]
             }
         }
         if (parsedJson[profile].containsKey('defines')) {
@@ -82,8 +104,8 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
