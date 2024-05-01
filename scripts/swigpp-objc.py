@@ -493,10 +493,10 @@ def buildSwigPackage(args, sourceDir, packageName):
   for fileName in os.listdir(sourceDir):
     if fileName == 'NutiSwig.i':
       continue
+    sourcePath = os.path.join(sourceDir, fileName)
     if (sourcePath in ignoredSourceFiles):
       continue
     fileNameWithoutExt = fileName.split(".")[0]
-    sourcePath = os.path.join(sourceDir, fileName)
     outPath = os.path.join(args.wrapperDir, fileNameWithoutExt) + "_wrap.mm"
     proxyDir = args.proxyDir
     proxyCPath = os.path.join(proxyDir, "NT%s.mm" % fileNameWithoutExt)
