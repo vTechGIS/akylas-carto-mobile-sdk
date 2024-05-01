@@ -1,8 +1,11 @@
 # CARTO Mobile SDK
 
+This is now a maintained fork of original Carto SDK as Carto stopped maintaining it.
+If you like the project and want me to keep on maintaining it. Please support it.
+
 CARTO Mobile SDK is an open, multi-platform framework for visualizing maps and providing location based services on mobile devices like smartphones or tablets. It includes high performance and flexible vector tile renderer, multiple built-in routing engines (for both indoor and street maps) plus built-in geocoding and reverse geocoding support.
 
-![Liverpool](https://drive.google.com/uc?id=1nnNxTse8u1KED5Ez8fWwLRfoD2IKDWqH)
+![Liverpool](media/carto-mobile-sdk-animated.gif)
 
 ## Features
 
