@@ -8,7 +8,7 @@ import string
 from build.sdk_build_utils import *
 
 IOS_ARCHS = ['i386', 'x86_64', 'armv7', 'arm64', 'arm64-simulator', 'x86_64-maccatalyst', 'arm64-maccatalyst']
-SDK_VERSION = "4.4.2"
+SDK_VERSION = "4.4.9"
 
 def getFinalBuildDir(target, arch=None):
   return getBuildDir(('%s_metal' % target) if args.metalangle else target, arch)
@@ -39,6 +39,21 @@ def updateUmbrellaHeader(filename, defines):
     lines = lines[:i+1] + ['\n'] + ['#define %s\n' % define for define in defines.split(';') if define] + lines[i+1:]
   with open(filename, 'w') as f:
     f.writelines(lines)
+
+def replaceInFile(filePath, regexp, replacement):
+  # Define the regular expression pattern
+  pattern = re.compile(regexp)
+
+  # Read from the input file
+  with open(filePath, 'r') as file:
+    content = file.read()
+
+  # Perform the replacement
+  modified_content = re.sub(pattern, replacement, content)
+
+  # Write back to the output file
+  with open(filePath, 'w') as file:
+    file.write(modified_content)
 
 def updatePublicHeader(filename):
   with open(filename, 'r') as f:
@@ -169,8 +184,12 @@ def buildIOSFramework(args, baseArchs, outputDir=None):
   ):
     return False
 
-  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, '%s/CartoMobileSDK.framework/Info.plist' % distDir):
+  outputInfoPlist = '%s/CartoMobileSDK.framework/Info.plist' % distDir
+
+  if not copyfile('%s/scripts/ios/Info.plist' % baseDir, outputInfoPlist):
       return False
+  # change version name in info.plist
+  replaceInFile(outputInfoPlist, '(?P<key>CFBundleShortVersionString</key>[\n\t\s]*<string>)([\d\.]+)(</string>)', '\1%s\3' % args.buildversion)
 
   if args.sharedlib:
     if not execute('install_name_tool', frameworkDir,
