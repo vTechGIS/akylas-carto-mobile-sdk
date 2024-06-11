@@ -57,10 +57,7 @@ jobs:
           cd mobile-swig
           wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz
           ./Tools/pcre-build.sh
-          ./autogen.sh
-          ./configure
-          make
-          make install
+          cp pcre/pcre-swig-install/bin/pcre2-config pcre/pcre-swig-install/bin/pcre-config
 
       - name: Build swig-objc
         if: matrix.variant != 'android'
