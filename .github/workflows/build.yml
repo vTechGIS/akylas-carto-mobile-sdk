@@ -58,6 +58,9 @@ jobs:
           wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz
           ./Tools/pcre-build.sh
           cp pcre/pcre-swig-install/bin/pcre2-config pcre/pcre-swig-install/bin/pcre-config
+          ./autogen.sh
+          ./configure
+          make
 
       - name: Build swig-objc
         if: matrix.variant != 'android'
