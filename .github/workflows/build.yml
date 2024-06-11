@@ -60,6 +60,7 @@ jobs:
           ./autogen.sh
           ./configure
           make
+          make install
 
       - name: Build swig-objc
         if: matrix.variant != 'android'
