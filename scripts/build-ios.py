@@ -289,6 +289,7 @@ parser.add_argument('--strip-bitcode', dest='stripbitcode', default=False, actio
 parser.add_argument('--shared-framework', dest='sharedlib', default=False, action='store_true', help='Build shared framework instead of static')
 
 args = parser.parse_args()
+args.defines += ';' + 'BOOST_NO_CXX98_FUNCTION_BASE'
 if 'all' in args.iosarch or args.iosarch == []:
   args.iosarch = list(filter(lambda arch: not (arch in ('i386', 'armv7')), IOS_ARCHS))
   if not args.buildxcframework:
