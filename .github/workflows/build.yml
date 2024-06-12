@@ -55,10 +55,8 @@ jobs:
           brew install autoconf automake libtool
           git clone https://github.com/farfromrefug/mobile-swig.git
           cd mobile-swig
-          wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz
+          wget https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.44/pcre2-10.44.tar.gz
           ./Tools/pcre-build.sh
-          cp pcre/pcre-swig-install/bin/pcre2-config pcre/pcre-swig-install/bin/pcre-config
-          cp pcre/pcre-swig-install/include/pcre2.h pcre/pcre-swig-install/include/pcre.h
           ./autogen.sh
           ./configure
           make
