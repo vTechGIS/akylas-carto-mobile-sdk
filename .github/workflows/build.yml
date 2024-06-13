@@ -129,5 +129,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: matrix.variant != 'android'
         with:
-          name: CartoMobileSDK-ios-${{ steps.get_version_or_prompt.outputs.result }}.zip
+          name: CartoMobileSDK-${{matrix.variant}}-${{ steps.get_version_or_prompt.outputs.result }}.zip
           path: dist/ios/*.zip
