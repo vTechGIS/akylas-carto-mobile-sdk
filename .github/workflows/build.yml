@@ -12,7 +12,7 @@ jobs:
     strategy:
       # max-parallel: 1
       matrix:
-        variant: ['android', 'ios']
+        variant: ['android', 'ios', 'ios-metal']
     runs-on: macos-latest
     name: CartoMobileSDK ${{ matrix.variant }}
     steps:
