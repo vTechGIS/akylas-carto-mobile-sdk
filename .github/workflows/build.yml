@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         variant: ['android', 'ios', 'ios-metal']
-    runs-on: ${{ matrix.variant == 'android' && 'unbuntu-latest' ||  'macos-12' }} 
+    runs-on: macos-12
     name: CartoMobileSDK ${{ matrix.variant }}
     steps:
       - uses: actions/checkout@v2
@@ -55,6 +55,11 @@ jobs:
           cd boost_1_78_0
           ./bootstrap.sh
           ./b2 headers
+      
+      - name: Install CMake
+        run: |
+          brew install cmake
+          cmake --version 
 
       - name: Build swig
         run: |
