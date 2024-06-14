@@ -298,8 +298,8 @@ parser.add_argument('--shared-framework', dest='sharedlib', default=False, actio
 args = parser.parse_args()
 args.defines += ';' + 'BOOST_NO_CXX98_FUNCTION_BASE'
 if 'all' in args.iosarch or args.iosarch == []:
-  args.iosarch = IOS_ARCHS
-  # args.iosarch = list(filter(lambda arch: not (arch in ('i386', 'armv7')), IOS_ARCHS))
+  # args.iosarch = IOS_ARCHS
+  args.iosarch = list(filter(lambda arch: not (arch in ('i386', 'armv7')), IOS_ARCHS))
   if not args.buildxcframework:
     args.iosarch = list(filter(lambda arch: not (arch.endswith('-simulator') or arch.endswith('-maccatalyst')), args.iosarch))
   if not args.metalangle:
