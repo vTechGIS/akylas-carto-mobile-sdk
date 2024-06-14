@@ -5,3 +5,4 @@
 /prebuilt
 *.pyc
 *DS_Store
+boost_*
