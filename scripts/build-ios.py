@@ -122,7 +122,7 @@ def buildIOSLib(args, baseArch, outputDir=None):
     '-DSHARED_LIBRARY:BOOL=%s' % ('ON' if args.sharedlib else 'OFF'),
     '-DCMAKE_OSX_ARCHITECTURES=%s' % arch,
     '-DCMAKE_OSX_SYSROOT=%s' % ('macosx' if platform == 'MACCATALYST' else 'iphone%s' % platform.lower()),
-    '-DCMAKE_OSX_DEPLOYMENT_TARGET=%s' % ('13.1' if platform == 'MACCATALYST' else ('10.0' if arch == 'i386' else '9.0')),
+    '-DCMAKE_OSX_DEPLOYMENT_TARGET=%s' % ('13.0' if platform == 'MACCATALYST' else ('10.0' if arch == 'i386' else '9.0')),
     '-DCMAKE_BUILD_TYPE=%s' % args.configuration,
     "-DSDK_CPP_DEFINES=%s" % " ".join(defines),
     "-DSDK_DEV_TEAM='%s'" % (args.devteam if args.devteam else ""),
