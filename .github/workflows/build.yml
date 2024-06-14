@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        variant: ['android', 'ios', 'ios-metal']
+        variant: ['ios-metal']
     runs-on: macos-13
     name: CartoMobileSDK ${{ matrix.variant }}
     steps:
