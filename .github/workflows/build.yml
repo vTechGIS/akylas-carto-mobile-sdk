@@ -35,7 +35,7 @@ jobs:
 
       - name: Setup Android SDK
         if: matrix.variant == 'android'
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v2
 
       - uses: nttld/setup-ndk@v1
         if: matrix.variant == 'android'
