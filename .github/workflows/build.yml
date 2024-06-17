@@ -39,7 +39,7 @@ jobs:
 
       - if: matrix.variant == 'android'
         name: run SDKManager
-        run:  sdkmanager "build-tools;34.0.0"
+        run:  sdkmanager "build-tools;30.0.0.3"
 
       - uses: nttld/setup-ndk@v1
         if: matrix.variant == 'android'
