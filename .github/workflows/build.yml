@@ -37,11 +37,15 @@ jobs:
         if: matrix.variant == 'android'
         uses: android-actions/setup-android@v2
 
+      - if: matrix.variant == 'android'
+        name: run SDKManager
+        run:  sdkmanager "build-tools;34.0.0"
+
       - uses: nttld/setup-ndk@v1
         if: matrix.variant == 'android'
         id: setup-ndk
         with:
-          ndk-version: r22
+          ndk-version: r23c
       
       - name: Install CMake
         run: |
