@@ -139,4 +139,4 @@ jobs:
         if: matrix.variant != 'android'
         with:
           name: CartoMobileSDK-${{matrix.variant}}-${{ steps.get_version_or_prompt.outputs.result }}.zip
-          path: dist/ios/*.zip
+          path: dist/ios_metal/*.zip
