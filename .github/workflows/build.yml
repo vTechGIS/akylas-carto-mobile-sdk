@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        variant: ['android', 'ios', 'ios-metal']
+        variant: ['android', 'ios', 'ios_metal']
     runs-on: macos-12
     name: CartoMobileSDK ${{ matrix.variant }}
     steps:
@@ -121,7 +121,7 @@ jobs:
           python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework
 
       - name: Build CartoSDK
-        if: matrix.variant == 'ios-metal'
+        if: matrix.variant == 'ios_metal'
         run: |
           cd scripts
           python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework --use-metalangle
@@ -139,4 +139,5 @@ jobs:
         if: matrix.variant != 'android'
         with:
           name: CartoMobileSDK-${{matrix.variant}}-${{ steps.get_version_or_prompt.outputs.result }}.zip
-          path: dist/ios_metal/*.zip
+          path: dist/${{matrix.variant}}/*.zip
+
