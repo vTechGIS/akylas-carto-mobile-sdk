@@ -176,6 +176,7 @@ def buildAndroidAAR(args):
     'assembleRelease'
   ):
     return False
+  print("aar output files %s" % os.listdir('%s/outputs/aar' % buildDir))
   aarFileName = '%s/outputs/aar/carto-mobile-sdk-%s.aar' % (buildDir, args.configuration.lower())
   if not os.path.exists(aarFileName):
     aarFileName = '%s/outputs/aar/carto-mobile-sdk.aar' % buildDir
