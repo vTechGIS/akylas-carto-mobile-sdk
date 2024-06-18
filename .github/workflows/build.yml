@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        variant: ['android']
+        variant: ['android', 'ios', 'ios-metal']
     runs-on: macos-12
     name: CartoMobileSDK ${{ matrix.variant }}
     steps:
@@ -110,7 +110,7 @@ jobs:
         run: |
           brew install gradle@7
           cd scripts
-          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=RelWithDebInfo --gradle /usr/local/opt/gradle@7/bin/gradle
+          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --gradle /usr/local/opt/gradle@7/bin/gradle
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -118,13 +118,13 @@ jobs:
         if: matrix.variant == 'ios'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=RelWithDebInfo --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework
 
       - name: Build CartoSDK
         if: matrix.variant == 'ios-metal'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=RelWithDebInfo --build-xcframework --use-metalangle
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework --use-metalangle
 
       - uses: actions/upload-artifact@v2
         if: matrix.variant == 'android'
