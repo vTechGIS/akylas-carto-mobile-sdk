@@ -1,4 +1,4 @@
-name: CartoMobileSDK ${{ steps.create_release.outputs.id }}
+name: Build CartoMobileSDK 
 
 on: 
   workflow_dispatch:
