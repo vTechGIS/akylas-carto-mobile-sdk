@@ -8,44 +8,95 @@ on:
        description: 'version number'
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      RELEASE_UPLOAD_ID: ${{ steps.create_release.outputs.id }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      # - name: Get version from tag
+      #   id: tag_name
+      #   run: |
+      #     echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+      # - name: Get Changelog Entry
+      #   id: changelog_reader
+      #   uses: Akylas/changelog-reader-action@v2
+      #   with:
+      #     version: ${{ steps.get_version_or_prompt.outputs.result }}
+      #     path: ./CHANGELOG.md
+
+      - name: create release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # This pulls from the "Get Changelog Entry" step above, referencing it's ID to get its outputs object.
+          # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          tag: v${{ steps.get_version_or_prompt.outputs.result }}
+          name: v${{ steps.get_version_or_prompt.outputs.result }}
+          generateReleaseNotes: true
+          # we create first the release as draft. Will be published once everything is done
+          draft: true
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
   build:
     strategy:
-      # max-parallel: 1
       matrix:
-        variant: ['android', 'ios']
+        variant: ['android', 'ios', 'ios_metal']
     runs-on: macos-latest
     name: CartoMobileSDK ${{ matrix.variant }}
     steps:
       - uses: actions/checkout@v2
-      
-      - name: fetch externals
-        run: |
-          git submodule update --init --remote --recursive
 
+      - uses: maxim-lobanov/setup-xcode@v1
+        if: matrix.variant != 'android'
+      
       - name: Setup JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          java-version: 11
+          java-version: 17
+          distribution: 'temurin'
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.12
+
       - name: Setup Android SDK
         if: matrix.variant == 'android'
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@v3
+
+      # - if: matrix.variant == 'android'
+      #   name: run SDKManager
+      #   run:  sdkmanager "build-tools;30.0.3"
 
       - uses: nttld/setup-ndk@v1
         if: matrix.variant == 'android'
         id: setup-ndk
         with:
-          ndk-version: r22
+          ndk-version: r25c
+      
+      - name: Install CMake
+        run: |
+          brew install cmake
+          cmake --version 
+
+      - name: fetch externals
+        run: |
+          git submodule update --init --remote --recursive
 
       - name: prepare boost
         run: |
-          wget https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.zip
-          unzip boost_1_78_0.zip
-          ln -s ../boost_1_78_0 libs-external/boost
-          cd boost_1_78_0
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.85.0/source/boost_1_85_0.zip
+          unzip boost_1_85_0.zip
+          ln -s ../boost_1_85_0 libs-external/boost
+          cd boost_1_85_0
           ./bootstrap.sh
           ./b2 headers
 
@@ -54,7 +105,7 @@ jobs:
           brew install autoconf automake libtool
           git clone https://github.com/farfromrefug/mobile-swig.git
           cd mobile-swig
-          wget https://github.com/PhilipHazel/pcre2/releases/download/pcre2-10.39/pcre2-10.39.tar.gz
+          wget https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.44/pcre2-10.44.tar.gz
           ./Tools/pcre-build.sh
           ./autogen.sh
           ./configure
@@ -92,9 +143,9 @@ jobs:
       - name: Build CartoSDK
         if: matrix.variant == 'android'
         run: |
-          brew install gradle@7
+          brew install gradle@8
           cd scripts
-          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --gradle /usr/local/opt/gradle@7/bin/gradle
+          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --gradle /usr/local/opt/gradle@8/bin/gradle
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -102,25 +153,36 @@ jobs:
         if: matrix.variant == 'ios'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework
 
       - name: Build CartoSDK
-        if: matrix.variant == 'ios-metal'
+        if: matrix.variant == 'ios_metal'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework --use-metalangle
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: matrix.variant == 'android'
         with:
-          name: CartoMobileSDK-android-${{ steps.get_version_or_prompt.outputs.result }}.zip
+          name: CartoMobileSDK-${{matrix.variant}}-${{ steps.get_version_or_prompt.outputs.result }}.zip
           path: |
             dist/android/*.aar
             dist/android/*.jar
             dist/android/*.pom
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: matrix.variant != 'android'
         with:
-          name: CartoMobileSDK-ios-${{ steps.get_version_or_prompt.outputs.result }}.zip
-          path: dist/ios/*.zip
+          name: CartoMobileSDK-${{matrix.variant}}-${{ steps.get_version_or_prompt.outputs.result }}.zip
+          path: dist/${{matrix.variant}}/*.zip
+  update-release:
+    runs-on: ubuntu-latest
+    needs: [create-release, build]
+    steps:
+      - name: Update release
+        uses: irongut/EditRelease@v1.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          id: ${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}
+          draft: false
+
