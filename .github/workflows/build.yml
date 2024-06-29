@@ -1,4 +1,4 @@
-name: Build CartoMobileSDK
+name: CartoMobileSDK ${{ steps.create_release.outputs.id }}
 
 on: 
   workflow_dispatch:
@@ -180,7 +180,7 @@ jobs:
     needs: [create-release, build]
     steps:
       - name: Update release
-        uses: irongut/EditRelease@v1.1.0
+        uses: irongut/EditRelease@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           id: ${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}
