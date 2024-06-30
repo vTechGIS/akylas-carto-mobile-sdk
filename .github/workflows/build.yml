@@ -87,6 +87,12 @@ jobs:
           brew install cmake
           cmake --version 
 
+      - name: Install gradle
+        if: matrix.variant == 'android'
+        run: |
+          brew install gradle@8
+          brew info gradle@8
+
       - name: fetch externals
         run: |
           git submodule update --init --remote --recursive
@@ -144,6 +150,7 @@ jobs:
         if: matrix.variant == 'android'
         run: |
           brew install gradle@8
+          brew info gradle@8
           cd scripts
           python build-android.py --profile standard+valhalla --build-aar --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --gradle /usr/local/opt/gradle/bin/gradle
         env:
