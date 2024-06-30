@@ -92,6 +92,8 @@ jobs:
         run: |
           brew install gradle@8
           brew info gradle@8
+          brew link gradle@8
+          which gradle
 
       - name: fetch externals
         run: |
