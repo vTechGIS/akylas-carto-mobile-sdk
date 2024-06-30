@@ -150,6 +150,14 @@ def buildIOSLib(args, baseArch, outputDir=None):
   ]):
     return False
 
+  # we need to fix targets for MACALYST which are wrong 
+  pbxproj = '%s/carto_mobile_sdk.xcodeproj/project.pbxproj' % buildDir
+  print('pbxproj %s' % pbxproj)
+  with open(pbxproj) as f:
+      pbxprojContent = f.read().replace('-apple-ios-13.0-macabi', '-apple-ios13.1-macabi')
+  with open(pbxproj, "w") as f:
+      f.write(pbxprojContent)
+
   bitcodeOptions = ['ENABLE_BITCODE=NO']
   if not args.stripbitcode and baseArch in ('armv7', 'arm64'):
     bitcodeOptions = ['ENABLE_BITCODE=YES', 'BITCODE_GENERATION_MODE=bitcode']
