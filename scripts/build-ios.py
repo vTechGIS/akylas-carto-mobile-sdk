@@ -255,7 +255,7 @@ def buildIOSPackage(args, buildCocoapod, buildSwiftPackage):
   baseDir = getBaseDir()
   distDir = getFinalDistDir(args)
   version = args.buildversion
-  distName = 'sdk4-ios-%s%s.zip' % (("metal-" if args.metalangle else ""), version)
+  distName = 'carto-mobile-sdk-ios-%s%s.zip' % (("metal-" if args.metalangle else ""), version)
   frameworkName = 'CartoMobileSDK%s' % ("-Metal" if args.metalangle else "")
   frameworkDir = 'CartoMobileSDK.%s' % ("xcframework" if args.buildxcframework else "framework")
   frameworks = (["QuartzCore"] if args.metalangle else ["OpenGLES", "GLKit"]) + ["UIKit", "CoreGraphics", "CoreText", "CFNetwork", "Foundation"]
