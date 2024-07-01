@@ -209,7 +209,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run:
-          gh release upload v${{ steps.get_version_or_prompt.outputs.result }} dist/${{matrix.variant}}/*.zi
+          gh release upload v${{ steps.get_version_or_prompt.outputs.result }} dist/${{matrix.variant}}/*.zip
 
 
   update-release:
