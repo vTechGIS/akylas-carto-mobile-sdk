@@ -22,6 +22,10 @@ namespace carto {
         return _is3DElement;
     }
 
+    int RayIntersectedElement::getPointIndex() const {
+        return _pointIndex;
+    }
+
     double RayIntersectedElement::getDistance(const cglib::vec3<double>& origin) const {
         return cglib::length(origin - _hitPos);
     }

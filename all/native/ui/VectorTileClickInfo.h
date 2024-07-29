@@ -31,7 +31,7 @@ namespace carto {
          * @param feature The clicked vector tile feature.
          * @param layer The layer on which the click was performed.
          */
-        VectorTileClickInfo(const ClickInfo& clickInfo, const MapPos& clickPos, const MapPos& featureClickPos, const std::shared_ptr<VectorTileFeature>& feature, const std::shared_ptr<Layer>& layer);
+        VectorTileClickInfo(const ClickInfo& clickInfo, const MapPos& clickPos, const MapPos& featureClickPos, const std::shared_ptr<VectorTileFeature>& feature, const std::shared_ptr<Layer>& layer, int featurePosIndex);
         virtual ~VectorTileClickInfo();
     
         /**
@@ -72,6 +72,11 @@ namespace carto {
          * @return The id of the clicked feature.
          */
         long long getFeatureId() const;
+        /**
+         * In case of MultiPoint PointGeometry this will return the index of the clicked position
+         * @return The index
+         */
+        int getFeaturePosIndex() const;
     
         /**
          * Returns the clicked feature.
@@ -96,6 +101,7 @@ namespace carto {
         ClickInfo _clickInfo;
         MapPos _clickPos;
         MapPos _featureClickPos;
+        int _featurePosIndex;
         std::shared_ptr<VectorTileFeature> _feature;
         std::shared_ptr<Layer> _layer;
     };

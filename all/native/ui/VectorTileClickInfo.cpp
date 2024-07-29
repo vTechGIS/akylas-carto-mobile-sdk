@@ -4,12 +4,14 @@ namespace carto {
 
     VectorTileClickInfo::VectorTileClickInfo(const ClickInfo& clickInfo, const MapPos& clickPos, const MapPos& featureClickPos,
                                              const std::shared_ptr<VectorTileFeature>& feature,
-                                             const std::shared_ptr<Layer>& layer) :
+                                             const std::shared_ptr<Layer>& layer,
+                                             const int featurePosIndex) :
         _clickInfo(clickInfo),
         _clickPos(clickPos),
         _featureClickPos(featureClickPos),
         _feature(feature),
-        _layer(layer)
+        _layer(layer),
+        _featurePosIndex(featurePosIndex)
     {
     }
     
@@ -39,7 +41,11 @@ namespace carto {
     long long VectorTileClickInfo::getFeatureId() const {
         return _feature->getId();
     }
-    
+
+    int VectorTileClickInfo::getFeaturePosIndex() const {
+        return _featurePosIndex;
+    }
+
     std::shared_ptr<VectorTileFeature> VectorTileClickInfo::getFeature() const {
         return _feature;
     }

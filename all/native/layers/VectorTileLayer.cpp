@@ -436,7 +436,7 @@ namespace carto {
                     if (std::shared_ptr<BinaryData> data = tileInfo.getTileData()) {
                         if (std::shared_ptr<VectorTileFeature> tileFeature = _tileDecoder->decodeFeature(hitResult.featureId, hitResult.tileId, data, tileInfo.getTileBounds())) {
                             std::shared_ptr<Layer> thisLayer = std::const_pointer_cast<Layer>(shared_from_this());
-                            results.push_back(RayIntersectedElement(tileFeature, thisLayer, ray(hitResult.rayT), ray(hitResult.rayT), pass > 0));
+                            results.push_back(RayIntersectedElement(tileFeature, thisLayer, ray(hitResult.rayT), ray(hitResult.rayT), pass > 0, hitResult.geoPointIndex));
                         } else {
                             Log::Warnf("VectorTileLayer::calculateRayIntersectedElements: Failed to decode feature %lld", hitResult.featureId);
                         }
@@ -461,7 +461,7 @@ namespace carto {
         if (eventListener) {
             if (auto tileFeature = intersectedElement.getElement<VectorTileFeature>()) {
                 MapPos hitPos = _dataSource->getProjection()->fromInternal(projectionSurface->calculateMapPos(intersectedElement.getHitPos()));
-                auto vectorClickInfo = std::make_shared<VectorTileClickInfo>(clickInfo, hitPos, hitPos, tileFeature, intersectedElement.getLayer());
+                auto vectorClickInfo = std::make_shared<VectorTileClickInfo>(clickInfo, hitPos, hitPos, tileFeature, intersectedElement.getLayer(), intersectedElement.getPointIndex());
                 return eventListener->onVectorTileClicked(vectorClickInfo);
             }
         }

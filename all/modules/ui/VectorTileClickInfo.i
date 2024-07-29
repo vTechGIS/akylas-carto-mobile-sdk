@@ -28,6 +28,7 @@
 %attributeval(carto::VectorTileClickInfo, carto::MapPos, FeatureClickPos, getFeatureClickPos)
 %attributeval(carto::VectorTileClickInfo, carto::MapTile, MapTile, getMapTile)
 %attribute(carto::VectorTileClickInfo, long long, FeatureId, getFeatureId)
+%attribute(carto::VectorTileClickInfo, int, FeaturePosIndex, getFeaturePosIndex)
 %attributestring(carto::VectorTileClickInfo, std::shared_ptr<carto::VectorTileFeature>, Feature, getFeature)
 %attributestring(carto::VectorTileClickInfo, std::string, FeatureLayerName, getFeatureLayerName)
 !attributestring_polymorphic(carto::VectorTileClickInfo, layers.Layer, Layer, getLayer)
