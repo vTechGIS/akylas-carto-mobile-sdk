@@ -37,6 +37,7 @@ namespace carto {
          * @param apiKey The API key (access token) to use registered with MapBox.
          */
         explicit ValhallaOnlineRoutingService(const std::string& apiKey);
+        explicit ValhallaOnlineRoutingService();
         virtual ~ValhallaOnlineRoutingService();
 
         /**

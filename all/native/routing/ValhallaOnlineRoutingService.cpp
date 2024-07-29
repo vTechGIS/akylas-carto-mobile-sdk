@@ -19,6 +19,12 @@ namespace carto {
         _mutex()
     {
     }
+    ValhallaOnlineRoutingService::ValhallaOnlineRoutingService() :
+        _profile("pedestrian"),
+        _serviceURL(),
+        _mutex()
+    {
+    }
 
     ValhallaOnlineRoutingService::~ValhallaOnlineRoutingService() {
     }
@@ -56,7 +62,9 @@ namespace carto {
 
             std::map<std::string, std::string> tagMap;
             tagMap["service"] = "trace_attributes";
-            tagMap["api_key"] = NetworkUtils::URLEncode(_apiKey);
+            if (!_apiKey.empty()) {
+                tagMap["api_key"] = NetworkUtils::URLEncode(_apiKey);
+            }
             baseURL = GeneralUtils::ReplaceTags(_serviceURL.empty() ? MAPBOX_SERVICE_URL : _serviceURL, tagMap);
         }
 
@@ -79,7 +87,9 @@ namespace carto {
 
             std::map<std::string, std::string> tagMap;
             tagMap["service"] = "route";
-            tagMap["api_key"] = NetworkUtils::URLEncode(_apiKey);
+            if (!_apiKey.empty()) {
+                tagMap["api_key"] = NetworkUtils::URLEncode(_apiKey);
+            }
             baseURL = GeneralUtils::ReplaceTags(_serviceURL.empty() ? MAPBOX_SERVICE_URL : _serviceURL, tagMap);
         }
 
