@@ -113,3 +113,13 @@ python build-winphone.py --profile standard
 # Support, Questions?
 * Post an [issue](https://github.com/CartoDB/mobile-sdk/issues) to this project, submit a [Pull Request](https://github.com/CartoDB/mobile-sdk/pulls)
 * Commercial support options: sales@carto.com
+
+
+# Building css2xml
+ Go into `libs-carto/cartocss/util`
+ Then run :
+ ```
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cd build
+make -j $(( $(nproc) + 1 )) css2xml
+```
