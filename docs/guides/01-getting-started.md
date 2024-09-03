@@ -1,16 +1,5 @@
 ## Getting Started
 
-
-### Prerequisites
-
-You need CARTO **Enterprise** or **Enterprise trial** account for Mobile SDK. Please  [contact us](mailto:sales@carto.com) for an offer and free trials. 
-
-#### Registering your App
-
-You **must register all your mobile apps** under your CARTO.com account settings. You'll get the **mobile app license code**, which is needed for your app code. There are no limits how many apps you can register, and every platform (also Xamarin iOS and Xamarin Android) is regarded as separate app and needs separate registration.
-
-You can find detailed instructions on [API Keys page](../API-keys/)
-
 ### Android app
 
 1) **Install SDK** by adding the following to the `build.gradle` of your project:
