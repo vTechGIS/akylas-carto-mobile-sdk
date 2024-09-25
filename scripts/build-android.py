@@ -64,6 +64,7 @@ def buildAndroidSO(args, abi):
     "-DWRAPPER_DIR=%s" % ('%s/generated/android-java/wrappers' % baseDir),
     "-DSINGLE_LIBRARY:BOOL=ON",
     "-DANDROID_STL='c++_static'",
+    "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
     "-DANDROID_ABI='%s'" % abi,
     "-DANDROID_PLATFORM='%d'" % (api64 if '64' in abi else api32),
     "-DANDROID_ARM_NEON=%s" % ('true' if abi == 'arm64-v8a' or api32 >= 19 else 'false'),
