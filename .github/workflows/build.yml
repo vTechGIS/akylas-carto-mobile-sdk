@@ -12,37 +12,21 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       RELEASE_UPLOAD_ID: ${{ steps.create_release.outputs.id }}
-
+      VERSION: ${{ steps.get_version_or_prompt.outputs.result }}
+      VERSION_TAG: v${{ steps.get_version_or_prompt.outputs.result }}
     steps:
-      - uses: actions/checkout@v2
       - name: setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
-      # - name: Get version from tag
-      #   id: tag_name
-      #   run: |
-      #     echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
-      # - name: Get Changelog Entry
-      #   id: changelog_reader
-      #   uses: Akylas/changelog-reader-action@v2
-      #   with:
-      #     version: ${{ steps.get_version_or_prompt.outputs.result }}
-      #     path: ./CHANGELOG.md
-
+          node-version: lts/*
 
       - uses: actions/github-script@v6
         id: get_version_or_prompt
         with:
           result-encoding: string
           script: |
-            console.log("inputs.version", "${{ github.event.inputs.version }}");
-            console.log("get_version", "${{ steps.get_version.outputs.is-semver }}", "${{ steps.get_version.outputs.version-without-v }}");
             if ("${{ github.event.inputs.version }}".length) {
              return "${{ github.event.inputs.version }}";
-            }
-            if ("${{ steps.get_version.outputs.is-semver }}" === 'true') {
-              return" ${{ steps.get_version.outputs.version-without-v }}";
             }
 
       - name: create release
@@ -65,9 +49,12 @@ jobs:
       matrix:
         variant: ['android', 'ios', 'ios_metal']
     runs-on: macos-latest
+    needs: [create-release]
     name: CartoMobileSDK ${{ matrix.variant }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+        with: 
+          fetch-depth: 1
 
       - uses: maxim-lobanov/setup-xcode@v1
         if: matrix.variant != 'android'
@@ -145,29 +132,12 @@ jobs:
         run: |
           cd scripts
           python swigpp-java.py --profile standard+valhalla --swig ../mobile-swig/swig
-      
-      - id: get_version
-        uses: battila7/get-version-action@v2
-
-      - uses: actions/github-script@v6
-        id: get_version_or_prompt
-        with:
-          result-encoding: string
-          script: |
-            console.log("inputs.version", "${{ github.event.inputs.version }}");
-            console.log("get_version", "${{ steps.get_version.outputs.is-semver }}", "${{ steps.get_version.outputs.version-without-v }}");
-            if ("${{ github.event.inputs.version }}".length) {
-             return "${{ github.event.inputs.version }}";
-            }
-            if ("${{ steps.get_version.outputs.is-semver }}" === 'true') {
-              return" ${{ steps.get_version.outputs.version-without-v }}";
-            }
 
       - name: Build CartoSDK
         if: matrix.variant == 'android'
         run: |
           cd scripts
-          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --gradle /opt/homebrew/bin/gradle
+          python build-android.py --profile standard+valhalla --build-aar --build-version ${{ needs.create-release.outputs.VERSION }}--configuration=Release --gradle /opt/homebrew/bin/gradle
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
 
@@ -175,18 +145,18 @@ jobs:
         if: matrix.variant == 'ios'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ needs.create-release.outputs.VERSION }} --configuration=Release --build-xcframework
 
       - name: Build CartoSDK
         if: matrix.variant == 'ios_metal'
         run: |
           cd scripts
-          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ steps.get_version_or_prompt.outputs.result }} --configuration=Release --build-xcframework --use-metalangle
+          python build-ios.py --profile standard+valhalla --build-cocoapod --build-version ${{ needs.create-release.outputs.VERSION }} --configuration=Release --build-xcframework --use-metalangle
 
       - uses: actions/upload-artifact@v4
         if: matrix.variant == 'android'
         with:
-          name: CartoMobileSDK-${{matrix.variant}}-${{ steps.get_version_or_prompt.outputs.result }}.zip
+          name: CartoMobileSDK-${{matrix.variant}}-${{ needs.create-release.outputs.VERSION }}.zip
           path: |
             dist/android/*.aar
             dist/android/*.jar
@@ -195,7 +165,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: matrix.variant != 'android'
         with:
-          name: CartoMobileSDK-${{matrix.variant}}-${{ steps.get_version_or_prompt.outputs.result }}.zip
+          name: CartoMobileSDK-${{matrix.variant}}-${{ needs.create-release.outputs.VERSION }}.zip
           path: dist/${{matrix.variant}}/*.zip
 
       - name: Upload Release Asset
@@ -203,35 +173,74 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run:
-          gh release upload v${{ steps.get_version_or_prompt.outputs.result }} dist/android/*.aar
+          gh release upload ${{ needs.create-release.outputs.VERSION_TAG }} dist/android/*.aar
       - name: Upload Release Asset
         if: matrix.variant != 'android'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run:
-          gh release upload v${{ steps.get_version_or_prompt.outputs.result }} dist/${{matrix.variant}}/*.zip
+          gh release upload ${{ needs.create-release.outputs.VERSION_TAG }} dist/${{matrix.variant}}/*.zip
 
+  build-css2xml:
+    needs: [create-release]
+    strategy:
+      matrix:
+        variant: ['linux', 'darmin']
+    runs-on: ${{ matrix.variant == 'linux' && 'ubuntu-latest' || 'macos-latest' }}
+    name: CartoMobileSDK CSS2XML ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v4
+        with: 
+          fetch-depth: 1
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2
+
+      - name: Install gradle
+        if: matrix.variant == 'android'
+        run: |
+          brew install gradle@8
+          brew info gradle@8
+          brew link gradle@8
+          which gradle
+
+      - name: fetch externals
+        run: |
+          git submodule update --init --remote --recursive
+
+      - name: prepare boost
+        run: |
+          wget https://boostorg.jfrog.io/artifactory/main/release/1.85.0/source/boost_1_85_0.zip
+          unzip boost_1_85_0.zip
+          ln -s ../boost_1_85_0 libs-external/boost
+          cd boost_1_85_0
+          ./bootstrap.sh
+          ./b2 headers
+
+      - name: build css2xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd libs-carto/cartocss/util
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+          cd build
+          make css2xml
+          mv css2xml css2xml_${{ matrix.variant }}
+          gh release upload ${{ needs.create-release.outputs.VERSION_TAG }} css2xml_${{ matrix.variant }}
+
+      - name: Upload Release Asset
+        if: matrix.variant != 'android'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
+          gh release upload ${{ needs.create-release.outputs.VERSION_TAG }} dist/${{matrix.variant}}/*.zip
 
   update-release:
     runs-on: ubuntu-latest
-    needs: [create-release, build]
+    needs: [create-release, build, build-css2xml]
     permissions:
       contents: write # release changes require contents write
-
     steps:
-      - uses: actions/github-script@v6
-        id: get_version_or_prompt
-        with:
-          result-encoding: string
-          script: |
-            console.log("inputs.version", "${{ github.event.inputs.version }}");
-            console.log("get_version", "${{ steps.get_version.outputs.is-semver }}", "${{ steps.get_version.outputs.version-without-v }}");
-            if ("${{ github.event.inputs.version }}".length) {
-             return "${{ github.event.inputs.version }}";
-            }
-            if ("${{ steps.get_version.outputs.is-semver }}" === 'true') {
-              return" ${{ steps.get_version.outputs.version-without-v }}";
-            }
     
       - name: Update release
         uses: irongut/EditRelease@v1.2.0
