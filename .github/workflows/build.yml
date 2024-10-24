@@ -28,6 +28,21 @@ jobs:
             if ("${{ github.event.inputs.version }}".length) {
              return "${{ github.event.inputs.version }}";
             }
+      # - name: Release
+      #   id: create_release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     tag_name:  v${{ steps.get_version_or_prompt.outputs.result }}
+      #     name: v${{ steps.get_version_or_prompt.outputs.result }}
+      #     generate_release_notes: false
+      #     draft: true
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag:  v${{ steps.get_version_or_prompt.outputs.result }}
 
       - name: create release
         id: create_release
@@ -39,7 +54,7 @@ jobs:
           # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           tag:  v${{ steps.get_version_or_prompt.outputs.result }}
           name: v${{ steps.get_version_or_prompt.outputs.result }}
-          generateReleaseNotes: true
+          generateReleaseNotes: false
           # we create first the release as draft. Will be published once everything is done
           draft: true
           allowUpdates: true
@@ -223,9 +238,16 @@ jobs:
     steps:
     
       - name: Update release
-        uses: irongut/EditRelease@v1.2.0
+        uses: irongut/EditRelease@v1.14.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           id: ${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}
           draft: false
+
+      - name: Commit CHANGELOG.md
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: main
+          commit_message: 'docs: update CHANGELOG.md for ${{ github.ref_name }} [skip ci]'
+          file_pattern: CHANGELOG.md
 
