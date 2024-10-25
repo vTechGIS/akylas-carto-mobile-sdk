@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [v5.0.0-rc.4] - 2024-10-25
+### :bug: Bug Fixes
+- [`5ec739c`](https://github.com/Akylas/mobile-sdk/commit/5ec739c76556ca5a7da385c0a2f462656ac1c43c) - allow shield to have no shield image
+- [`7fef879`](https://github.com/Akylas/mobile-sdk/commit/7fef87973e49eca5874af8be50a939fc8afea67a) - **android**: add support for 16 KB page sizes
+
+
 ## 5.0.0-rc.2 (2024-08-30)
 
 
@@ -1242,3 +1248,4 @@ Release notes for next releases can be found from [Releases section](https://git
 
 * Windows Phone 8.1 is no longer supported, as the platform is generally deprecated, only Windows Phone 10 is now supported
 * Basic CartoCSS styling support is removed from styles module, full CartoCSS is available for vector tiles
+[v5.0.0-rc.4]: https://github.com/Akylas/mobile-sdk/compare/v5.0.0-rc.2...v5.0.0-rc.4
