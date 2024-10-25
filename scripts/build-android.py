@@ -248,9 +248,9 @@ if args.buildaar:
     print('Failed to find gradle executable. Use --gradle to specify its location')
     sys.exit(-1)
 
-# for abi in args.androidabi:
-#   if not buildAndroidSO(args, abi):
-#     sys.exit(-1)
+for abi in args.androidabi:
+  if not buildAndroidSO(args, abi):
+    sys.exit(-1)
 
 if args.buildjar:
   if not buildAndroidJAR(args):
