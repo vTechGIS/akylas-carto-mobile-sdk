@@ -240,6 +240,7 @@ jobs:
         id: changelog
         uses: requarks/changelog-action@v1
         with:
+          useGitmojis: false
           excludeTypes: build,docs,other,style,chore,perf,doc
           token: ${{ secrets.GITHUB_TOKEN }}
           tag:  v${{ needs.create-release.outputs.VERSION }}
