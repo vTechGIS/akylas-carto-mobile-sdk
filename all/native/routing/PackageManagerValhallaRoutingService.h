@@ -56,6 +56,8 @@ namespace carto {
 
         virtual std::shared_ptr<RoutingResult> calculateRoute(const std::shared_ptr<RoutingRequest>& request) const;
 
+        void addLocale(const std::string& key, const std::string& json) const;
+
     protected:
         const std::shared_ptr<PackageManager> _packageManager;
         std::string _profile;

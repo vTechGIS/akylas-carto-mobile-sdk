@@ -189,6 +189,10 @@ namespace carto {
     }
 
 #ifdef _CARTO_VALHALLA_ROUTING_SUPPORT
+    void ValhallaRoutingProxy::AddLocale(const std::string& key, const std::string& json) {
+        valhalla::odin::add_locale(key, json);
+    }
+
     std::shared_ptr<RouteMatchingResult> ValhallaRoutingProxy::MatchRoute(const std::vector<std::shared_ptr<sqlite3pp::database> >& databases, const std::string& profile, const Variant& config, const std::shared_ptr<RouteMatchingRequest>& request) {
         std::string resultString;
         try {
@@ -543,6 +547,7 @@ namespace carto {
         }
         return responseString;
     }
+
 
     ValhallaRoutingProxy::ValhallaRoutingProxy() {
     }

@@ -38,6 +38,7 @@ namespace carto {
 #ifdef _CARTO_VALHALLA_ROUTING_SUPPORT
         static std::shared_ptr<RouteMatchingResult> MatchRoute(const std::vector<std::shared_ptr<sqlite3pp::database> >& databases, const std::string& profile, const Variant& config, const std::shared_ptr<RouteMatchingRequest>& request);
         static std::shared_ptr<RoutingResult> CalculateRoute(const std::vector<std::shared_ptr<sqlite3pp::database> >& databases, const std::string& profile, const Variant& config, const std::shared_ptr<RoutingRequest>& request);
+        static void AddLocale(const std::string& key, const std::string& json);
 #endif
 
         static Variant GetDefaultConfiguration();
@@ -56,7 +57,7 @@ namespace carto {
         static std::shared_ptr<RoutingResult> ParseRoutingResult(const std::shared_ptr<Projection>& proj, const std::string& resultString);
 
         static std::string MakeHTTPRequest(HTTPClient& httpClient, const std::string& url);
-    };
+  };
 
 }
 

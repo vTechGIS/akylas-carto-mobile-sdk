@@ -5,6 +5,7 @@ static const char valhalla_default_config[] = R"({
   "httpd": {
     "service": {
       "drain_seconds": 28,
+      "timeout_seconds": 28,
       "interrupt": "ipc:///tmp/interrupt",
       "listen": "tcp://*:8002",
       "loopback": "ipc:///tmp/loopback",
@@ -109,7 +110,7 @@ static const char valhalla_default_config[] = R"({
       "infer_internal_intersections": true,
       "infer_turn_channels": true,
       "scan_tar": false,
-      "use_admin_db": true,
+      "use_admin_db": false,
       "use_direction_on_ways": false,
       "use_rest_area": false,
       "use_urban_tag": false
@@ -198,6 +199,7 @@ static const char valhalla_default_config[] = R"({
     "max_radius": 200,
     "max_reachability": 100,
     "max_timedep_distance": 500000,
+    "max_timedep_distance_matrix": 0,
     "motor_scooter": {
       "max_distance": 500000.0,
       "max_locations": 50,

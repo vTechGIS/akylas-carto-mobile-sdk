@@ -185,7 +185,10 @@ namespace carto {
         return result;
     }
 
-    
+    void MultiValhallaOfflineRoutingService::addLocale(const std::string& key, const std::string& json) const {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        ValhallaRoutingProxy::AddLocale(key, json);
+    }
 }
 
 #endif
