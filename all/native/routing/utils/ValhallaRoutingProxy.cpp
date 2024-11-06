@@ -189,9 +189,10 @@ namespace carto {
     }
 
 
-    std::unordered_map<std::string, std::string> valhalla_locales;
 #ifdef _CARTO_VALHALLA_ROUTING_SUPPORT
+    std::unordered_map<std::string, std::string> valhalla_locales;
     void ValhallaRoutingProxy::AddLocale(const std::string& key, const std::string& json) {
+
         if (valhalla_locales.find(key) == valhalla_locales.end()) {
             valhalla_locales.insert(std::make_pair(key, json));
         }
