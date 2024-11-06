@@ -89,7 +89,7 @@ jobs:
         if: matrix.variant == 'android'
         id: setup-ndk
         with:
-          ndk-version: r25c
+          ndk-version: r27c
           local-cache: false
       
       - name: Setup Gradle
