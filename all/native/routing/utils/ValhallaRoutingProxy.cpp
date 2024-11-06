@@ -188,9 +188,13 @@ namespace carto {
         return ParseRoutingResult(request->getProjection(), responseString);
     }
 
+
+    std::unordered_map<std::string, std::string> valhalla_locales;
 #ifdef _CARTO_VALHALLA_ROUTING_SUPPORT
     void ValhallaRoutingProxy::AddLocale(const std::string& key, const std::string& json) {
-        valhalla::odin::add_locale(key, json);
+        if (valhalla_locales.find(key) == valhalla_locales.end()) {
+            valhalla_locales.insert(std::make_pair(key, json));
+        }
     }
 
     std::shared_ptr<RouteMatchingResult> ValhallaRoutingProxy::MatchRoute(const std::vector<std::shared_ptr<sqlite3pp::database> >& databases, const std::string& profile, const Variant& config, const std::shared_ptr<RouteMatchingRequest>& request) {
@@ -203,7 +207,7 @@ namespace carto {
             auto reader = std::make_shared<valhalla::baldr::GraphReader>(databases);
 
             valhalla::Api api;
-            valhalla::ParseApi(SerializeRouteMatchingRequest(profile, request), valhalla::Options::trace_attributes, api);
+            valhalla::ParseApi(SerializeRouteMatchingRequest(profile, request), valhalla::Options::trace_attributes, api, valhalla_locales);
 
             valhalla::loki::loki_worker_t lokiworker(configTree, reader);
             lokiworker.trace(api);
@@ -227,7 +231,7 @@ namespace carto {
             auto reader = std::make_shared<valhalla::baldr::GraphReader>(databases);
 
             valhalla::Api api;
-            valhalla::ParseApi(SerializeRoutingRequest(profile, request), valhalla::Options::route, api);
+            valhalla::ParseApi(SerializeRoutingRequest(profile, request), valhalla::Options::route, api, valhalla_locales);
 
             valhalla::loki::loki_worker_t lokiworker(configTree, reader);
             lokiworker.route(api);
@@ -393,15 +397,18 @@ namespace carto {
             locations.emplace_back(location);
         }
 
-        picojson::value customParams = request->getCustomParameters().toPicoJSON();
-
         picojson::object json;
-        if (customParams.is<picojson::object>()) {
-            json = customParams.get<picojson::object>();
-        }
         json["locations"] = picojson::value(locations);
         json["costing"] = picojson::value(profile);
         json["units"] = picojson::value("kilometers");
+
+        picojson::value customParams = request->getCustomParameters().toPicoJSON();
+        if (customParams.is<picojson::object>()) {
+            const picojson::object& customParamsObj = customParams.get<picojson::value::object>();
+            for (auto it = customParamsObj.begin(); it != customParamsObj.end(); it++) {
+                json[it->first] = it->second;
+            }
+        }
         return picojson::value(json).serialize();
     }
 
