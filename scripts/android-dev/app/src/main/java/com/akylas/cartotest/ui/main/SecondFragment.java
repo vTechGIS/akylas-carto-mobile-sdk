@@ -720,7 +720,8 @@ public class SecondFragment extends Fragment {
        vector.add(new MapPos(5.74027, 45.24433));
        RoutingRequest request = new RoutingRequest(projection, vector);
        request.setCustomParameter("costing_options", Variant.fromString("{\"bicycle\":{\"non_network_penalty\":0,\"use_ferry\":0,\"shortest\":true,\"use_roads\":0.0,\"use_tracks\":0.5,\"bicycle_type\":\"Hybrid\"}}"));
-       request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"en\"}"));
+//       request.setCustomParameter("directions_options", Variant.fromString("{\"language\":\"fr-FR\"}"));
+       request.setCustomParameter("language", new Variant("fr-FR"));
        runValhallaInThread(routingService, request, "bicycle", localSource);
 //            request = new RoutingRequest(projection, vector);
    }
