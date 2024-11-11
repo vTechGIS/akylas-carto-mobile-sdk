@@ -99,6 +99,11 @@ namespace carto {
 
         return ValhallaRoutingProxy::CalculateRoute(std::vector<std::shared_ptr<sqlite3pp::database> > { _database }, profile, configuration, request);
     }
+
+    void ValhallaOfflineRoutingService::addLocale(const std::string& key, const std::string& json) const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        ValhallaRoutingProxy::AddLocale(key, json);
+    }
 }
 
 #endif

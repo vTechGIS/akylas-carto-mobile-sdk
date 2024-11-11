@@ -67,6 +67,7 @@ namespace carto {
          */
         bool remove(const std::string&  database);
 
+        void addLocale(const std::string& key, const std::string& json) const;
     private:
         void accessLocalPackages(const std::function<void(const std::map<std::string, std::shared_ptr<ValhallaRoutingPackageHandler> >&)>& callback) const;
 

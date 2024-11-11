@@ -54,6 +54,8 @@ namespace carto {
         virtual std::shared_ptr<RouteMatchingResult> matchRoute(const std::shared_ptr<RouteMatchingRequest>& request) const;
 
         virtual std::shared_ptr<RoutingResult> calculateRoute(const std::shared_ptr<RoutingRequest>& request) const;
+        
+        void addLocale(const std::string& key, const std::string& json) const;
 
     private:
         std::shared_ptr<sqlite3pp::database> _database;

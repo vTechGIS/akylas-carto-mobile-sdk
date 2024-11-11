@@ -31,3 +31,17 @@ After that, there are several rules you should follow when a new pull request is
 * assets - images and style files sources used for map rendering. Converted to C++ headers
 * docs - documentation, published in CARTO docs site
 * scripts - scripts for building SDK (using Python, CMake, Swig and other tools)
+
+
+## valhalla
+
+If you need to update the Valhalla submodule you might need to update the proto files.
+```
+cd libs-external/protobuf/protobuf
+make -j$(nproc)
+./src/protoc --proto_path ../../valhalla/valhalla/proto/ --cpp_out ../../valhalla/proto/valhalla/proto/ api.proto common.proto directions.proto incidents.proto info.proto options.proto sign.proto status.proto transit.proto transit_fetch.proto trip.proto matrix.proto isochrone.proto expansion.proto
+```
+You might also need to update locales
+```
+cd libs-external/valhalla/valhalla
+cmake -DMSVC= -P cmake/ValhallaBin2Header.cmake path_to_wanted_valhalla_json_locales/ ../config/valhalla/odin/locales.h --locales

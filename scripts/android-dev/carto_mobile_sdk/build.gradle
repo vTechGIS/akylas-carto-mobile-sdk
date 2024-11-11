@@ -80,9 +80,10 @@ android {
     }
 
     defaultConfig {
+        ndkVersion "27.2.12479018"
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_STL=c++_static", "-DWRAPPER_DIR=${projectDir.absolutePath.replaceAll('\\\\', '/')}/../../../generated/android-java/wrappers"
+                arguments "-DANDROID_STL=c++_static", '-DUSE_OS_TZDB=1', "-DWRAPPER_DIR=${projectDir.absolutePath.replaceAll('\\\\', '/')}/../../../generated/android-java/wrappers"
                 cmakeOptions().each {option -> arguments option }
             }
         }

@@ -134,6 +134,10 @@ namespace carto {
         return result;
     }
 
+    void PackageManagerValhallaRoutingService::addLocale(const std::string& key, const std::string& json) const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        ValhallaRoutingProxy::AddLocale(key, json);
+    }
 }
 
 #endif
